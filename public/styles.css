@@ -1,0 +1,23 @@
+
+
+.canvas-container
+{
+    position: relative;
+}
+
+canvas
+{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+#canvas-forground
+{
+    z-index: 2;
+}
+
+#canvas-waves
+{
+    z-index: 1;
+}

@@ -1,0 +1,136 @@
+
+
+class Rect
+{
+    constructor(x, y, w, h)
+    {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+
+        this.oldX = x;
+        this.oldY = y;
+    }
+
+    isInsideOut()
+    {
+        return this.w < 0 && this.h < 0;
+    }
+
+    getLeft()
+    { return this.x; }
+
+    getRight()
+    { return this.x + this.w; }
+
+    getTop()
+    { return this.y; }
+
+    getBottom()
+    { return this.y + this.h; }
+
+    getOldLeft()
+    { return this.oldX; }
+
+    getOldRight()
+    { return this.oldX + this.w; }
+
+    getOldTop()
+    { return this.oldY; }
+
+    getOldBottom()
+    { return this.oldY + this.h; }
+
+    getCenterX()
+    { return this.x + 0.5 * this.w; }
+
+    getCenterY()
+    { return this.y + 0.5 * this.h; }
+
+    setLeft(x) 
+    { this.x = x; }
+
+    setRight(x) 
+    { this.x = x - this.w; }
+
+    setTop(y) 
+    { this.y = y; }
+
+    setBottom(y) 
+    { this.y = y - this.h; }
+
+    drawOutline(ctx, camera) 
+    {
+        var margin = 2;
+        ctx.strokeStyle = "#ffef42";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(this.x - camera.x - margin,
+            this.y - camera.y - margin,
+            this.w + 2 * margin, this.h + 2 * margin);
+    }
+
+    static detectCollision(fixed, movable, margin = 0)
+    {
+        if (fixed.isInsideOut())
+        {
+            return - margin + fixed.getRight() > movable.getLeft() ||
+                + margin + fixed.getLeft() < movable.getRight() ||
+                - margin + fixed.getBottom() > movable.getTop() ||
+                + margin + fixed.getTop() < movable.getBottom();
+        }
+        else
+        {
+            return  - margin + fixed.getLeft()    <= movable.getRight() && 
+                    + margin + fixed.getRight()   >= movable.getLeft() && 
+                    - margin + fixed.getTop()     <= movable.getBottom() && 
+                    + margin + fixed.getBottom()  >= movable.getTop();
+        }
+    }
+
+    static detectIntersection(rect, point, margin = 0)
+    {
+        return - margin + rect.getLeft() < point.x && margin + rect.getRight() > point.x
+            && - margin + rect.getTop() < point.y && margin + rect.getBottom() > point.y;
+    }
+
+    static collide(fixed, movable, offsetMargin = 0.01)
+    {
+        const collision = Rect.detectCollision(fixed, movable); 
+        if (collision)
+        {
+            if (movable.getRight() >= fixed.getLeft() &&
+            movable.getOldRight() < fixed.getLeft())
+            {
+                // movable has fixed to its right
+                movable.setRight(fixed.getLeft() - offsetMargin);
+                movable.oldX = movable.x;
+            }
+            else if (movable.getLeft() <= fixed.getRight() &&
+                    movable.getOldLeft() > fixed.getRight())
+            {
+                // movable has fixed to its left
+                movable.setLeft(fixed.getRight() + offsetMargin);
+                movable.oldX = movable.x;
+            }
+            
+            if (movable.getBottom() >= fixed.getTop() &&
+            movable.getOldBottom() < fixed.getTop())
+            {
+                // movable has fixed to its bottom
+                movable.setBottom(fixed.getTop() - offsetMargin);
+                movable.oldY = movable.y;
+            }
+            else if (movable.getTop() <= fixed.getBottom() &&
+                    movable.getOldTop() > fixed.getBottom())
+            {
+                // movable has fixed to its top
+                movable.setTop(fixed.getBottom() + offsetMargin);
+                movable.oldY = movable.y;
+            }
+        }
+        return collision;
+    }
+}
+
+module.exports = Rect;
