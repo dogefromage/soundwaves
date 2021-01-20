@@ -114,17 +114,18 @@ class Player extends Rect
 		}
 
 		// STEP
-		if ((this.lastStep.x - this.x)**2 + (this.lastStep.y - this.y)**2 > GameSettings.sqrPlayerStepDist)
+		let distanceWalked = (this.lastStep.x - this.x)**2 + (this.lastStep.y - this.y)**2;
+		if (distanceWalked > GameSettings.sqrPlayerStepDist)
 		{
 			this.lastStep = { x: this.x, y: this.y };
 
 			if (this.input.sneak)
 			{
-				newSoundWaves.push(this.createSoundwave(SoundwaveSettings.sneak));
+				newSoundWaves.push(this.createSoundwave(SoundwaveSettings.sneak()));
 			}
 			else
 			{
-				newSoundWaves.push(this.createSoundwave(SoundwaveSettings.walk));
+				newSoundWaves.push(this.createSoundwave(SoundwaveSettings.walk()));
 			}
 		}
 
@@ -150,13 +151,13 @@ class Player extends Rect
 		if (this.health < 0)
 		{
 			this.killer = offender;
-			newSoundwaves.push(this.createSoundwave(SoundwaveSettings.death));
+			newSoundwaves.push(this.createSoundwave(SoundwaveSettings.death()));
 		}
 		else
 		{
 			if (this.hurtCooldown == 0)
 			{
-				newSoundwaves.push(this.createSoundwave(SoundwaveSettings.hurt));
+				newSoundwaves.push(this.createSoundwave(SoundwaveSettings.hurt()));
 				this.hurtCooldown += 0.1;
 			}
 		}

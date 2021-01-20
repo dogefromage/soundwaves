@@ -200,13 +200,25 @@ class SoundwaveSettings
         this.resolution = resolution;
     }
 
-    static walk = new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 200);
+    static walk()
+    {
+        return new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 200);
+    }
 
-    static sneak = new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 100);
+    static sneak()
+    {
+        return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 100);
+    }
 
-    static hurt = new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 100);
+    static hurt()
+    {
+        return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 100);
+    }
 
-    static death = new SoundwaveSettings(0.1, 3, 0, 0, 2 * Math.PI, 150);
+    static death()
+    {
+        return new SoundwaveSettings(0.1, 3, 0, 0, 2 * Math.PI, 150);
+    }
 
     static Attack(rotation, magnitude)
     {

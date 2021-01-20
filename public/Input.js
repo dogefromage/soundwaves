@@ -2,26 +2,28 @@
 
 class Input
 {
-    static axisX = 0;
-    static axisY = 0;
-    static angle = 0;
+    constructor()
+    {
+        this.axisX = 0;
+        this.axisY = 0;
+        this.angle = 0;
+        this.keys = [];
+    }
 
-    static keys = [];
-
-    static getKey(key)
+    getKey(key)
     {
         return this.keys[key] || false;
     }
 
     // ADD EVENTS TO KEY
-    static onKey(key , down = () => {}, up = () => {})
+    onKey(key , down = () => {}, up = () => {})
     {
         document.addEventListener("keydown", (event) =>
         {
             if (event.code == key)
             {
-                Input.keys[key] = true;
-                down();
+                this.keys[key] = true;
+                down(this);
             }
         });
 
@@ -29,14 +31,14 @@ class Input
         {
             if (event.code == key)
             {
-                Input.keys[key] = false;
-                up();
+                this.keys[key] = false;
+                up(this);
             }
         });
     }
 
     // ADD UDPATEAXIS() TO WASD AND ARROWS
-    static recordMovement(wasd = true, arrows = true)
+    recordMovement(wasd = true, arrows = true)
     {
         let keyList = [];
 
@@ -51,23 +53,23 @@ class Input
 
         for (const key of keyList)
         {
-            Input.onKey(key, Input.updateAxis, Input.updateAxis);
+            this.onKey(key, this.updateAxis, this.updateAxis);
         }
     }
 
-    static updateAxis()
+    updateAxis(sender)
     {
-        let u = Input.keys['ArrowUp'] || Input.keys['KeyW'] || false;
-        let l = Input.keys['ArrowLeft'] || Input.keys['KeyA'] || false;
-        let d = Input.keys['ArrowDown'] || Input.keys['KeyS'] || false;
-        let r = Input.keys['ArrowRight'] || Input.keys['KeyD'] || false;
+        let u = sender.keys['ArrowUp'] || sender.keys['KeyW'] || false;
+        let l = sender.keys['ArrowLeft'] || sender.keys['KeyA'] || false;
+        let d = sender.keys['ArrowDown'] || sender.keys['KeyS'] || false;
+        let r = sender.keys['ArrowRight'] || sender.keys['KeyD'] || false;
 
-        Input.axisX = (r ? 1 : 0) - (l ? 1 : 0);
-        Input.axisY = (d ? 1 : 0) - (u ? 1 : 0);
+        sender.axisX = (r ? 1 : 0) - (l ? 1 : 0);
+        sender.axisY = (d ? 1 : 0) - (u ? 1 : 0);
         
-        if (Input.axisX != 0 || Input.axisY != 0)
+        if (sender.axisX != 0 || sender.axisY != 0)
         {
-            Input.angle = Math.atan2(Input.axisY, Input.axisX);
+            sender.angle = Math.atan2(sender.axisY, sender.axisX);
         }
     }
 }

@@ -1,9 +1,10 @@
 const socket = io.connect(location.url);
 
 // set up input
-Input.recordMovement();
-Input.onKey('Space');
-Input.onKey('ShiftLeft');
+const input = new Input();
+input.recordMovement();
+input.onKey('Space');
+input.onKey('ShiftLeft');
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
@@ -31,13 +32,13 @@ socket.on('loop', (data) =>
     if (game.mainPlayer)
     {
         // send player input to server
-        const input = {
-            x: Input.axisX,
-            y: Input.axisY,
-            shoot: Input.getKey('Space'),
-            sneak: Input.getKey('ShiftLeft'),
+        const playerInput = {
+            x: input.axisX,
+            y: input.axisY,
+            shoot: input.getKey('Space'),
+            sneak: input.getKey('ShiftLeft'),
         };
-        socket.emit('input', input);
+        socket.emit('input', playerInput);
 
         // remove join card
         card.classList.add("hidden");
@@ -59,8 +60,8 @@ document.getElementById("nameInput").addEventListener('keypress', (e) => {
 
 function joinGame()
 {
-    let input = document.getElementById("nameInput");
-    let name = input.value.trim();
+    let nameInput = document.getElementById("nameInput");
+    let name = nameInput.value.trim();
 
     socket.emit('request-join', name);
 
@@ -171,11 +172,6 @@ function drawBars()
 // {
 //     socket.emit('die-test');
 // }
-
-
-
-
-
 
 
 
