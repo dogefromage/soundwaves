@@ -1,93 +1,162 @@
-
 const GameMap = require('./GameMap');
+const Player = require('./Player');
 const GameSettings = require('./GameSettings');
 const Rect = require('./Rect');
+const { Soundwave, SoundwaveSettings } = require('./Soundwave')
+const GameDebugger = require('./GameDebugger');
 
 class Game
 {
     constructor(mapSize)
     {
-        this.map = new GameMap(mapSize, mapSize);
+        this.map = new GameMap(mapSize);
         this.players = [];
-        this.soundWaves = [];
-        this.projectiles = [];
+        this.soundwaves = [];
+    }
+
+    addPlayer(id, name)
+    {
+        if (this.players.find(p => p.id == id)) 
+        {
+            return; 
+        }
+
+        // find empty spawning space for player
+        let x, y;
+        do
+        {
+            x = Math.floor(Math.random() * this.map.width);
+            y = Math.floor(Math.random() * this.map.height);
+        }
+        while(this.map.pixels[y][x]) // repeat if map square isn't empty
+
+        const p = new Player(x + 0.5, y + 0.5, id, name);
+        this.players.push(p);
+    }
+
+    removePlayer(id)
+    {
+        for (let i = this.players.length - 1; i >= 0; i--)
+        {
+            if (this.players[i].id == id)
+            {
+                this.players.splice(i, 1);
+                return;
+            }
+        }
     }
 
     update(deltaTime)
     {
+        // DEBUG
+        GameDebugger.reset();
+
+        // SOUNDWAVES
+        for (let i = this.soundwaves.length - 1; i >= 0; i--)
+        {
+            const w = this.soundwaves[i];
+
+            const waveWaves = w.update(deltaTime, this.map);
+            this.soundwaves = this.soundwaves.concat(waveWaves);
+
+            // IS DEAD?
+            if (!w.alive)
+            {
+                this.soundwaves.splice(i, 1);
+                i--;
+            }
+        }
+
         // PLAYERS
         for (const p of this.players)
         {
+            let playerWaves = p.update(deltaTime);
+
             // COLLISION PLAYER - WALL
+            // optimise collision search by only checking in a specified range
+            const margin = GameSettings.rangeRectMargin;
+            const rangeRect = p.extend(margin);
+            // check collision
             this.map.foreachWall((wall) =>
             {
-                Rect.collide(wall, p);
-            }, true);
+                Rect.collide(wall, p, GameSettings.collisionIterations);
+            }, rangeRect);
 
-            p.update(deltaTime);
+            this.soundwaves = this.soundwaves.concat(playerWaves);
+
+            // death
+            if (p.health <= 0)
+            {
+                this.removePlayer(p.id);
+                console.log(`Player ${p.id} has unfortunately died`);
+            }
         }
 
-        // SOUNDWAVES
-        for (let i = 0; i < this.soundWaves.length; i++)
+        ////////////// SOUNDWAVE x PLAYER COLLISION /////////////////
+        for (const w of this.soundwaves)
         {
-            const w = this.soundWaves[i];
+            // collide with border rectangle first to improve collision performance
+            let wBorder = new Rect(w.center.x, w.center.y, 0, 0).extend(w.r);
 
-            w.update(deltaTime);
-            // FADE OUT
-            if (w.power < GameSettings.waveLowestPower)
+            for (let p of this.players)
             {
-                this.soundWaves.splice(i, 1);
-                i--;
-            }
-
-            // COLLIDE WITH WALL
-            this.map.foreachWallWithMargin((wall) =>
-            {
-                w.collideWith(wall);
-            }, GameSettings.soundwaveBleed);
-
-            for (const p of this.players)
-            {
-                if (p !== w.sender)
+                if (!Rect.detectCollision(wBorder, p))
                 {
-                    w.collideWith(p);
+                    continue; // player was not in range of soundwave
+                }
+
+                if (p.id != w.sender && w.settings.damage > 0)
+                {
+                    let hit = false;
+                    for (let v of w.vertices)
+                    {
+                        if (Rect.detectIntersection(p, v))
+                        {
+                            hit = true;
+                        }
+                    }
+
+                    if (hit)
+                    {
+                        let collisionWaves = p.hurt(w.settings.damage * w.power, w.sender);
+                        this.soundwaves = this.soundwaves.concat(collisionWaves);
+                    }
                 }
             }
         }
-
-        // PROJECTILES
-        for (const b of this.projectiles)
-        {
-            b.update(deltaTime);
-        }
     }
 
-    // draw(ctxForground, ctxWaves, camera)
-    // {
-    //     // WAVE CANVAS (fade out)
-    //     ctxWaves.fillStyle = GameSettings.fadeClearColor;
-    //     ctxWaves.fillRect(0, 0, w, h);
+    getData(id)
+    {
+        // PLAYERS
+        const players = [];
+        for (let p of this.players)
+        {
+            players.push(p.getData());
+        }
 
-    //     for (const b of this.projectiles)
-    //     {
-    //         b.draw(ctxWaves, camera);
-    //     }
+        // SOUNDWAVES
+        const waves = [];
+        for (let w of this.soundwaves)
+        {
+            waves.push(w.getData());
+        }
 
-    //     for (const w of this.soundWaves)
-    //     {
-    //         w.draw(ctxWaves, camera);
-    //     }
+        const debug = 
+        {
+            rects: GameDebugger.rectangles
+        };
 
-    //     // FORGROUND CANVAS
-    //     ctxForground.clearRect(0, 0, w, h);
+        const data = 
+        {
+            map: this.map.getData(),
+            players,
+            soundwaves: waves,
+            debug: debug,
+        };
 
-    //     this.map.draw(ctxForground, camera);
-
-    //     for (const p of this.players)
-    //     {
-    //         p.draw(ctxForground, camera);
-    //     }
-    // }
+        return data;
+    }
 }
 
 module.exports = Game;

@@ -1,30 +1,69 @@
 const Rect = require('./Rect');
 const GameSettings = require('./GameSettings');
+const GameDebugger = require('./GameDebugger');
+const { mapSize } = require('./GameSettings');
+const generateMaze = require('./Maze');
 
 class GameMap
 {
-    constructor(w, h)
+    constructor(size)
     {
-        this.width = w;
-        this.height = h;
+        this.width = 2 * size + 1;
+        this.height = 2 * size + 1;
         this.pixels = [];
-        this.borderRect = new Rect(this.width, this.height, -this.width, -this.height);
+
+        let maze1 = generateMaze(size, size);
+        let maze2 = generateMaze(size, size);
 
         for (let j = 0; j < this.height; j++)
         {
             this.pixels[j] = [];
-            for (let i = 0; i < this.width; i++)
+            for (let i = 0; i < this.height; i++)
             {
-                this.pixels[j][i] = Math.random() > 0.8;
+                this.pixels[j][i] = !(maze1[j][i] || maze2[j][i]);
             }
         }
+
+        // for (let j = 0; j < this.height; j++)
+        // {
+        //     this.pixels[j] = [];
+        //     for (let i = 0; i < this.width; i++)
+        //     {
+        //         // this.pixels[j][i] = Math.random() > 0.8;
+        //         let pixel = false;
+
+        //         if (j == 0 || j == this.height - 1 || i == 0 || i == this.width - 1)
+        //             pixel = true;
+        //         else if (i % 2 == 0 && j % 2 == 0)
+        //             pixel = true;
+        //         else if (i % 2 == 0 || j % 2 == 0)
+        //         {
+        //             if (Math.random() > 0.7) pixel = true;
+        //         }
+
+        //         this.pixels[j][i] = pixel;
+        //     }
+        // }
     }
 
-    foreachWall(action, alsoUseBorder = false)
+    foreachWall(action, rangeRect = null)
     {
-        for (let j = 0; j < this.height; j++)
+        let X = 0, Y = 0, R = this.width, B = this.height;
+        if (rangeRect)
         {
-            for (let i = 0; i < this.width; i++)
+            X = Math.max(X, Math.floor(rangeRect.x));
+            Y = Math.max(Y, Math.floor(rangeRect.y));
+            R = Math.min(R, Math.ceil(rangeRect.getRight()));
+            B = Math.min(B, Math.ceil(rangeRect.getBottom()));
+            
+            // FOR DEBUG
+            if (GameSettings.drawRangeRect)
+                GameDebugger.rectangles.push(new Rect(X, Y, R - X, B - Y));
+        }
+        
+        for (let j = Y; j < B; j++)
+        {
+            for (let i = X; i < R; i++)
             {
                 if (this.pixels[j][i])
                 {
@@ -33,18 +72,26 @@ class GameMap
                 }
             }
         }
-
-        if (alsoUseBorder)
-        {
-            action(this.borderRect);
-        }
     }
 
-    foreachWallWithMargin(action, margin)
+    foreachWallWithMargin(action, margin, rangeRect = null)
     {
-        for (let j = 0; j < this.height; j++)
+        let X = 0, Y = 0, R = this.width, B = this.height;
+        if (rangeRect)
         {
-            for (let i = 0; i < this.width; i++)
+            X = Math.max(X, Math.floor(rangeRect.x));
+            Y = Math.max(Y, Math.floor(rangeRect.y));
+            R = Math.min(R, Math.ceil(rangeRect.getRight()));
+            B = Math.min(B, Math.ceil(rangeRect.getBottom()));
+            
+            // FOR DEBUG
+            if (GameSettings.drawRangeRectWithBleed)
+                GameDebugger.rectangles.push(new Rect(X, Y, R - X, B - Y));
+        }
+        
+        for (let j = Y; j < B; j++)
+        {
+            for (let i = X; i < R; i++)
             {
                 if (this.pixels[j][i])
                 {
@@ -64,6 +111,10 @@ class GameMap
                         1 - (right ? 0 : margin) - (left ? 0 : margin),
                         1 - (bottom ? 0 : margin) - (top ? 0 : margin)
                     );
+
+                    // FOR DEBUG
+                    if (GameSettings.drawWallBleedMargin)
+                        GameDebugger.rectangles.push(rect);
                     
                     action(rect);
                 }
@@ -71,31 +122,20 @@ class GameMap
         }
     }
 
-    // draw(ctx, camera)
-    // {
-    //     ctx.fillStyle = GameSettings.canvasBlack;
-
-    //     if (GameSettings.debug)
-    //     {
-    //         ctx.fillStyle = "#222";
-    //     }
+    getData(rangeRect)
+    {
+        const walls =  [];
+        this.foreachWall((rect) => {
+            walls.push(rect);
+        }, rangeRect);
         
-    //     this.foreachWall((rect) =>
-    //     {
-    //         const canRect = camera.WorldToCanvasRect(rect);
-    //         ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);   
-    //     });
-
-    //     if (GameSettings.debug)
-    //     {
-    //         ctx.fillStyle = "#ff000066";
-    //         this.foreachWallWithMargin((rect) =>
-    //         {
-    //             const canRect = camera.WorldToCanvasRect(rect);
-    //             ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);   
-    //         }, GameSettings.soundwaveBleed);
-    //     }
-    // }
+        return {
+            width: this.width,
+            height: this.height,
+            walls: walls,
+            color: GameSettings.canvasBlack,
+        };
+    }
 }
 
 module.exports = GameMap;

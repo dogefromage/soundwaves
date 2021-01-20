@@ -2,28 +2,27 @@
 
 class GameSettings
 {
-    // DEV
-    static debug = false;
+    // DEBUG
+    static drawWallBleedMargin = true;
+    // static drawRangeRect = true;
+    // static drawRangeRectWithBleed = true;
+    // static drawCollisionIterations = true;
 
-    // RENDERING
-    static canvasBlack = "#030303";
-    static fadeClearColor = "#00000022"; 
-    
-    // SOUNDWAVE
-    static soundWaveResolution = 100;
-    static speedOfSound = 2.5;
-    static waveLineWidth = 5;
-    static soundwaveBleed = 0.05;
-    
-    // GAMEPLAY
-    static playerSize = 0.2;
-    static playerSpeed = 0.03;
-    static sqrPlayerStepDist = 0.2;
-    static waveLowestPower = 0.05;
+    // PHYSICS
+    static collisionIterations = 3;
+    static rangeRectMargin = 0.5;
 
-    // PROJECTILES
-    static projectileSpeed = 0.08;
-    static projectileSize = 0.05;
+    // SOUNDWAVE TECHNICAL
+    static soundWaveResolution = 20;
+
+    // PLAYER
+    static playerSize = 0.04;
+    static playerSpeed = 0.4;
+    static sqrPlayerStepDist = 0.06;
+    static sneakFactor = 0.5;
+
+    // MAP
+    static mapSize = 3; // map width and height: 2 * mapSize + 1
 }
 
 module.exports = GameSettings;

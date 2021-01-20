@@ -1,23 +1,111 @@
 
-
-.canvas-container
+*
 {
-    position: relative;
+    font-family: Verdana, Geneva, sans-serif;
+}
+
+body
+{
+    position:absolute;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    overflow-y: hidden; /* Hide vertical scrollbar */
+    overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
 canvas
 {
     position: absolute;
-    top: 0px;
-    left: 0px;
+    left: 0;
+    top: 0;
+    margin: 0;
+    border: 0;
 }
 
-#canvas-forground
+.card
 {
-    z-index: 2;
-}
-
-#canvas-waves
-{
+    background-color: #fff;
+    width: 400px;
+    height: 300px;
     z-index: 1;
+    border-radius: 40px;
+    box-shadow: 0px 0px 20px 0px #00000088;
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.card input
+{
+    width: 80%;
+    margin: 7px;
+    height: 42px;
+    border: 0;
+    border-radius: 7px;
+    background: #ccc;
+    text-align: center;
+    font-size: 16px;
+}
+
+.card input:focus
+{
+    outline: none;
+}
+
+.card button
+{
+    width: 82%;
+    height: 50px;
+    margin: 7px;
+    border: 0;
+    border-radius: 10px;
+    background: #222;
+    transition-duration: 0.1s;
+    color: white;
+    font-size: 16px;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.card button:active
+{
+    background: #000;
+}
+
+.card button:focus
+{
+    outline: none;
+}
+
+.card .error
+{
+    font-size: 16px;
+    color: red;
+}
+
+.hidden
+{
+    visibility: hidden;
+}
+
+.disabled
+{
+    display: none;
 }
