@@ -1,6 +1,5 @@
 const Rect = require('./Rect');
 const GameSettings = require('./GameSettings');
-const GameDebugger = require('./GameDebugger');
 const { mapSize } = require('./GameSettings');
 const generateMaze = require('./Maze');
 
@@ -23,27 +22,6 @@ class GameMap
                 this.pixels[j][i] = !(maze1[j][i] || maze2[j][i]);
             }
         }
-
-        // for (let j = 0; j < this.height; j++)
-        // {
-        //     this.pixels[j] = [];
-        //     for (let i = 0; i < this.width; i++)
-        //     {
-        //         // this.pixels[j][i] = Math.random() > 0.8;
-        //         let pixel = false;
-
-        //         if (j == 0 || j == this.height - 1 || i == 0 || i == this.width - 1)
-        //             pixel = true;
-        //         else if (i % 2 == 0 && j % 2 == 0)
-        //             pixel = true;
-        //         else if (i % 2 == 0 || j % 2 == 0)
-        //         {
-        //             if (Math.random() > 0.7) pixel = true;
-        //         }
-
-        //         this.pixels[j][i] = pixel;
-        //     }
-        // }
     }
 
     foreachWall(action, rangeRect = null)
@@ -55,10 +33,6 @@ class GameMap
             Y = Math.max(Y, Math.floor(rangeRect.y));
             R = Math.min(R, Math.ceil(rangeRect.getRight()));
             B = Math.min(B, Math.ceil(rangeRect.getBottom()));
-            
-            // FOR DEBUG
-            if (GameSettings.drawRangeRect)
-                GameDebugger.rectangles.push(new Rect(X, Y, R - X, B - Y));
         }
         
         for (let j = Y; j < B; j++)
@@ -83,10 +57,6 @@ class GameMap
             Y = Math.max(Y, Math.floor(rangeRect.y));
             R = Math.min(R, Math.ceil(rangeRect.getRight()));
             B = Math.min(B, Math.ceil(rangeRect.getBottom()));
-            
-            // FOR DEBUG
-            if (GameSettings.drawRangeRectWithBleed)
-                GameDebugger.rectangles.push(new Rect(X, Y, R - X, B - Y));
         }
         
         for (let j = Y; j < B; j++)
@@ -111,10 +81,6 @@ class GameMap
                         1 - (right ? 0 : margin) - (left ? 0 : margin),
                         1 - (bottom ? 0 : margin) - (top ? 0 : margin)
                     );
-
-                    // FOR DEBUG
-                    if (GameSettings.drawWallBleedMargin)
-                        GameDebugger.rectangles.push(rect);
                     
                     action(rect);
                 }

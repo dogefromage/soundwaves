@@ -1,6 +1,4 @@
-const GameDebugger = require('./GameDebugger');
 const { lerp }  = require('./GameMath');
-const GameSettings = require('./GameSettings');
 
 class Rect
 {
@@ -108,9 +106,6 @@ class Rect
                 lerp(movable.oldX, movable.x, t),
                 lerp(movable.oldY, movable.y, t),
                 movable.w, movable.h);
-
-            if (GameSettings.drawCollisionIterations)
-                GameDebugger.rectangles.push(interpolated.copy());
 
             const collision = Rect.detectCollision(fixed, interpolated); 
             if (collision)
