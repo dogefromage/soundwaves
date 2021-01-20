@@ -1,6 +1,6 @@
 
 
-class ClientGameMap
+class ClientGamemap
 {
     constructor({width, height, walls})
     {

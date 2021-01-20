@@ -20,7 +20,7 @@ class ClientGame
         }
         else
         {
-            this.map = new ClientGameMap(mapData);
+            this.map = new ClientGamemap(mapData);
         }
 
         /*      PLAYERS     */
