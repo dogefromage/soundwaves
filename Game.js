@@ -3,7 +3,6 @@ const Player = require('./Player');
 const GameSettings = require('./GameSettings');
 const Rect = require('./Rect');
 const { Soundwave, SoundwaveSettings } = require('./Soundwave')
-const GameDebugger = require('./GameDebugger');
 
 class Game
 {
@@ -12,6 +11,7 @@ class Game
         this.map = new GameMap(mapSize);
         this.players = [];
         this.soundwaves = [];
+        this.powerups = [];
     }
 
     addPlayer(id, name)
@@ -48,9 +48,6 @@ class Game
 
     update(deltaTime)
     {
-        // DEBUG
-        GameDebugger.reset();
-
         // SOUNDWAVES
         for (let i = this.soundwaves.length - 1; i >= 0; i--)
         {
@@ -142,17 +139,11 @@ class Game
             waves.push(w.getData());
         }
 
-        const debug = 
-        {
-            rects: GameDebugger.rectangles
-        };
-
         const data = 
         {
             map: this.map.getData(),
             players,
             soundwaves: waves,
-            debug: debug,
         };
 
         return data;

@@ -8,10 +8,9 @@ class ClientGame
         this.mainPlayer;
         this.players = [];
         this.soundwaves = [];
-        this.debug;
     }
 
-    setData({ map: mapData, players: playerDatas, soundwaves: soundwaveDatas, debug })
+    setData({ map: mapData, players: playerDatas, soundwaves: soundwaveDatas })
     {
         /*      MAP     */
         // update map with data or create new
@@ -29,9 +28,6 @@ class ClientGame
 
         /*    SOUNDWAVES    */
         this.alignArrays(this.soundwaves, soundwaveDatas, ClientSoundwave);
-
-        // DEBUG
-        this.debug = debug;
 
         this.mainPlayer = undefined;
         // find main player
@@ -97,17 +93,13 @@ class ClientGame
             p.draw(ctx, camera, p == this.mainPlayer);
         }
 
-        // if (this.mainPlayer)
+        // OLD
+        // for (let i = 0; i < this.debug.rects.length; i++)
         // {
-        //     this.mainPlayer.draw(ctx, camera);
+        //     ctx.strokeStyle = "#ff0000";
+        //     ctx.lineWidth = 2;
+        //     const canRect = camera.WorldToCanvasRect(this.debug.rects[i]);
+        //     ctx.strokeRect(canRect.x, canRect.y, canRect.w, canRect.h);
         // }
-
-        for (let i = 0; i < this.debug.rects.length; i++)
-        {
-            ctx.strokeStyle = "#ff0000";
-            ctx.lineWidth = 2;
-            const canRect = camera.WorldToCanvasRect(this.debug.rects[i]);
-            ctx.strokeRect(canRect.x, canRect.y, canRect.w, canRect.h);
-        }
     }
 }

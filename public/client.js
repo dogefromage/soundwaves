@@ -160,17 +160,17 @@ function drawBars()
     }
 }
 
-// instant join 
-setTimeout(() =>
-{
-    document.getElementById("nameInput").value = "gagi";
-    joinGame();
-}, 100);
+// // instant join 
+// setTimeout(() =>
+// {
+//     document.getElementById("nameInput").value = "gagi";
+//     joinGame();
+// }, 100);
 
-function dieTest()
-{
-    socket.emit('die-test');
-}
+// function dieTest()
+// {
+//     socket.emit('die-test');
+// }
 
 
 
