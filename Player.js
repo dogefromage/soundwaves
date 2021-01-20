@@ -1,6 +1,6 @@
 const Rect = require('./Rect');
 const GameSettings = require('./GameSettings');
-const { Soundwave, SoundwaveSettings } = require('./SoundWave');
+const { Soundwave, SoundwaveSettings } = require('./Soundwave');
 const { lerp } = require('./GameMath');
 const Color = require('./Color');
 
