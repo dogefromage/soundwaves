@@ -31,12 +31,15 @@ class Player extends Rect
 		// for soundwave spawning
 		this.lastStep = { x: this.x, y: this.y };
 		
-		this.input = { x: 0, y: 0, jump: false, sneak: false }
+		// for input
+		this.lastInput = { x:0, y:0 };
+		this.walk = { x:0, y:0 };
+		this.sneaking = false;
+		this.slingshot = false;
 
-		this.health = 0.77;
+		this.health = 1;
 
-		this.slingshot;
-
+		// when hit
 		this.brightness = 0;
 		this.hurtCooldown = 0;
 	}
@@ -44,37 +47,39 @@ class Player extends Rect
 	setInput(input)
 	{
 		// validate input
-		if (isNaN(input.x))
-			input.x = 0;
+		if (!isNaN(input.x))
+			this.input.x = Math.sign(input.x);
 		if (isNaN(input.y)) 
-			input.y = 0;
-			
-		input.shoot = Boolean(input.shoot);
-		input.sneak = Boolean(input.sneak);
-		input.x = Math.sign(input.x);
-		input.y = Math.sign(input.y);
+			this.input.y = Math.sign(input.y);
 
-		if (input.x != 0 && input.y != 0)
+		if ( !(input.x == 0 && input.y == 0))
 		{
-			input.x *= 0.707
-			input.y *= 0.707
+			// normalize
+			let t = 1. / Math.hypot(this.input.x, this.input.y);
+			this.input.x *= t;
+			this.input.y *= t;
 		}
 		
 		// smoothen walk
-		this.input.x = lerp(this.input.x, input.x, 0.4);
-		this.input.y = lerp(this.input.y, input.y, 0.4);
+		this.walk.x = lerp(this.walk.x, this.input.x, 0.4);
+		this.walk.y = lerp(this.walk.y, this.input.y, 0.4);
 
-		if (input.shoot && !this.input.shoot)
+		if (input.hasOwnProperty("shoot"))
 		{
-			this.slingshot = { x: this.x, y: this.y, shoot: false };
-		}
-		else if (!input.shoot && this.input.shoot)
-		{
-			this.slingshot.shoot = true;
+			if (input.shoot)
+			{
+				this.slingshot = { x: this.x, y: this.y, shoot: false };
+			}
+			else
+			{
+				this.slingshot.shoot = true;
+			}
 		}
 
-		this.input.shoot = input.shoot;
-		this.input.sneak = input.sneak;
+		if (input.hasOwnProperty("sneak"))
+		{
+			this.sneaking = input.sneak;
+		}
 	}
 
 	update(deltaTime)
@@ -85,13 +90,13 @@ class Player extends Rect
 
 		// MOVE
 		let speed = GameSettings.playerSpeed;
-		if (this.input.sneak)
+		if (this.sneaking)
 		{
 			speed *= GameSettings.sneakFactor;
 		}
 
-		this.x += this.input.x * speed * deltaTime;
-		this.y += this.input.y * speed * deltaTime;
+		this.x += this.walk.x * speed * deltaTime;
+		this.y += this.walk.y * speed * deltaTime;
 
 		if (this.slingshot)
 		{

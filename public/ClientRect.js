@@ -8,9 +8,6 @@ class ClientRect
         this.y = y;
         this.w = w;
         this.h = h;
-
-        this.oldX = x;
-        this.oldY = y;
     }
 
     isInsideOut()

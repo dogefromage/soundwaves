@@ -125,25 +125,43 @@ class Game
 
     getData(id)
     {
+        let pos = this.players.find(p => p.id == id);
+        let range;
+        let viewDist = 1.5;
+        if (pos)
+        {
+            range = new Rect(pos.x, pos.y, 0, 0).extend(viewDist).roundUp();
+        }
+        else
+        {
+            range = new Rect(0.5 * this.map.width, 0.5 * this.map.height, 0, 0).extend(viewDist).roundUp();
+        }
+
         // PLAYERS
         const players = [];
         for (let p of this.players)
         {
-            players.push(p.getData());
+            if (Rect.detectIntersection(range, p))
+            {
+                players.push(p.getData());
+            }
         }
 
         // SOUNDWAVES
-        const waves = [];
+        const soundwaves = [];
         for (let w of this.soundwaves)
         {
-            waves.push(w.getData());
+            if (Rect.detectCollision(range, w.getRange()))
+            {
+                soundwaves.push(w.getData());
+            }
         }
 
         const data = 
         {
             map: this.map.getData(),
             players,
-            soundwaves: waves,
+            soundwaves,
         };
 
         return data;

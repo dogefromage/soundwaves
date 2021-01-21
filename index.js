@@ -54,13 +54,18 @@ io.on('connection', (socket) =>
         }
     });
 
-    socket.on('input', (input) =>
+    socket.on('client-data', (clientData) =>
     {
-        const player = game.players.find(p => p.id == socket.id);
-        if (player)
+        if (clientData.input)
         {
-            player.setInput(input);
+            const player = game.players.find(p => p.id == socket.id);
+            if (player)
+            {
+                player.setInput(clientData.input);
+            }
         }
+
+        socket.gameTree = clientData.tree;
     });
 
     socket.on('disconnect', () => 
@@ -106,6 +111,8 @@ function loop()
     for (let socket of sockets)
     {
         const gameData = game.getData(socket.id);
+        // console.log(JSON.stringify(gameData).length);
+        console.log(JSON.stringify(gameData));
         socket.emit('loop', gameData);
     }
 

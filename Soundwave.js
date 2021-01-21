@@ -1,6 +1,7 @@
 const RandomInteger = require('./RandomInteger');
 const GameSettings = require('./GameSettings');
 const Color = require('./Color');
+const Rect = require('./Rect');
 
 class Soundwave // version 4 or something???!
 {
@@ -40,6 +41,11 @@ class Soundwave // version 4 or something???!
                 center: true,
             });
         }
+    }
+
+    getRange()
+    {
+        return new Rect(this.center.x, this.center.y, 0, 0).extend(this.r);
     }
 
     update(deltaTime, map)

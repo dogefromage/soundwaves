@@ -2,15 +2,18 @@ const { lerp }  = require('./GameMath');
 
 class Rect
 {
-    constructor(x, y, w, h)
+    constructor(x, y, w, h, remembers=false)
     {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
 
-        this.oldX = x;
-        this.oldY = y;
+        if (remembers)
+        {
+            this.oldX = x;
+            this.oldY = y;
+        }
     }
 
     isInsideOut()
@@ -78,6 +81,17 @@ class Rect
     extend(m)
     {
         return new Rect(this.x - m, this.y - m, this.w + 2 * m, this.h + 2 * m);
+    }
+
+    roundUp()
+    {
+        let newX = Math.floor(this.x);
+        let newY = Math.floor(this.y);
+        return new Rect(
+            newX, newY,
+            Math.ceil(this.w + this.x - newX),
+            Math.ceil(this.h + this.y - newY),
+        );
     }
 
     static detectCollision(fixed, movable, margin = 0)

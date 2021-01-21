@@ -2,27 +2,33 @@
 
 class ClientGamemap
 {
-    constructor({width, height, walls})
+    constructor({width, height, pixels})
     {
         this.width = width;
         this.height = height;
-        this.walls = walls;
+        this.pixels = pixels;
     }
 
-    setData({width, height, walls})
+    setData({width, height, pixels})
     {
         this.width = width;
         this.height = height;
-        this.walls = walls;
+        this.pixels = pixels;
     }
 
     draw(ctx, camera)
     {
         ctx.fillStyle = "#000000";
-        for (let w of this.walls)
+        for (let j = 0; j < this.pixels.length; j++)
         {
-            const canRect = camera.WorldToCanvasRect(w);
-            ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);   
+            for (let i = 0; i < this.pixels[j].length; i++)
+            {
+                if (this.pixels[j][i] == '1')
+                {
+                    const canRect = camera.WorldToCanvasRect(new ClientRect(i, j, 1, 1));
+                    ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);   
+                }
+            }
         }
     }
 }

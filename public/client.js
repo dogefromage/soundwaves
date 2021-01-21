@@ -15,30 +15,53 @@ let displayStamina = 0, displayHealth = 0;
 
 const game = new ClientGame();
 const camera = new ClientCamera(0, 0, 100);
+let lastPlayerInput = {};
 
 // MAIN LOOP (server triggered)
-socket.on('loop', (data) => 
+socket.on('loop', (serverData) => 
 {
     // update client game with server data
-    game.setData(data);
-
+    game.update(serverData);
+    
+    //drawing
     updateCamera();
-
     game.draw(ctx, camera, w, h);
-
     drawBars();
 
+    /**
+     * This data is sent to the server.
+     * It includes the changes in player input
+     * and also the current tree of objects in the clients game.
+     * This allows the server to selectively update objects and tell client to "forget" them
+     * after they have left the frame.
+     */
+    const clientData = 
+    {
+        tree: game.getTree(),
+    }
+    
     let card = document.getElementById('join-window');
     if (game.mainPlayer)
     {
-        // send player input to server
-        const playerInput = {
+        // send new player input to server
+        let playerInput = 
+        {
             x: input.axisX,
             y: input.axisY,
             shoot: input.getKey('Space'),
             sneak: input.getKey('ShiftLeft'),
         };
-        socket.emit('input', playerInput);
+        
+        // put all inputs which have changed into new array
+        let playerInputChanges = {};
+        for (let i in playerInput)
+        {
+            if (playerInput[i] != lastPlayerInput[i])
+            {
+                lastPlayerInput[i] = playerInputChanges[i] = playerInput[i];
+            }
+        }
+        clientData.input = playerInputChanges,
 
         // remove join card
         card.classList.add("hidden");
@@ -48,6 +71,8 @@ socket.on('loop', (data) =>
         // display join card
         card.classList.remove("hidden");
     }
+
+    socket.emit('client-data', clientData);
 
     frameCount++;
 });
@@ -226,4 +251,6 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
     if (stroke) {
       ctx.stroke();
     }
-  }
+}
+
+
