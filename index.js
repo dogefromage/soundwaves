@@ -87,7 +87,7 @@ io.on('connection', (socket) =>
 
 //      MAIN LOOP      //
 // loop time control
-const loopTimeGoal = 20; //ms
+const loopTimeGoal = 500; //ms
 let lastLoopTime = process.hrtime();
 
 // for loops per second measurement
@@ -110,7 +110,7 @@ function loop()
     // SEND GAME TO CLIENTS
     for (let socket of sockets)
     {
-        const gameData = game.getData(socket.id);
+        const gameData = game.getData(socket.id, clientTree);
         // console.log(JSON.stringify(gameData).length);
         console.log(JSON.stringify(gameData));
         socket.emit('loop', gameData);

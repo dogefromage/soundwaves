@@ -9,13 +9,6 @@ class ClientGamemap
         this.pixels = pixels;
     }
 
-    setData({width, height, pixels})
-    {
-        this.width = width;
-        this.height = height;
-        this.pixels = pixels;
-    }
-
     draw(ctx, camera)
     {
         ctx.fillStyle = "#000000";

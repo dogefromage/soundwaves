@@ -114,14 +114,6 @@ function updateCamera()
 
     if (game.mainPlayer)
     {
-        // fixed increments
-        // let viewSegments = 1;
-        // let newX = viewSegments * Math.floor(game.mainPlayer.x / viewSegments) + 0.5 * viewSegments - x;
-        // let newY = viewSegments * Math.floor(game.mainPlayer.y / viewSegments) + 0.5 * viewSegments - y;
-        // camera.x += (newX - camera.x) * 0.4
-        // camera.y += (newY - camera.y) * 0.4
-
-        // central
         let smoothness = 0.05;
         camera.x += ( (game.mainPlayer.x - x) - camera.x) * smoothness;
         camera.y += ( (game.mainPlayer.y - y) - camera.y) * smoothness;
@@ -197,8 +189,6 @@ function drawBars()
 // {
 //     socket.emit('die-test');
 // }
-
-
 
 //https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
 /**

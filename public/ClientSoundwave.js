@@ -10,14 +10,6 @@ class ClientSoundwave
         this.radius = radius;
         this.vertices = vertices;
     }
-    
-    setData({ color, center, radius, vertices })
-    {
-        this.color = color;
-        this.center = center;
-        this.radius = radius;
-        this.vertices = vertices;
-    }
 
     draw(ctx, camera)
     {
@@ -69,25 +61,3 @@ class ClientSoundwave
         }
     }
 }
-
-// class ClientSoundwave
-// {
-//     // constructor({id, color, circle, lineWidth})
-//     constructor({id, color, circle})
-//     {
-//         this.id = id;
-//         this.color = color;
-//         this.circle = new ClientCircle(circle);
-//     }
-    
-//     setData({color, circle})
-//     {
-//         this.color = color;
-//         this.circle.setData(circle);
-//     }
-
-//     draw(ctx, camera)
-//     {
-//         this.circle.draw(ctx, camera, this.color);
-//     }
-// }

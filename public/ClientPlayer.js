@@ -2,23 +2,12 @@
 
 class ClientPlayer extends ClientRect
 {
-	constructor({ id, x, y, w, h, colorSelf, colorOthers, health })
+	constructor({ id, x, y, w, h, cSelf, cOther, health })
 	{
 		super(x, y, w, h);
 		this.id = id;
-		this.colorSelf = colorSelf;
-		this.colorOthers = colorOthers;
-		this.health = health;
-	}
-
-	setData({ x, y, w, h, colorSelf, colorOthers, health })
-	{
-		this.x = x;
-		this.y = y;
-		this.w = w;
-		this.h = h;
-		this.colorSelf = colorSelf;
-		this.colorOthers = colorOthers;
+		this.colorSelf = cSelf;
+		this.colorOthers = cOther;
 		this.health = health;
 	}
 

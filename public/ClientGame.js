@@ -18,85 +18,112 @@ class ClientGame
             this.map = new ClientGamemap(serverData.map);
         }
 
+        // soundwaves
+        this.merge(this.soundwaves, serverData.waves, ClientSoundwave);
+
         // players
-        if (serverData.players)
+        this.merge(this.players, serverData.players, ClientPlayer);
+
+        for (let p of this.players)
         {
-            for (let playerData in serverData.players)
+            if (p.id == socket.id)
             {
-                if (playerData.info == 'new')
-                {
-                    
-                }
-                else if (playerData.info == 'upd')
-                {
+                this.mainPlayer = p;
+                break;
+            }
+        }
+    }
 
-                }
-                else if (playerData.info == 'del')
-                {
+    /**
+     * updates clients array with server data.
+     * info displays the kind of action for every object.
+     * 
+     * if element does not exist on client -> "new"
+     *  - create new Element of type T
+     *  - arguments must be compatible with constructor
+     * 
+     * if element must be updated -> "upd"
+     *  - item is searched by "id"
+     *  - for every component sent by server, set on clientObj
+     * 
+     * if element must be deleted -> "del"
+     *  - delete element from array using id
+     */
+    merge(clientSide, serverSide, T)
+    {
+        if (!serverSide)
+        {
+            // no data sent
+            return;
+        }
 
+        for (let serverObj of serverSide)
+        {
+            if (serverObj.info == 'new')
+            {
+                if (clientSide.find(c => c.id == serverObj.id))
+                {
+                    console.log("object was tried to create but id already existed!");
+                }
+                else
+                {
+                    clientSide.push(new T(serverObj));
+                }
+            }
+            else if (serverObj.info == 'upd')
+            {
+                let clientObj = clientSide.find(c => c.id == serverObj.id);
+                if (clientObj)
+                {
+                    for (let i in serverObj)
+                    {
+                        clientObj[i] = serverObj[i];
+                    }
+                }
+                else
+                {
+                    console.log("update called on non existing array object!");
+                }
+            }
+            else if (serverObj.info == 'del')
+            {
+                
+                let index = clientSide.indexOf(clientSide.find(c => c.id == serverObj.id));
+                if (index >= 0)
+                {
+                    clientSide.splice(index, 1);
+                }
+                else
+                {
+                    console.log("delete called on non existing array object!");
                 }
             }
         }
     }
 
-    // setData({ map: mapData, players: playerDatas, soundwaves: soundwaveDatas })
-    // {
-    //     /*      MAP     */
-    //     if (mapData)
-    //     {
-    //         this.map = new ClientGamemap(mapData);
-    //     }
+    /**
+     * send tree which gives server information about what is stored on client.
+     * short variable names to reduce data sent
+     */
+    getTree()
+    {
+        let tree = {
+            m: (typeof this.map !== 'undefined'), // if map is defined
+            p: [], // players
+            w: [], // soundwaves
+        };
 
-    //     /*      PLAYERS     */
-    //     this.alignArrays(this.players, playerDatas, ClientPlayer);
-
-    //     /*    SOUNDWAVES    */
-    //     this.alignArrays(this.soundwaves, soundwaveDatas, ClientSoundwave);
-
-    //     this.mainPlayer = undefined;
-    //     // find main player
-    //     for (let p of this.players)
-    //     {
-    //         if (p.id == socket.id)
-    //         {
-    //             this.mainPlayer = p;
-    //             break;
-    //         }
-    //     }
-    // }
-
-    // alignArrays(clientArray, serverData, T)
-    // {
-    //     // update clientarray with serverData, which both are 
-    //     // filled with objects (every object with "id" property which has to match).
-    //     // !! every element needs to have a setData function to set the new data
+        for (let p in this.players)
+        {
+            tree.p.push(p.id);
+        }
+        for (let w in this.soundwaves)
+        {
+            tree.w.push(w.id);
+        }
         
-    //     // loop through on client existing data
-    //     for (let i = clientArray.length - 1; i >= 0; i--)
-    //     {
-    //         const client = clientArray[i];
-    //         const data = serverData.find(data => data.id == client.id);
-    //         // if server has data, update values on client
-    //         if (data)
-    //         {
-    //             // this function must exist for every element
-    //             client.setData(data);
-    //             // remove used data
-    //             serverData.splice(serverData.indexOf(data), 1);
-    //         }
-    //         // if no data sent, remove object from client array
-    //         else
-    //         {
-    //             clientArray.splice(i, 1);
-    //         }
-    //     }
-
-    //     // data array now only holds newly added objects, so add them to client
-    //     for (let d of serverData)
-    //     {
-    //         clientArray.push(new T(d));
-    //     }
-    // }
+        return tree;
+    }
 
     draw(ctx, camera, w, h)
     {
@@ -118,28 +145,5 @@ class ClientGame
         {
             p.draw(ctx, camera, p == this.mainPlayer);
         }
-    }
-
-    getTree()
-    {
-        /**
-         * send tree which gives server information about what is stored on client.
-         * short variable names to reduce bandwidth
-         */
-        let tree = {
-            p: [], // players
-            w: [], // soundwaves
-        };
-
-        for (let p in this.players)
-        {
-            tree.p.push(p.id);
-        }
-        for (let w in this.soundwaves)
-        {
-            tree.w.push(w.id);
-        }
-        
-        return tree;
     }
 }

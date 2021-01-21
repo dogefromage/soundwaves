@@ -123,11 +123,11 @@ class Game
         }
     }
 
-    getData(id)
+    getData(id, clientTree)
     {
+        let range; // range rectangle to limit view and data sent
+        let viewDist = 2;
         let pos = this.players.find(p => p.id == id);
-        let range;
-        let viewDist = 1.5;
         if (pos)
         {
             range = new Rect(pos.x, pos.y, 0, 0).extend(viewDist).roundUp();
@@ -137,34 +137,89 @@ class Game
             range = new Rect(0.5 * this.map.width, 0.5 * this.map.height, 0, 0).extend(viewDist).roundUp();
         }
 
-        // PLAYERS
-        const players = [];
-        for (let p of this.players)
+        // data to be sent
+        const data = {};
+
+        if (clientTree)
         {
-            if (Rect.detectIntersection(range, p))
+            // send data not currently in tree, otherwise update if needed
+            if (!clientTree.m)
             {
-                players.push(p.getData());
+                // resend map
+                data.map = this.map.getData();
+            }
+            
+            // players
+            data.players = selectData(this.players, clientTree.p, range);
+
+            // waves
+            data.waves = selectData(this.soundwaves, clientTree.w, range);
+        }
+        else
+        {
+            // send all data in range and whole map
+            data.map = this.map.getData();
+            
+            data.players = [];
+            for (let p of this.players)
+            {
+                if (Rect.detectCollision(range, p))
+                {
+                    data.players.push(p.getAllData());
+                }
+            }
+
+            data.waves = [];
+            for (let w in this.soundwaves)
+            {
+                if (Rect.detectCollision(range, w.getRange()))
+                {
+                    data.waves.push(w.getAllData());
+                }
             }
         }
-
-        // SOUNDWAVES
-        const soundwaves = [];
-        for (let w of this.soundwaves)
-        {
-            if (Rect.detectCollision(range, w.getRange()))
-            {
-                soundwaves.push(w.getData());
-            }
-        }
-
-        const data = 
-        {
-            map: this.map.getData(),
-            players,
-            soundwaves,
-        };
 
         return data;
+    }
+
+    /**
+     * select the data which needs to be updated on every client
+     * if client data is not on server, delete
+     * an id must exist for every object 
+     */
+    selectData(serverArray, clientIDs, range)
+    {
+        let data = [];
+        // make copy so it can be manipulated
+        let idsCopy = clientIDs.slice();
+
+        for (let serverObj of serverArray)
+        {
+            if (!Rect.detectCollision(range, serverObj.getRange()))
+            {
+                continue;
+            }
+
+            let IDIndex = idsCopy.indexOf(idsCopy.find(id => id == serverObj.id));
+            if (IDIndex >= 0)
+            {
+                // update
+                let objData = serverObj.getNewData();
+                objData.info = "upd";
+            }
+            else
+            {
+                // create new
+            }
+
+            // remove id from copy
+            idsCopy.splice(IDIndex, 1);
+        }
+
+        for (let id of idsCopy)
+        {
+            // deletes
+        }
     }
 }
 

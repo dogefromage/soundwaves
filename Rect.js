@@ -16,6 +16,11 @@ class Rect
         }
     }
 
+    getRange()
+    {
+        return this;
+    }
+
     isInsideOut()
     {
         return this.w < 0 && this.h < 0;
