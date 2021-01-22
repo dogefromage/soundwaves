@@ -12,26 +12,41 @@ class ClientGame
 
     update(serverData)
     {
+        const deltaTime = serverData.dt;
+
         // map
         if (serverData.m)
         {
             this.map = new ClientGamemap(serverData.m);
         }
 
-        // soundwaves
-        this.merge(this.soundwaves, serverData.w, ClientSoundwave);
-
-        // players
-        this.merge(this.players, serverData.p, ClientPlayer);
-
-        for (let p of this.players)
+        // new soundwaves
+        if (serverData.w)
         {
-            if (p.id == socket.id)
+            for (let newWave of serverData.w)
             {
-                this.mainPlayer = p;
-                break;
+                this.soundwaves.push(new ClientSoundwave(newWave));
             }
         }
+        // update soundwaves
+        for (let i = this.soundwaves.length - 1; i >= 0; i--)
+        {
+            const w = this.soundwaves[i];
+            w.update(deltaTime, this.map);
+            if (!w.alive)
+            {
+                this.soundwaves.splice(i, 1);
+            }
+        }
+
+        // players
+        if (serverData.p)
+        {
+            this.merge(this.players, serverData.p, ClientPlayer);
+        }
+
+        // mainplayer - if set to undefined, join card shows up
+        this.mainPlayer = this.players.find(p => p.id == socket.id);
     }
 
     /**
@@ -83,7 +98,6 @@ class ClientGame
                 else
                 {
                     console.log("update called on non existing array object!");
-                    debugger;
                 }
             }
             else if (serverObj.info == 'del')

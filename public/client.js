@@ -16,10 +16,12 @@ let displayStamina = 0, displayHealth = 0;
 const game = new ClientGame();
 const camera = new ClientCamera(0, 0, 100);
 let lastPlayerInput = {};
+let cardDisplayed = true;
 
 // MAIN LOOP (server triggered)
-socket.on('loop', (serverData) => 
+socket.on('loop', (dataJSON) => 
 {
+    const serverData = JSON.parse(dataJSON);
     // update client game with server data
     game.update(serverData);
     
@@ -35,11 +37,9 @@ socket.on('loop', (serverData) =>
      * This allows the server to selectively update objects and tell client to "forget" them
      * after they have left the frame.
      */
-
-    const tree = game.getTree();
     const clientData = 
     {
-        tree,
+        tree: game.getTree(),
     }
     
     let card = document.getElementById('join-window');
@@ -63,15 +63,32 @@ socket.on('loop', (serverData) =>
                 lastPlayerInput[i] = playerInputChanges[i] = playerInput[i];
             }
         }
-        clientData.input = playerInputChanges,
+        clientData.input = playerInputChanges;
 
-        // remove join card
-        card.classList.add("hidden");
+        if (cardDisplayed)
+        {
+            // remove join card
+            card.classList.add('opacity-zero');
+            setTimeout(() =>
+            {
+                card.classList.add('disabled');
+            }, 400) // time must be same as in '.opacity-zero'
+            cardDisplayed = false;
+        }
     }
     else
     {
-        // display join card
-        card.classList.remove("hidden");
+        
+        if (!cardDisplayed)
+        {
+            // display join card
+            card.classList.remove('disabled');
+            setTimeout(() => 
+            {
+                card.classList.remove('opacity-zero');
+            }, 3);
+            cardDisplayed = true;
+        }
     }
 
     socket.emit('client-data', clientData);
@@ -157,7 +174,7 @@ function drawBars()
         
         let bars = [
             { stat: displayHealth, color: "#ff2244", name: "HEALTH" },
-            { stat: displayStamina, color: "#eeee11", name: "STAMINA" },
+            // { stat: displayStamina, color: "#eeee11", name: "STAMINA" },
         ]
 
         for (let bar of bars)
@@ -187,10 +204,10 @@ function drawBars()
 //     joinGame();
 // }, 100);
 
-// function dieTest()
-// {
-//     socket.emit('die-test');
-// }
+function dieTest()
+{
+    socket.emit('die-test');
+}
 
 //https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
 /**

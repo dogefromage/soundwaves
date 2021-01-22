@@ -49,10 +49,10 @@ class Player extends Rect
 		// validate input
 		if (!isNaN(input.x))
 			this.input.x = Math.sign(input.x);
-		if (isNaN(input.y)) 
+		if (!isNaN(input.y)) 
 			this.input.y = Math.sign(input.y);
 
-		if ( !(input.x == 0 && input.y == 0))
+		if ( !(this.input.x == 0 && this.input.y == 0))
 		{
 			// normalize
 			let t = 1. / Math.hypot(this.input.x, this.input.y);
@@ -64,17 +64,20 @@ class Player extends Rect
 		this.walk.x = lerp(this.walk.x, this.input.x, 0.4);
 		this.walk.y = lerp(this.walk.y, this.input.y, 0.4);
 
-		// if (input.hasOwnProperty("shoot"))
-		// {
-		// 	if (input.shoot)
-		// 	{
-		// 		this.slingshot = { x: this.x, y: this.y, shoot: false };
-		// 	}
-		// 	else
-		// 	{
-		// 		this.slingshot.shoot = true;
-		// 	}
-		// }
+		if (input.hasOwnProperty("shoot"))
+		{
+			if (input.shoot)
+			{
+				this.slingshot = { x: this.x, y: this.y, shoot: false };
+			}
+			else
+			{
+				if (this.slingshot)
+				{
+					this.slingshot.shoot = true;
+				}
+			}
+		}
 
 		if (input.hasOwnProperty("sneak"))
 		{
@@ -88,7 +91,7 @@ class Player extends Rect
 		this.oldX = this.x;
 		this.oldY = this.y;
 
-		// MOVE
+		// LOCOMOTION
 		let speed = GameSettings.playerSpeed;
 		if (this.sneaking)
 		{
@@ -98,6 +101,7 @@ class Player extends Rect
 		this.x += this.walk.x * speed * deltaTime;
 		this.y += this.walk.y * speed * deltaTime;
 
+		// SHOOT
 		if (this.slingshot)
 		{
 			if (this.slingshot.shoot)
@@ -118,7 +122,7 @@ class Player extends Rect
 			}
 		}
 
-		// STEP
+		// SPAWN SOUNDWAVE ON STEP
 		let distanceWalked = (this.lastStep.x - this.x)**2 + (this.lastStep.y - this.y)**2;
 		if (distanceWalked > GameSettings.sqrPlayerStepDist)
 		{
@@ -148,7 +152,7 @@ class Player extends Rect
 	{
 		let newSoundwaves = [];
 
-		this.health -=  damage;
+		this.health -= damage;
 
 		// glow for short moment
 		this.brightness += this.health;
@@ -193,15 +197,22 @@ class Player extends Rect
 		};
 	}
 
-	getNewData()
+	getNewData(mainPlayer = true)
 	{
-		return {
+		let data = {
 			id: this.id,
 			x: this.x,
 			y: this.y,
 			cOther: this.color.toHex(),
-			health: this.health,
 		}
+
+		// only needed if mainplayer
+		if (mainPlayer)
+		{
+			data.health = this.health;
+		}
+
+		return data;
 	}
 }
 

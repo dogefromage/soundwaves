@@ -56,7 +56,6 @@ function lerpColor(a, b, t)
     }
 }
 
-
 module.exports = 
 {
     lerp,

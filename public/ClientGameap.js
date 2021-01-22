@@ -2,11 +2,20 @@
 
 class ClientGamemap
 {
-    constructor({width, height, pixels})
+    constructor({w: width, h: height, data})
     {
         this.width = width;
         this.height = height;
-        this.pixels = pixels;
+        this.pixels = [];
+        for (let j = 0; j < this.height; j++)
+        {
+            this.pixels[j] = [];
+            for (let i = 0; i < this.width; i++)
+            {
+                this.pixels[j][i] = data[ j * this.width + i ];
+            }
+        }
+
     }
 
     draw(ctx, camera)

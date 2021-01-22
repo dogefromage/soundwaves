@@ -45,6 +45,10 @@ canvas
     justify-content: center;
     flex-direction: column;
     align-items: center;
+
+    opacity: 1;
+    transition: 0.4s all ease-in-out;
+
 }
 
 .card input
@@ -103,6 +107,11 @@ canvas
 .hidden
 {
     visibility: hidden;
+}
+
+.opacity-zero
+{
+    opacity: 0;
 }
 
 .disabled

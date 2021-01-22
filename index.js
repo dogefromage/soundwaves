@@ -63,8 +63,6 @@ io.on('connection', (socket) =>
             {
                 player.setInput(clientData.input);
             }
-
-            console.log(clientData.input);
         }
 
         socket.clientTree = clientData.tree;
@@ -89,7 +87,7 @@ io.on('connection', (socket) =>
 
 //      MAIN LOOP      //
 // loop time control
-const loopTimeGoal = 500; //ms
+const loopTimeGoal = 15; //ms
 let lastLoopTime = process.hrtime();
 
 // for loops per second measurement
@@ -113,9 +111,20 @@ function loop()
     for (let socket of sockets)
     {
         const gameData = game.getData(socket.id, socket.clientTree);
-        // console.log(JSON.stringify(gameData).length);
-        console.log(JSON.stringify(gameData));
-        socket.emit('loop', gameData);
+        gameData.dt = deltaTime;
+        
+        const reducedJSON = JSON.stringify(gameData, function(key, value) {
+            // limit precision of floats
+            if (typeof value === 'number') {
+                return parseFloat(value.toFixed(4)); // adequate, lower looks like shit
+            }
+            return value;
+        });
+
+        // console.log(reducedJSON); // show data
+        // console.log(reducedJSON.length); // show data size in characters
+
+        socket.emit('loop', reducedJSON);
     }
 
     // time the loop execution took (in ms)

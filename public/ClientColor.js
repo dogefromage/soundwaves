@@ -1,5 +1,5 @@
 
-class Color
+class ClientColor
 {
     constructor(r, g, b, a = 255)
     {
@@ -35,8 +35,6 @@ class Color
 
     copy()
     {
-        return new Color(this.r, this.g, this.b, this.a);
+        return new ClientColor(this.r, this.g, this.b, this.a);
     }
 }
-
-module.exports = Color;

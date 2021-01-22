@@ -11,7 +11,7 @@ class Game
         this.map = new GameMap(mapSize);
         this.players = [];
         this.soundwaves = [];
-        this.powerups = [];
+        // this.powerups = [];
     }
 
     addPlayer(id, name)
@@ -154,31 +154,23 @@ class Game
             data.p = this.selectData(this.players, clientTree.p, range);
 
             // waves
-            data.w = this.selectData(this.soundwaves, clientTree.w, range);
+            data.w = [];
+            for (let w of this.soundwaves)
+            {
+                if (Rect.detectCollision(w.getRange(), range))
+                {
+                    let clientID = clientTree.w.find(id => id == w.id);
+                    if (!clientID)
+                    {
+                        data.w.push(w.getData());
+                    }
+                }
+            }
         }
         else
         {
-            // send all data in range and whole map
-            // console.log("doesnt have clienttree");
-            data.map = this.map.getData();
-            
-            data.p = [];
-            for (let p of this.players)
-            {
-                if (Rect.detectCollision(range, p))
-                {
-                    data.p.push(p.getAllData());
-                }
-            }
-
-            data.w = [];
-            for (let w in this.soundwaves)
-            {
-                if (Rect.detectCollision(range, w.getRange()))
-                {
-                    data.w.push(w.getAllData());
-                }
-            }
+            // send map
+            data.m = this.map.getData();
         }
 
         return data;

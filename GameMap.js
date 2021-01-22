@@ -51,10 +51,19 @@ class GameMap
 
     getData(rangeRect)
     {
+        let pixelString = "";
+        for (let j = 0; j < this.height; j++)
+        {
+            for (let i = 0; i < this.width; i++)
+            {
+                pixelString += this.pixels[j][i];
+            }
+        }
+
         return {
-            width: this.width,
-            height: this.height,
-            pixels: this.pixels,
+            w: this.width,
+            h: this.height,
+            data: pixelString,
         };
     }
 }
