@@ -35,9 +35,11 @@ socket.on('loop', (serverData) =>
      * This allows the server to selectively update objects and tell client to "forget" them
      * after they have left the frame.
      */
+
+    const tree = game.getTree();
     const clientData = 
     {
-        tree: game.getTree(),
+        tree,
     }
     
     let card = document.getElementById('join-window');

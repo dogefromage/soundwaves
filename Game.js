@@ -28,7 +28,7 @@ class Game
             x = Math.floor(Math.random() * this.map.width);
             y = Math.floor(Math.random() * this.map.height);
         }
-        while(this.map.pixels[y][x]) // repeat if map square isn't empty
+        while(this.map.pixels[y][x] == '1') // repeat if map square isn't empty
 
         const p = new Player(x + 0.5, y + 0.5, id, name);
         this.players.push(p);
@@ -143,38 +143,40 @@ class Game
         if (clientTree)
         {
             // send data not currently in tree, otherwise update if needed
+            // console.log("has clienttree");
             if (!clientTree.m)
             {
                 // resend map
-                data.map = this.map.getData();
+                data.m = this.map.getData();
             }
             
             // players
-            data.players = selectData(this.players, clientTree.p, range);
+            data.p = this.selectData(this.players, clientTree.p, range);
 
             // waves
-            data.waves = selectData(this.soundwaves, clientTree.w, range);
+            data.w = this.selectData(this.soundwaves, clientTree.w, range);
         }
         else
         {
             // send all data in range and whole map
+            // console.log("doesnt have clienttree");
             data.map = this.map.getData();
             
-            data.players = [];
+            data.p = [];
             for (let p of this.players)
             {
                 if (Rect.detectCollision(range, p))
                 {
-                    data.players.push(p.getAllData());
+                    data.p.push(p.getAllData());
                 }
             }
 
-            data.waves = [];
+            data.w = [];
             for (let w in this.soundwaves)
             {
                 if (Rect.detectCollision(range, w.getRange()))
                 {
-                    data.waves.push(w.getAllData());
+                    data.w.push(w.getAllData());
                 }
             }
         }
@@ -206,10 +208,14 @@ class Game
                 // update
                 let objData = serverObj.getNewData();
                 objData.info = "upd";
+                data.push(objData);
             }
             else
             {
                 // create new
+                let objData = serverObj.getAllData();
+                objData.info = "new";
+                data.push(objData);
             }
 
             // remove id from copy
@@ -219,7 +225,10 @@ class Game
         for (let id of idsCopy)
         {
             // deletes
+            data.push({ info: "del", id });
         }
+
+        return data;
     }
 }
 

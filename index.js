@@ -63,9 +63,11 @@ io.on('connection', (socket) =>
             {
                 player.setInput(clientData.input);
             }
+
+            console.log(clientData.input);
         }
 
-        socket.gameTree = clientData.tree;
+        socket.clientTree = clientData.tree;
     });
 
     socket.on('disconnect', () => 
@@ -110,7 +112,7 @@ function loop()
     // SEND GAME TO CLIENTS
     for (let socket of sockets)
     {
-        const gameData = game.getData(socket.id, clientTree);
+        const gameData = game.getData(socket.id, socket.clientTree);
         // console.log(JSON.stringify(gameData).length);
         console.log(JSON.stringify(gameData));
         socket.emit('loop', gameData);

@@ -171,7 +171,7 @@ class Soundwave // version 4 or something???!
         return newSoundWaves;
     }
 
-    getData()
+    getAllData()
     {
         let vertices = [];
         for (const v of this.vertices)
@@ -187,6 +187,26 @@ class Soundwave // version 4 or something???!
             id: this.id,
             color: this.color.toHex(),
             center: this.center,
+            radius: this.r,
+            vertices,
+        };
+    }
+
+    getNewData()
+    {
+        let vertices = [];
+        for (const v of this.vertices)
+        {
+            vertices.push({
+                x: v.x,
+                y: v.y,
+                hit: !v.active && !v.center
+            });
+        }
+
+        return {
+            id: this.id,
+            color: this.color.toHex(),
             radius: this.r,
             vertices,
         };

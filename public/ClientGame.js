@@ -13,16 +13,16 @@ class ClientGame
     update(serverData)
     {
         // map
-        if (serverData.map)
+        if (serverData.m)
         {
-            this.map = new ClientGamemap(serverData.map);
+            this.map = new ClientGamemap(serverData.m);
         }
 
         // soundwaves
-        this.merge(this.soundwaves, serverData.waves, ClientSoundwave);
+        this.merge(this.soundwaves, serverData.w, ClientSoundwave);
 
         // players
-        this.merge(this.players, serverData.players, ClientPlayer);
+        this.merge(this.players, serverData.p, ClientPlayer);
 
         for (let p of this.players)
         {
@@ -83,6 +83,7 @@ class ClientGame
                 else
                 {
                     console.log("update called on non existing array object!");
+                    debugger;
                 }
             }
             else if (serverObj.info == 'del')
@@ -113,11 +114,11 @@ class ClientGame
             w: [], // soundwaves
         };
 
-        for (let p in this.players)
+        for (let p of this.players)
         {
             tree.p.push(p.id);
         }
-        for (let w in this.soundwaves)
+        for (let w of this.soundwaves)
         {
             tree.w.push(w.id);
         }

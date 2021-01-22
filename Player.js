@@ -32,10 +32,10 @@ class Player extends Rect
 		this.lastStep = { x: this.x, y: this.y };
 		
 		// for input
-		this.lastInput = { x:0, y:0 };
+		this.input = { x:0, y:0 };
 		this.walk = { x:0, y:0 };
 		this.sneaking = false;
-		this.slingshot = false;
+		this.slingshot;
 
 		this.health = 1;
 
@@ -64,17 +64,17 @@ class Player extends Rect
 		this.walk.x = lerp(this.walk.x, this.input.x, 0.4);
 		this.walk.y = lerp(this.walk.y, this.input.y, 0.4);
 
-		if (input.hasOwnProperty("shoot"))
-		{
-			if (input.shoot)
-			{
-				this.slingshot = { x: this.x, y: this.y, shoot: false };
-			}
-			else
-			{
-				this.slingshot.shoot = true;
-			}
-		}
+		// if (input.hasOwnProperty("shoot"))
+		// {
+		// 	if (input.shoot)
+		// 	{
+		// 		this.slingshot = { x: this.x, y: this.y, shoot: false };
+		// 	}
+		// 	else
+		// 	{
+		// 		this.slingshot.shoot = true;
+		// 	}
+		// }
 
 		if (input.hasOwnProperty("sneak"))
 		{
@@ -178,7 +178,7 @@ class Player extends Rect
 				this.color.copy());
 	}
 
-	getData()
+	getAllData()
 	{
 		return {
 			id: this.id,
@@ -187,10 +187,21 @@ class Player extends Rect
 			y: this.y,
 			w: this.w,
 			h: this.h,
-			colorSelf: this.color.toHexNoAlpha(),
-			colorOthers: this.color.toHex(),
+			cSelf: this.color.toHexNoAlpha(),
+			cOther: this.color.toHex(),
 			health: this.health,
 		};
+	}
+
+	getNewData()
+	{
+		return {
+			id: this.id,
+			x: this.x,
+			y: this.y,
+			cOther: this.color.toHex(),
+			health: this.health,
+		}
 	}
 }
 
