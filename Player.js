@@ -6,17 +6,8 @@ const Color = require('./Color');
 
 class Player extends Rect
 {
-	constructor(x, y, id, name, color = undefined) 
+	constructor(x, y, id, name, color = new Color(255,0,255)) 
 	{
-		if (!color)
-		{
-			let angle = Math.random() * 6.283;
-			color = new Color(
-				220 + 30 * Math.sin(angle),
-				220 + 30 * Math.sin(angle - 2.094),
-				220 + 30 * Math.sin(angle + 2.094),
-			)
-		}
 
 		const size = GameSettings.playerSize;
 		super(x, y, size, size);

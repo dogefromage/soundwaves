@@ -106,8 +106,11 @@ function joinGame()
 {
     let nameInput = document.getElementById("nameInput");
     let name = nameInput.value.trim();
+    let colorInput = document.getElementById('colorInput');
+    let color = colorInput.value;
+    console.log(color);
 
-    socket.emit('request-join', name);
+    socket.emit('request-join', name, color);
 
     socket.on('answer-join', ({ answer, reasoning }) => 
     {

@@ -28,7 +28,7 @@ io.on('connection', (socket) =>
     console.log("Socket connected", socket.id);
     sockets.push(socket);
 
-    socket.on('request-join', (name) =>
+    socket.on('request-join', (name, color) =>
     {
         const regex = /^[\w-]+$/;
         if (regex.test(name))
@@ -38,7 +38,7 @@ io.on('connection', (socket) =>
             {
                 // NAME IS VALID
                 socket.emit('answer-join', { answer: true });
-                game.addPlayer(socket.id, name);
+                game.addPlayer(socket.id, name, color);
                 console.log(`Player ${name} joined the game (id=${socket.id})`);
             }
             else

@@ -23,8 +23,6 @@ class ClientPlayer extends ClientRect
 			ctx.fillStyle = this.cOther;
 		}
 
-		console.log(this.cOther);
-
 		// rect
 		const canRect = camera.WorldToCanvasRect(this);
 		ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);

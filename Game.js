@@ -3,6 +3,7 @@ const Player = require('./Player');
 const GameSettings = require('./GameSettings');
 const Rect = require('./Rect');
 const { Soundwave, SoundwaveSettings } = require('./Soundwave')
+const Color = require('./Color')
 
 class Game
 {
@@ -14,7 +15,7 @@ class Game
         // this.powerups = [];
     }
 
-    addPlayer(id, name)
+    addPlayer(id, name, colorValue)
     {
         if (this.players.find(p => p.id == id)) 
         {
@@ -30,7 +31,10 @@ class Game
         }
         while(this.map.pixels[y][x] == '1') // repeat if map square isn't empty
 
-        const p = new Player(x + 0.5, y + 0.5, id, name);
+        // color, 60% saturated seems good
+        let color = Color.FromHSV(360 - colorValue * 3.6, .6, 1);
+
+        const p = new Player(x + 0.5, y + 0.5, id, name, color);
         this.players.push(p);
     }
 
