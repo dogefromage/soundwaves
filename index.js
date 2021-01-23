@@ -33,7 +33,7 @@ io.on('connection', (socket) =>
         // restrict names???
         // const regex = /^[\w-]+$/;
         // if (regex.test(name))
-        if (true);
+        if (true)
         {
             let unique = !game.players.find(p => p.name == name);
             if (unique)
