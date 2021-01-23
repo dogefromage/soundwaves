@@ -30,8 +30,10 @@ io.on('connection', (socket) =>
 
     socket.on('request-join', (name, color) =>
     {
-        const regex = /^[\w-]+$/;
-        if (regex.test(name))
+        // restrict names???
+        // const regex = /^[\w-]+$/;
+        // if (regex.test(name))
+        if (true);
         {
             let unique = !game.players.find(p => p.name == name);
             if (unique)
