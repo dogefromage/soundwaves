@@ -1,0 +1,181 @@
+
+*
+{
+    font-family: Verdana, Geneva, sans-serif;
+}
+
+body
+{
+    position:absolute;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    overflow-y: hidden; /* Hide vertical scrollbar */
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+}
+
+canvas
+{
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    border: 0;
+}
+
+.card
+{
+    background-color: #fff;
+    width: 400px;
+    height: 400px;
+    z-index: 1;
+    border-radius: 40px;
+    box-shadow: 0px 0px 20px 0px #00000088;
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+
+    opacity: 1;
+    transition: 0.4s all ease-in-out;
+
+}
+
+.card h1
+{
+    margin-bottom: 40px;
+}
+
+.card .text-input
+{
+    width: 80%;
+    margin: 7px;
+    height: 50px;
+    border: 0;
+    border-radius: 7px;
+    background: #ccc;
+    text-align: center;
+    font-size: 16px;
+    padding: 0px;
+}
+
+.no-outline:focus
+{
+    outline: none;
+}
+
+.color-input
+{
+    width: 80%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+
+    -webkit-appearance: none;  /* Override default CSS styles*/
+    appearance: none;
+    height: 15px; /* Specified height */
+
+    background-image: -webkit-gradient( linear, left top, right top, color-stop(0.0,#ff0004), color-stop(0.1,#ff0098), color-stop(0.2,#cb00ff), color-stop(0.3,#2e00ff), color-stop(0.4,#0065ff), color-stop(0.5,#00ffff), color-stop(0.6,#00ff61), color-stop(0.7,#37ff00), color-stop(0.8,#d0ff00), color-stop(0.9,#ff9400), color-stop(1.0,#ff0000) );
+    background-image: gradient( linear, left top, right top, color-stop(0.0,#ff0004), color-stop(0.1,#ff0098), color-stop(0.2,#cb00ff), color-stop(0.3,#2e00ff), color-stop(0.4,#0065ff), color-stop(0.5,#00ffff), color-stop(0.6,#00ff61), color-stop(0.7,#37ff00), color-stop(0.8,#d0ff00), color-stop(0.9,#ff9400), color-stop(1.0,#ff0000) );
+
+    outline: none; /*Remove outline*/
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+
+.color-input:hover
+{
+    opacity: 1;
+}
+
+.color-input::-webkit-slider-thumb 
+{
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 10px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    border-radius: 5px;
+    background: #000000; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.color-input::-moz-range-thumb 
+{
+    width: 10px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #000000; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.card button
+{
+    width: 80%;
+    height: 50px;
+    margin: 7px;
+    border: 0;
+    padding: 0;
+    border-radius: 10px;
+    background: #222;
+    transition-duration: 0.1s;
+    color: white;
+    font-size: 16px;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.card button:active
+{
+    background: #000;
+}
+
+.card button:focus
+{
+    outline: none;
+}
+
+.card .error
+{
+    font-size: 16px;
+    color: red;
+}
+
+.hidden
+{
+    visibility: hidden;
+}
+
+.opacity-zero
+{
+    opacity: 0;
+}
+
+.disabled
+{
+    display: none;
+}
+
+/* https://reactgo.com/disable-text-selection-css/ */
+.no-select
+{
+    -ms-user-select:none;
+    -moz-user-select:none;
+    -webkit-user-select:none;
+    -webkit-touch-callout: none;
+    -khtml-user-select: none;
+     user-select:none;
+}

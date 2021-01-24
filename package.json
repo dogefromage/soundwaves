@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "webpack --config webpackDev.js && nodemon",
+    "dist": "webpack --config webpackDist.js"
   },
   "author": "dogefromage",
   "license": "ISC",
@@ -13,5 +14,7 @@
     "socket.io": "^3.0.4"
   },
   "devDependencies": {
+    "webpack": "^5.17.0",
+    "webpack-cli": "^4.4.0"
   }
 }

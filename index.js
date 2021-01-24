@@ -4,7 +4,8 @@ const port = process.env.PORT || 5000;
 const socket = require('socket.io');
 
 //static
-app.use(express.static('public'));
+// app.use(express.static('public'));
+app.use(express.static('public/dist'));
 
 //server
 const server = app.listen(port, () =>
