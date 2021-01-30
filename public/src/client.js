@@ -33,13 +33,13 @@ socket.on('loop', (dataJSON) =>
     /**
      * This data is sent to the server.
      * It includes the changes in player input
-     * and also the current tree of objects in the clients game.
+     * (and also the current tree of objects in the clients game.
      * This allows the server to selectively update objects and tell client to "forget" them
-     * after they have left the frame.
+     * after they have left the frame.)
      */
     const clientData = 
     {
-        tree: game.getTree(),
+        // tree: game.getTree(),
     }
     
     let card = document.getElementById('join-window');
@@ -108,7 +108,7 @@ function loop()
     game.draw(ctx, camera, w, h);
     drawBars();
 
-    window.setTimeout(loop, 20)
+    window.setTimeout(loop, 15)
 }
 
 // if you press enter in input field instead of the button
@@ -203,7 +203,8 @@ function drawBars()
             ctx.fillStyle = bar.color;
             let m = 4;
             let stat = Math.max(0, Math.min(1, bar.stat));
-            roundRect(ctx, X + m, Y + m, stat * (W - 2 * m), H - 2 * m, 5, true, false);
+            let statWidth = stat * (W - 2 * m);
+            roundRect(ctx, X + m, Y + m, statWidth, H - 2 * m, Math.min(statWidth, 5), true, false);
 
             ctx.fillStyle = "#000000";
             ctx.font = "bold 16px Verdana";

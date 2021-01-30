@@ -128,29 +128,29 @@ export class ClientGame
         }
     }
 
-    /**
-     * send tree which gives server information about what is stored on client.
-     * short variable names to reduce data sent
-     */
-    getTree()
-    {
-        let tree = {
-            m: (typeof this.map !== 'undefined'), // if map is defined
-            p: [], // players
-            w: [], // soundwaves
-        };
+    // /**
+    //  * send tree which gives server information about what is stored on client.
+    //  * short variable names to reduce data sent
+    //  */
+    // getTree()
+    // {
+    //     let tree = {
+    //         m: (typeof this.map !== 'undefined'), // if map is defined
+    //         p: [], // players
+    //         w: [], // soundwaves
+    //     };
 
-        for (let p of this.players)
-        {
-            tree.p.push(p.id);
-        }
-        for (let w of this.soundwaves)
-        {
-            tree.w.push(w.id);
-        }
+    //     for (let p of this.players)
+    //     {
+    //         tree.p.push(p.id);
+    //     }
+    //     for (let w of this.soundwaves)
+    //     {
+    //         tree.w.push(w.id);
+    //     }
         
-        return tree;
-    }
+    //     return tree;
+    // }
 
     draw(ctx, camera, w, h)
     {

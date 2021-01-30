@@ -127,7 +127,7 @@ class Game
         }
     }
 
-    getData(id, clientTree)
+    getData(id, gameTree)
     {
         let range; // range rectangle to limit view and data sent
         let viewDist = 2;
@@ -144,37 +144,53 @@ class Game
         // data to be sent
         const data = {};
 
-        if (clientTree)
+        // send data not currently in tree, otherwise update if needed
+        if (!gameTree.map)
         {
-            // send data not currently in tree, otherwise update if needed
-            // console.log("has clienttree");
-            if (!clientTree.m)
-            {
-                // resend map
-                data.m = this.map.getData();
-            }
-            
-            // players
-            data.p = this.selectData(this.players, clientTree.p, range);
+            // resend map
+            data.m = this.map.getData();
+            gameTree.map = true;
+        }
 
-            // waves
-            data.w = [];
-            for (let w of this.soundwaves)
+        if (!gameTree.settings)
+        {
+            data.settings = GameSettings;
+            gameTree.settings = true;
+        }
+        
+        // players
+        if (!gameTree.p)
+        {
+            gameTree.p = [];
+        }
+        data.p = this.selectData(this.players, gameTree.p, range);
+
+        // waves
+        if (!gameTree.w)
+        {
+            gameTree.w = []
+        }
+        let treeWavesCopy = gameTree.w.slice();
+        data.w = [];
+        for (let w of this.soundwaves)
+        {
+            if (Rect.detectCollision(w.getRange(), range))
             {
-                if (Rect.detectCollision(w.getRange(), range))
+                let IDIndex = treeWavesCopy.indexOf(w.id);
+                if (IDIndex >= 0)
                 {
-                    let clientID = clientTree.w.find(id => id == w.id);
-                    if (!clientID)
-                    {
-                        data.w.push(w.getData());
-                    }
+                    treeWavesCopy.splice(IDIndex, 1);
+                }
+                else
+                {
+                    data.w.push(w.getData());
+                    gameTree.w.push(w.id);
                 }
             }
         }
-        else
+        for (let id of treeWavesCopy)
         {
-            // send map
-            data.m = this.map.getData();
+            gameTree.w.splice(gameTree.w.indexOf(id));
         }
 
         return data;
@@ -185,11 +201,11 @@ class Game
      * if client data is not on server, delete
      * an id must exist for every object 
      */
-    selectData(serverArray, clientIDs, range)
+    selectData(serverArray, treeIDs, range)
     {
         let data = [];
         // make copy so it can be manipulated
-        let idsCopy = clientIDs.slice();
+        let treeIDsCopy = treeIDs.slice();
 
         for (let serverObj of serverArray)
         {
@@ -198,7 +214,7 @@ class Game
                 continue;
             }
 
-            let IDIndex = idsCopy.indexOf(idsCopy.find(id => id == serverObj.id));
+            let IDIndex = treeIDsCopy.indexOf(serverObj.id);
             if (IDIndex >= 0)
             {
                 // update
@@ -212,16 +228,18 @@ class Game
                 let objData = serverObj.getAllData();
                 objData.info = "new";
                 data.push(objData);
+                treeIDs.push(serverObj.id)
             }
 
             // remove id from copy
-            idsCopy.splice(IDIndex, 1);
+            treeIDsCopy.splice(IDIndex, 1);
         }
 
-        for (let id of idsCopy)
+        for (let id of treeIDsCopy)
         {
             // deletes
             data.push({ info: "del", id });
+            treeIDs.splice(treeIDs.indexOf(id))
         }
 
         return data;
