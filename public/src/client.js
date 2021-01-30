@@ -2,6 +2,7 @@
 import {ClientCamera} from './ClientCamera';
 import {ClientGame} from './ClientGame';
 import {Input} from './Input';
+import {lerp} from './ClientGameMath';
 
 window.socket = io.connect(location.url);
 
@@ -16,13 +17,11 @@ const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
 let lastTime = new Date().getTime();
 
-//display
-let displayHealth = 0;
-
 const game = new ClientGame();
 const camera = new ClientCamera(0, 0, 100);
 let lastPlayerInput = {};
 let cardDisplayed = true;
+
 
 // MAIN LOOP (server triggered)
 socket.on('loop', (dataJSON) => 
@@ -157,10 +156,9 @@ function updateCamera(dt)
 
     if (game.mainPlayer)
     {
-        let smoothness = 1.5;
-        let k = smoothness * dt;
-        camera.x += ( (game.mainPlayer.x - x) - camera.x) * k;
-        camera.y += ( (game.mainPlayer.y - y) - camera.y) * k;
+        let k = 1.5 * dt;
+        camera.x = lerp(camera.x, (game.mainPlayer.x - x), k);
+        camera.y = lerp(camera.y, (game.mainPlayer.y - y), k);
 
     }
     else
@@ -183,6 +181,10 @@ function resize()
 resize();
 window.addEventListener('resize', resize);
 
+
+//display
+let displayHealth = 0; let displayCharge = 0;
+
 function drawBars(dt)
 {
     if (game.mainPlayer)
@@ -193,12 +195,13 @@ function drawBars(dt)
         let X = 30;
         let Y = h - H - 30;
 
-        let smoothness = 4;
-        displayHealth += (game.mainPlayer.health - displayHealth) * Math.min(1, smoothness * dt);
+        let k = 4 * dt;
+        displayHealth = lerp(displayHealth, game.mainPlayer.health, k);
+        displayCharge = lerp(displayCharge, game.mainPlayer.charge, k);
         
         let bars = [
-            { stat: displayHealth, color: "#ff2244", name: "HEALTH" },
-            // { stat: displayStamina, color: "#eeee11", name: "STAMINA" },
+            { stat: displayHealth, color: "#fc415d", name: "HEALTH" },
+            { stat: displayCharge, color: "#9664e5", name: "CHARGE" },
         ]
 
         for (let bar of bars)

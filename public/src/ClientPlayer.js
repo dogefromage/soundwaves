@@ -12,6 +12,7 @@ export class ClientPlayer extends ClientRect
 		this.cSelf = cSelf;
 		this.cOther = cOther;
 		this.health = health;
+		this.charge = 0;
 		this.name = name;
 		this.oldX = this.x;
 		this.oldY = this.y;

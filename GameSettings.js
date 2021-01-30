@@ -11,6 +11,7 @@ module.exports =
     walkSmoothness: 5,
     sqrPlayerStepDist: 0.06,
     sneakFactor: 0.5,
+    chargeSpeed: 3,
 
     // MAP
     mapSize: 3,

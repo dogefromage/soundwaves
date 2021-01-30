@@ -222,7 +222,7 @@ class SoundwaveSettings
         // spread similar to 1/x but offset so f(0)=PI
         let spread = 3.1415 / (30 * magnitude + 1);
 
-        return new SoundwaveSettings(speed, lifetime, damage, 3.1415 + rotation, spread, 50, 100);
+        return new SoundwaveSettings(speed, lifetime, damage, rotation, spread, 50, 100);
     }
 }
 

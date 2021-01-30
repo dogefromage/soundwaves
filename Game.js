@@ -109,10 +109,10 @@ class Game
 
                     if (hit)
                     {
-                        let collisionWaves = p.hurt(w.settings.damage * w.power, w.sender);
-                        if (collisionWaves.size > 0)
+                        let hurtWaves = p.hurt(w.settings.damage * w.power, w.sender);
+                        if (hurtWaves.size > 0)
                         {
-                            this.soundwaves = new Map([...this.soundwaves, ...collisionWaves])
+                            this.soundwaves = new Map([...this.soundwaves, ...hurtWaves])
                         }
                     }
                 }
