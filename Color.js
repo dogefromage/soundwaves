@@ -1,5 +1,5 @@
 
-const {clamp} = require('./GameMath');
+const { clamp } = require('./GameMath');
 
 class Color
 {

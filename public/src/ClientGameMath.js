@@ -55,15 +55,3 @@ export function lerpColor(a, b, t)
         return { r: 255, g: 0, b: 255 };
     }
 }
-
-
-// module.exports = 
-// {
-//     lerp,
-//     inverseLerp,
-//     lerpVector,
-//     hexToRgb,
-//     rgbToHex,
-//     lerpColorHex,
-//     lerpColor,
-// };

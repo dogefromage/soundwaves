@@ -66,4 +66,71 @@ export class ClientRect
             this.y - camera.y - margin,
             this.w + 2 * margin, this.h + 2 * margin);
     }
+
+    static detectCollision(fixed, movable, margin = 0)
+    {
+        return  - margin + fixed.getLeft()    <= movable.getRight() && 
+                + margin + fixed.getRight()   >= movable.getLeft() && 
+                - margin + fixed.getTop()     <= movable.getBottom() && 
+                + margin + fixed.getBottom()  >= movable.getTop();
+    }
+
+    static detectIntersection(rect, point, margin = 0)
+    {
+        return - margin + rect.getLeft() < point.x && margin + rect.getRight() > point.x
+            && - margin + rect.getTop() < point.y && margin + rect.getBottom() > point.y;
+    }
+
+    static collide(fixed, movable, iterations = 1, offsetMargin = 0.001)
+    {
+        // fix collision of 'movable' in relation to 'fixed'
+
+        for (let i = 0; i < iterations; i++)
+        {
+            // interpolate movement of 'movable' between its position from last frame and now 
+            const t = (i + 1) / iterations;
+            let interpolated = new Rect(
+                lerp(movable.oldX, movable.x, t),
+                lerp(movable.oldY, movable.y, t),
+                movable.w, movable.h);
+
+            const collision = Rect.detectCollision(fixed, interpolated); 
+            if (collision)
+            {
+                // COLLISION IN X DIRECTION
+                if (interpolated.getRight() >= fixed.getLeft() &&
+                    movable.getOldRight() < fixed.getLeft())
+                {
+                    // movable has fixed to its right
+                    movable.setRight(fixed.getLeft() - offsetMargin);
+                    movable.oldX = movable.x;
+                }
+                else if (interpolated.getLeft() <= fixed.getRight() &&
+                    movable.getOldLeft() > fixed.getRight())
+                {
+                    // movable has fixed to its left
+                    movable.setLeft(fixed.getRight() + offsetMargin);
+                    movable.oldX = movable.x;
+                }
+                
+                // COLLISION IN Y DIRECTION
+                if (interpolated.getBottom() >= fixed.getTop() &&
+                    movable.getOldBottom() < fixed.getTop())
+                {
+                    // movable has fixed to its bottom
+                    movable.setBottom(fixed.getTop() - offsetMargin);
+                    movable.oldY = movable.y;
+                }
+                else if (interpolated.getTop() <= fixed.getBottom() &&
+                    movable.getOldTop() > fixed.getBottom())
+                {
+                    // movable has fixed to its top
+                    movable.setTop(fixed.getBottom() + offsetMargin);
+                    movable.oldY = movable.y;
+                }
+                return true;
+            }
+        }
+        return false;
+    }
 }

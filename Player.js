@@ -1,14 +1,13 @@
 const Rect = require('./Rect');
 const GameSettings = require('./GameSettings');
 const { Soundwave, SoundwaveSettings } = require('./Soundwave');
-const { lerp } = require('./GameMath');
 const Color = require('./Color');
+const { Vec2 } = require('./Vector.js')
 
 class Player extends Rect
 {
 	constructor(x, y, id, name, color = new Color(255,0,255)) 
 	{
-
 		const size = GameSettings.playerSize;
 		super(x, y, size, size);
 		this.id = id;
@@ -20,11 +19,11 @@ class Player extends Rect
 		this.oldY = y;
 
 		// for soundwave spawning
-		this.lastStep = { x: this.x, y: this.y };
+		this.lastStep = new Vec2(this.x, this.y);
 		
 		// for input
-		this.input = { x:0, y:0 };
-		this.walk = { x:0, y:0 };
+		this.velocity = new Vec2();
+		this.input = new Vec2();
 		this.sneaking = false;
 		this.slingshot;
 
@@ -42,18 +41,6 @@ class Player extends Rect
 			this.input.x = Math.sign(input.x);
 		if (!isNaN(input.y)) 
 			this.input.y = Math.sign(input.y);
-
-		if ( !(this.input.x == 0 && this.input.y == 0))
-		{
-			// normalize
-			let t = 1. / Math.hypot(this.input.x, this.input.y);
-			this.input.x *= t;
-			this.input.y *= t;
-		}
-		
-		// smoothen walk
-		this.walk.x = lerp(this.walk.x, this.input.x, 0.4);
-		this.walk.y = lerp(this.walk.y, this.input.y, 0.4);
 
 		if (input.hasOwnProperty("shoot"))
 		{
@@ -76,7 +63,7 @@ class Player extends Rect
 		}
 	}
 
-	update(deltaTime)
+	update(dt)
 	{
 		let newSoundWaves = [];
 		this.oldX = this.x;
@@ -88,9 +75,13 @@ class Player extends Rect
 		{
 			speed *= GameSettings.sneakFactor;
 		}
+		let targetVel = this.input.copy();
+		targetVel = targetVel.normalize(speed); // set mag to speed
 
-		this.x += this.walk.x * speed * deltaTime;
-		this.y += this.walk.y * speed * deltaTime;
+		let k = Math.min(1, dt * GameSettings.walkSmoothness); // make lerp time relative
+		this.velocity = this.velocity.lerp(targetVel, k)
+		this.x += this.velocity.x * dt; // newton
+		this.y += this.velocity.y * dt;
 
 		// SHOOT
 		if (this.slingshot)
@@ -114,10 +105,10 @@ class Player extends Rect
 		}
 
 		// SPAWN SOUNDWAVE ON STEP
-		let distanceWalked = (this.lastStep.x - this.x)**2 + (this.lastStep.y - this.y)**2;
-		if (distanceWalked > GameSettings.sqrPlayerStepDist)
+		let distanceWalkedSqr = this.lastStep.sub(new Vec2(this.x, this.y)).sqrMagnitude();
+		if (distanceWalkedSqr > GameSettings.sqrPlayerStepDist)
 		{
-			this.lastStep = { x: this.x, y: this.y };
+			this.lastStep = new Vec2(this.x, this.y);
 
 			if (this.input.sneak)
 			{
@@ -132,9 +123,9 @@ class Player extends Rect
 		// color
 		let a = Math.floor(Math.min(255, Math.max(0, this.brightness * 255)));
 		this.color.a = a;
-		this.brightness = Math.max(0, this.brightness - deltaTime);
+		this.brightness = Math.max(0, this.brightness - dt);
 
-		this.hurtCooldown = Math.max(0, this.hurtCooldown - deltaTime);
+		this.hurtCooldown = Math.max(0, this.hurtCooldown - dt);
 
 		return newSoundWaves;
 	}
@@ -168,9 +159,9 @@ class Player extends Rect
 	createSoundwave(settings)
 	{
 		return new Soundwave(this.getCenterX(), this.getCenterY(), 
-				this.id, 
-				settings, 
-				this.color.copy());
+			this.id, 
+			settings, 
+			this.color.copy());
 	}
 
 	getAllData()
@@ -182,6 +173,7 @@ class Player extends Rect
 			y: this.y,
 			w: this.w,
 			h: this.h,
+			v: this.velocity,
 			cSelf: this.color.toHexNoAlpha(),
 			cOther: this.color.toHex(),
 			health: this.health,
@@ -194,10 +186,11 @@ class Player extends Rect
 			id: this.id,
 			x: this.x,
 			y: this.y,
+			v: this.velocity,
 			cOther: this.color.toHex(),
 		}
 
-		// only needed if mainplayer
+		// only sent to mainplayer
 		if (mainPlayer)
 		{
 			data.health = this.health;

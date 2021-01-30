@@ -13,7 +13,7 @@ input.onKey('ShiftLeft');
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
-let frameCount = 0;
+let lastTime = new Date().getTime();
 
 //display
 let displayStamina = 0, displayHealth = 0;
@@ -28,12 +28,7 @@ socket.on('loop', (dataJSON) =>
 {
     const serverData = JSON.parse(dataJSON);
     // update client game with server data
-    game.update(serverData);
-    
-    //drawing
-    updateCamera();
-    game.draw(ctx, camera, w, h);
-    drawBars();
+    game.setData(serverData);
 
     /**
      * This data is sent to the server.
@@ -83,7 +78,6 @@ socket.on('loop', (dataJSON) =>
     }
     else
     {
-        
         if (!cardDisplayed)
         {
             // display join card
@@ -97,9 +91,25 @@ socket.on('loop', (dataJSON) =>
     }
 
     socket.emit('client-data', clientData);
-
-    frameCount++;
 });
+
+loop()
+function loop()
+{
+    let time = new Date().getTime();
+    let dt = (time - lastTime) * 0.001;
+    lastTime = time;
+
+    // update
+    game.update(dt);
+    
+    //drawing
+    updateCamera();
+    game.draw(ctx, camera, w, h);
+    drawBars();
+
+    window.setTimeout(loop, 20)
+}
 
 // if you press enter in input field instead of the button
 document.getElementById("nameInput").addEventListener('keypress', (e) => {
@@ -113,7 +123,6 @@ function joinGame()
     let name = nameInput.value.trim();
     let colorInput = document.getElementById('colorInput');
     let color = colorInput.value;
-    console.log(color);
 
     socket.emit('request-join', name, color);
 
@@ -149,7 +158,7 @@ function updateCamera()
     }
     else
     {
-        if (frameCount == 1)
+        if (game.map)
         {
             camera.x = game.map.width * 0.5 - x;
             camera.y = game.map.height * 0.5 - y;
@@ -207,7 +216,7 @@ function drawBars()
 }
 
 // // instant join 
-// setTimeout(() =>
+// window.setTimeout(() =>
 // {
 //     document.getElementById("nameInput").value = "gagi";
 //     joinGame();

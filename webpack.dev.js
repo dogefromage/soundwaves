@@ -3,7 +3,8 @@ const path = require('path');
 module.exports = 
 {
     mode: 'development',
-    devtool: 'inline-nosources-source-map',
+    // devtool: 'inline-nosources-source-map',
+    // devtool: 'inline-cheap-module-source-map',
     entry: './public/src/client.js',
     output:
     {

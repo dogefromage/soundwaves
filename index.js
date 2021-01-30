@@ -34,7 +34,7 @@ io.on('connection', (socket) =>
         // restrict names???
         // const regex = /^[\w-]+$/;
         // if (regex.test(name))
-        if (true)
+        if (name.length > 0)
         {
             let unique = !game.players.find(p => p.name == name);
             if (unique)
@@ -53,7 +53,7 @@ io.on('connection', (socket) =>
         else
         {
             // NAME DOES NOT SATISFY REGEX
-            socket.emit('answer-join', { answer: false, reasoning: "That's not a valid name!" });
+            socket.emit('answer-join', { answer: false, reasoning: "Please enter a name!" });
         }
     });
 

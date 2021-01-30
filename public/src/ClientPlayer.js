@@ -2,9 +2,11 @@ import { ClientRect } from "./ClientRect";
 
 export class ClientPlayer extends ClientRect
 {
-	constructor({ id, x, y, w, h, name, cSelf, cOther, health })
+	constructor({ id, x, y, w, h, v, name, cSelf, cOther, health })
 	{
+		// all properties MUST have same name as in data, because use of hasProperty() etc.
 		super(x, y, w, h);
+		this.v = v;
 		this.id = id;
 		this.cSelf = cSelf;
 		this.cOther = cOther;

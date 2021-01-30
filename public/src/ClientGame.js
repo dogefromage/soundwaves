@@ -12,10 +12,30 @@ export class ClientGame
         this.soundwaves = [];
     }
 
-    update(serverData)
+    update(dt)
     {
-        const deltaTime = serverData.dt;
+        // update soundwaves
+        for (let i = this.soundwaves.length - 1; i >= 0; i--)
+        {
+            const w = this.soundwaves[i];
+            w.update(dt, this.map);
+            if (!w.alive)
+            {
+                this.soundwaves.splice(i, 1);
+            }
+        }
 
+        // if (this.mainPlayer)
+        // {
+        //     this.map.foreachWall((wall) =>
+        //     {
+        //         Rect.collide(wall, p, GameSettings.collisionIterations);
+        //     }, rangeRect);
+        // }
+    }
+
+    setData(serverData)
+    {
         // map
         if (serverData.m)
         {
@@ -28,16 +48,6 @@ export class ClientGame
             for (let newWave of serverData.w)
             {
                 this.soundwaves.push(new ClientSoundwave(newWave));
-            }
-        }
-        // update soundwaves
-        for (let i = this.soundwaves.length - 1; i >= 0; i--)
-        {
-            const w = this.soundwaves[i];
-            w.update(deltaTime, this.map);
-            if (!w.alive)
-            {
-                this.soundwaves.splice(i, 1);
             }
         }
 
