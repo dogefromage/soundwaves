@@ -13,6 +13,7 @@ class Player extends Rect
 		this.id = id;
 		this.name = name;
 		this.color = color;
+		this.health = 1;
 
 		// for collision detection
 		this.oldX = x;
@@ -26,8 +27,6 @@ class Player extends Rect
 		this.input = new Vec2();
 		this.sneaking = false;
 		this.slingshot;
-
-		this.health = 1;
 
 		// when hit
 		this.brightness = 0;
@@ -65,7 +64,7 @@ class Player extends Rect
 
 	update(dt)
 	{
-		let newSoundWaves = [];
+		let newSoundWaves = new Map();
 		this.oldX = this.x;
 		this.oldY = this.y;
 
@@ -98,7 +97,8 @@ class Player extends Rect
 				if (m > 0.02)
 				{
 					let settings = SoundwaveSettings.Attack(alpha, m);
-					newSoundWaves.push(this.createSoundwave(settings));
+					const newWave = this.createSoundwave(settings);
+					newSoundWaves.set(newWave.id, newWave);
 				}
 				this.slingshot = undefined;
 			}
@@ -112,11 +112,13 @@ class Player extends Rect
 
 			if (this.input.sneak)
 			{
-				newSoundWaves.push(this.createSoundwave(SoundwaveSettings.sneak()));
+				const newWave = this.createSoundwave(SoundwaveSettings.sneak());
+				newSoundWaves.set(newWave.id, newWave);
 			}
 			else
 			{
-				newSoundWaves.push(this.createSoundwave(SoundwaveSettings.walk()));
+				const newWave = this.createSoundwave(SoundwaveSettings.walk());
+				newSoundWaves.set(newWave.id, newWave);
 			}
 		}
 
@@ -132,7 +134,7 @@ class Player extends Rect
 
 	hurt(damage, offender)
 	{
-		let newSoundwaves = [];
+		let newSoundwaves = new Map();
 
 		this.health -= damage;
 
@@ -142,13 +144,15 @@ class Player extends Rect
 		if (this.health < 0)
 		{
 			this.killer = offender;
-			newSoundwaves.push(this.createSoundwave(SoundwaveSettings.death()));
+			const newWave = this.createSoundwave(SoundwaveSettings.death());
+			newSoundWaves.set(newWave.id, newWave);
 		}
 		else
 		{
 			if (this.hurtCooldown == 0)
 			{
-				newSoundwaves.push(this.createSoundwave(SoundwaveSettings.hurt()));
+				const newWave = this.createSoundwave(SoundwaveSettings.hurt());
+				newSoundWaves.set(newWave.id, newWave);
 				this.hurtCooldown += 0.1;
 			}
 		}
@@ -167,7 +171,7 @@ class Player extends Rect
 	getAllData()
 	{
 		return {
-			id: this.id,
+			// id: this.id,
 			name: this.name,
 			x: this.x,
 			y: this.y,
@@ -183,7 +187,7 @@ class Player extends Rect
 	getNewData(mainPlayer = true)
 	{
 		let data = {
-			id: this.id,
+			// id: this.id,
 			x: this.x,
 			y: this.y,
 			v: this.velocity,

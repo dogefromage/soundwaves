@@ -7,6 +7,7 @@ window.socket = io.connect(location.url);
 
 // set up input
 const input = new Input();
+window.input = input;
 input.recordMovement();
 input.onKey('Space');
 input.onKey('ShiftLeft');
@@ -16,7 +17,7 @@ let w, h;
 let lastTime = new Date().getTime();
 
 //display
-let displayStamina = 0, displayHealth = 0;
+let displayHealth = 0;
 
 const game = new ClientGame();
 const camera = new ClientCamera(0, 0, 100);
@@ -26,21 +27,23 @@ let cardDisplayed = true;
 // MAIN LOOP (server triggered)
 socket.on('loop', (dataJSON) => 
 {
-    const serverData = JSON.parse(dataJSON);
-    // update client game with server data
+    const serverData = JSON.parse(dataJSON, (key, value) =>
+    {
+        if (key == 'w' || key == 'p') // put waves and players back to where they came from!
+        {
+            if (value instanceof Array)
+            {
+                return new Map(value);
+            }
+        }
+            
+        return value;
+    });
+
+    // feed client game with server data
     game.setData(serverData);
 
-    /**
-     * This data is sent to the server.
-     * It includes the changes in player input
-     * (and also the current tree of objects in the clients game.
-     * This allows the server to selectively update objects and tell client to "forget" them
-     * after they have left the frame.)
-     */
-    const clientData = 
-    {
-        // tree: game.getTree(),
-    }
+    const clientData = {}
     
     let card = document.getElementById('join-window');
     if (game.mainPlayer)
@@ -90,7 +93,10 @@ socket.on('loop', (dataJSON) =>
         }
     }
 
-    socket.emit('client-data', clientData);
+    if (Object.keys(clientData).length > 0) // only emit if data even exists
+    {
+        socket.emit('client-data', clientData);
+    }
 });
 
 loop()
@@ -104,9 +110,9 @@ function loop()
     game.update(dt);
     
     //drawing
-    updateCamera();
+    updateCamera(dt);
     game.draw(ctx, camera, w, h);
-    drawBars();
+    drawBars(dt);
 
     window.setTimeout(loop, 15)
 }
@@ -142,7 +148,7 @@ function joinGame()
 }
 window.joinGame = joinGame;
 
-function updateCamera()
+function updateCamera(dt)
 {
     let d = Math.sqrt(window.innerWidth * window.innerHeight);
     camera.zoom = Math.floor(0.5 * d);
@@ -151,9 +157,10 @@ function updateCamera()
 
     if (game.mainPlayer)
     {
-        let smoothness = 0.05;
-        camera.x += ( (game.mainPlayer.x - x) - camera.x) * smoothness;
-        camera.y += ( (game.mainPlayer.y - y) - camera.y) * smoothness;
+        let smoothness = 1.5;
+        let k = smoothness * dt;
+        camera.x += ( (game.mainPlayer.x - x) - camera.x) * k;
+        camera.y += ( (game.mainPlayer.y - y) - camera.y) * k;
 
     }
     else
@@ -176,7 +183,7 @@ function resize()
 resize();
 window.addEventListener('resize', resize);
 
-function drawBars()
+function drawBars(dt)
 {
     if (game.mainPlayer)
     {
@@ -186,9 +193,8 @@ function drawBars()
         let X = 30;
         let Y = h - H - 30;
 
-        let smoothness = 0.3;
-        displayHealth += (game.mainPlayer.health - displayHealth) * smoothness;
-        displayStamina += (0.34 - displayStamina) * smoothness;
+        let smoothness = 4;
+        displayHealth += (game.mainPlayer.health - displayHealth) * Math.min(1, smoothness * dt);
         
         let bars = [
             { stat: displayHealth, color: "#ff2244", name: "HEALTH" },

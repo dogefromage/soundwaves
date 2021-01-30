@@ -29,7 +29,13 @@ io.on('connection', (socket) =>
     console.log("Socket connected", socket.id);
     sockets.push(socket);
 
-    socket.gameTree = {};
+    socket.gameTree = 
+    {
+        map: false,
+        settings: false,
+        players: new Set(),
+        waves: new Set()
+    };
 
     socket.on('request-join', (name, color) =>
     {
@@ -38,7 +44,15 @@ io.on('connection', (socket) =>
         // if (regex.test(name))
         if (name.length > 0)
         {
-            let unique = !game.players.find(p => p.name == name);
+            let unique = true;
+            for (const [pID, p] of game.players)
+            {
+                if (p.name == name)
+                {
+                    unique = false;
+                }
+            }
+
             if (unique)
             {
                 // NAME IS VALID
@@ -63,7 +77,7 @@ io.on('connection', (socket) =>
     {
         if (clientData.input)
         {
-            const player = game.players.find(p => p.id == socket.id);
+            const player = game.players.get(socket.id);
             if (player)
             {
                 player.setInput(clientData.input);
@@ -92,7 +106,7 @@ io.on('connection', (socket) =>
 
 //      MAIN LOOP      //
 // loop time control
-const loopTimeGoal = 100; //ms
+const loopTimeGoal = 50; //ms
 let lastLoopTime = process.hrtime();
 
 // for loops per second measurement
@@ -116,15 +130,17 @@ function loop()
     for (let socket of sockets)
     {
         const gameData = game.getData(socket.id, socket.gameTree);
-        gameData.dt = deltaTime;
-        console.log(socket.gameTree);
         
         const reducedJSON = JSON.stringify(gameData, function(key, value) {
             // limit precision of floats
             if (typeof value === 'number') {
                 return parseFloat(value.toFixed(4)); // adequate, any lower looks like shit
             }
-            return value;
+            // all maps to arrays with key-value sub arrays and all sets to arrays
+            else if (value instanceof Map || value instanceof Set) {
+                return [...value];
+            }
+            return value
         });
 
         // console.log(reducedJSON); // show data

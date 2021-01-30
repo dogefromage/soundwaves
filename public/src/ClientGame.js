@@ -7,22 +7,27 @@ export class ClientGame
     constructor()
     {
         this.map;
+        this.settings;
         this.mainPlayer;
-        this.players = [];
-        this.soundwaves = [];
+        this.players = new Map();
+        this.soundwaves = new Map();
     }
 
     update(dt)
     {
         // update soundwaves
-        for (let i = this.soundwaves.length - 1; i >= 0; i--)
+        for (const [wID, w] of this.soundwaves)
         {
-            const w = this.soundwaves[i];
             w.update(dt, this.map);
             if (!w.alive)
             {
-                this.soundwaves.splice(i, 1);
+                this.soundwaves.delete(wID);
             }
+        }
+
+        for (const [pID, p] of this.players)
+        {
+            p.update(dt);
         }
 
         // if (this.mainPlayer)
@@ -36,97 +41,123 @@ export class ClientGame
 
     setData(serverData)
     {
-        // map
-        if (serverData.m)
+        /////////////////// Map ///////////////////////
+        if (serverData.map)
         {
-            this.map = new ClientGamemap(serverData.m);
+            this.map = new ClientGamemap(serverData.map);
         }
 
-        // new soundwaves
+        /////////////////// Settings ///////////////////////
+        if (serverData.settings)
+        {
+            window.gameSettings = serverData.settings; // set globally
+        }
+
+        /////////////////// Waves ///////////////////////
         if (serverData.w)
         {
-            for (let newWave of serverData.w)
+            for (const [wID, wData] of serverData.w)
             {
-                this.soundwaves.push(new ClientSoundwave(newWave));
+                this.soundwaves.set(wID, new ClientSoundwave(wData));
             }
         }
 
-        // players
+        /////////////////// Players ///////////////////////
         if (serverData.p)
         {
-            this.merge(this.players, serverData.p, ClientPlayer);
-        }
-
-        // mainplayer - if set to undefined, join card shows up
-        this.mainPlayer = this.players.find(p => p.id == socket.id);
-    }
-
-    /**
-     * updates clients array with server data.
-     * info displays the kind of action for every object.
-     * 
-     * if element does not exist on client -> "new"
-     *  - create new Element of type T
-     *  - arguments must be compatible with constructor
-     * 
-     * if element must be updated -> "upd"
-     *  - item is searched by "id"
-     *  - for every component sent by server, set on clientObj
-     * 
-     * if element must be deleted -> "del"
-     *  - delete element from array using id
-     */
-    merge(clientSide, serverSide, T)
-    {
-        if (!serverSide)
-        {
-            // no data sent
-            return;
-        }
-
-        for (let serverObj of serverSide)
-        {
-            if (serverObj.info == 'new')
+            for (const [pID, pData] of serverData.p)
             {
-                if (clientSide.find(c => c.id == serverObj.id))
+                if (pData[0] == 'del')
                 {
-                    console.log("object was tried to create but id already existed!");
+                    this.players.delete(pID);
                 }
-                else
+                else if (pData[0] == 'upd')
                 {
-                    clientSide.push(new T(serverObj));
-                }
-            }
-            else if (serverObj.info == 'upd')
-            {
-                let clientObj = clientSide.find(c => c.id == serverObj.id);
-                if (clientObj)
-                {
+                    const clientObj = this.players.get(pID);
+                    const serverObj = pData[1];
+                    // loop over and set all properties
                     for (let i in serverObj)
                     {
                         clientObj[i] = serverObj[i];
                     }
                 }
-                else
+                else if (pData[0] == 'new')
                 {
-                    console.log("update called on non existing array object!");
-                }
-            }
-            else if (serverObj.info == 'del')
-            {
-                
-                let index = clientSide.indexOf(clientSide.find(c => c.id == serverObj.id));
-                if (index >= 0)
-                {
-                    clientSide.splice(index, 1);
-                }
-                else
-                {
-                    console.log("delete called on non existing array object!");
+                    this.players.set(pID, new ClientPlayer(pData[1]));
                 }
             }
         }
+
+        // mainplayer - if set to undefined, join card shows up
+        this.mainPlayer = this.players.get(socket.id);
     }
+
+    // /**
+    //  * updates clients array with server data.
+    //  * info displays the kind of action for every object.
+    //  * 
+    //  * if element does not exist on client -> "new"
+    //  *  - create new Element of type T
+    //  *  - arguments must be compatible with constructor
+    //  * 
+    //  * if element must be updated -> "upd"
+    //  *  - item is searched by "id"
+    //  *  - for every component sent by server, set on clientObj
+    //  * 
+    //  * if element must be deleted -> "del"
+    //  *  - delete element from array using id
+    //  */
+    // merge(clientSide, serverSide, T)
+    // {
+    //     if (!serverSide)
+    //     {
+    //         // no data sent
+    //         return;
+    //     }
+
+    //     for (let serverObj of serverSide)
+    //     {
+    //         if (serverObj.info == 'new')
+    //         {
+    //             if (clientSide.find(c => c.id == serverObj.id))
+    //             {
+    //                 console.log("object was tried to create but id already existed!");
+    //             }
+    //             else
+    //             {
+    //                 clientSide.push(new T(serverObj));
+    //             }
+    //         }
+    //         else if (serverObj.info == 'upd')
+    //         {
+    //             let clientObj = clientSide.find(c => c.id == serverObj.id);
+    //             if (clientObj)
+    //             {
+    //                 for (let i in serverObj)
+    //                 {
+    //                     clientObj[i] = serverObj[i];
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 console.log("update called on non existing array object!");
+    //             }
+    //         }
+    //         else if (serverObj.info == 'del')
+    //         {
+                
+    //             let index = clientSide.indexOf(clientSide.find(c => c.id == serverObj.id));
+    //             if (index >= 0)
+    //             {
+    //                 clientSide.splice(index, 1);
+    //             }
+    //             else
+    //             {
+    //                 console.log("delete called on non existing array object!");
+    //             }
+    //         }
+    //     }
+    // }
 
     // /**
     //  * send tree which gives server information about what is stored on client.
@@ -158,7 +189,7 @@ export class ClientGame
         ctx.fillStyle = "#000000";
         ctx.fillRect(0, 0, w, h);
 
-        for (const w of this.soundwaves)
+        for (const [wID, w] of this.soundwaves)
         {
             w.draw(ctx, camera);
         }
@@ -168,9 +199,9 @@ export class ClientGame
             this.map.draw(ctx, camera);
         }
 
-        for (let p of this.players)
+        for (const [pID, p] of this.players)
         {
-            p.draw(ctx, camera, p == this.mainPlayer);
+            p.draw(ctx, camera, pID == socket.id);
         }
     }
 }

@@ -1,4 +1,4 @@
-const RandomInteger = require('./RandomInteger');
+const RandomID = require('./RandomID');
 const Color = require('./Color');
 const Rect = require('./Rect');
 
@@ -6,7 +6,7 @@ class Soundwave // version 4 or something???!
 {
     constructor(x, y, sender, settings, color = new Color(255, 255, 255))
     {
-        this.id = RandomInteger();
+        this.id = RandomID();
         this.sender = sender;
         this.color = color;
         this.settings = settings;
@@ -49,9 +49,6 @@ class Soundwave // version 4 or something???!
 
     update(deltaTime, map)
     {
-        // soundwaves, which this soundwave may spawn
-        let newSoundWaves = [];
-
         this.age += deltaTime;
         this.r = this.age * this.settings.speed;
 
@@ -166,14 +163,12 @@ class Soundwave // version 4 or something???!
                 }
             }
         }
-
-        return newSoundWaves;
     }
 
     getData()
     {
         return {
-            id: this.id,
+            // id: this.id,
             color: this.color,
             center: this.center,
             age: this.age,

@@ -1,3 +1,4 @@
+import { Vec2 } from "./ClientVector";
 import { ClientRect } from "./ClientRect";
 
 export class ClientPlayer extends ClientRect
@@ -12,6 +13,32 @@ export class ClientPlayer extends ClientRect
 		this.cOther = cOther;
 		this.health = health;
 		this.name = name;
+		this.oldX = this.x;
+		this.oldY = this.y;
+	}
+
+	update(dt)
+	{
+		this.oldX = this.x;
+		this.oldY = this.y;
+
+		this.velocity = new Vec2(this.v.x, this.v.y);
+
+		// LOCOMOTION
+		let speed = window.gameSettings.playerSpeed;
+		if (window.input.getKey('ShiftLeft'))
+		{
+			speed *= window.gameSettings.sneakFactor;
+		}
+		let targetVel = new Vec2(window.input.axisX, window.input.axisY);
+		targetVel = targetVel.normalize(speed); // set mag to speed
+
+		let k = Math.min(1, dt * window.gameSettings.walkSmoothness); // make lerp time relative
+		this.velocity = this.velocity.lerp(targetVel, k)
+		this.x += this.velocity.x * dt; // newton
+		this.y += this.velocity.y * dt;
+
+		this.v = this.velocity;
 	}
 
 	draw(ctx, camera, self)
