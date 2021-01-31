@@ -1,19 +1,22 @@
 
-
 export class ClientRect
 {
-    constructor(x, y, w, h)
+    constructor(x, y, w, h, remembers=false)
     {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
+
+        if (remembers)
+        {
+            this.oldX = x;
+            this.oldY = y;
+        }
     }
 
-    isInsideOut()
-    {
-        return this.w < 0 && this.h < 0;
-    }
+    getRange()
+    { return this; }
 
     getLeft()
     { return this.x; }
@@ -67,18 +70,69 @@ export class ClientRect
             this.w + 2 * margin, this.h + 2 * margin);
     }
 
-    static detectCollision(fixed, movable, margin = 0)
+    copy()
+    {
+        return new ClientRect(this.x, this.y, this.w, this.h);
+    }
+
+    extend(m)
+    {
+        return new ClientRect(this.x - m, this.y - m, this.w + 2 * m, this.h + 2 * m);
+    }
+
+    roundUp()
+    {
+        let newX = Math.floor(this.x);
+        let newY = Math.floor(this.y);
+        return new ClientRect(
+            newX, newY,
+            Math.ceil(this.w + this.x - newX),
+            Math.ceil(this.h + this.y - newY),
+        );
+    }
+
+    static intersectPoint(rect, point, margin = 0)
+    {
+        return - margin + rect.getLeft() < point.x && margin + rect.getRight() > point.x
+            && - margin + rect.getTop() < point.y && margin + rect.getBottom() > point.y;
+    }
+
+    // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+    static intersectLine(rect, A, B)
+    {
+        let tmin = (rect.getLeft() - A.x) / (B.x - A.x); 
+        let tmax = (rect.getRight() - A.x) / (B.x - A.x); 
+
+        if (tmin > tmax)
+            tmin = [tmax, tmax = tmin][0]; // 1 line swap of doom
+
+        let tymin = (rect.getTop() - A.y) / (B.y - A.y); 
+        let tymax = (rect.getBottom() - A.y) / (B.y - A.y); 
+
+        if (tymin > tymax) 
+            tymin = [tymax, tymax = tymin][0];
+
+        if ((tmin > tymax) || (tymin > tmax)) 
+            return false; 
+
+        if (tymin > tmin) 
+            tmin = tymin; 
+
+        if (tymax < tmax) 
+            tmax = tymax; 
+
+        if (tmin > 1 || tmax < 0)
+            return false; // not between A and B
+
+        return true;
+    }
+
+    static intersectRect(fixed, movable, margin = 0)
     {
         return  - margin + fixed.getLeft()    <= movable.getRight() && 
                 + margin + fixed.getRight()   >= movable.getLeft() && 
                 - margin + fixed.getTop()     <= movable.getBottom() && 
                 + margin + fixed.getBottom()  >= movable.getTop();
-    }
-
-    static detectIntersection(rect, point, margin = 0)
-    {
-        return - margin + rect.getLeft() < point.x && margin + rect.getRight() > point.x
-            && - margin + rect.getTop() < point.y && margin + rect.getBottom() > point.y;
     }
 
     static collide(fixed, movable, iterations = 1, offsetMargin = 0.001)
@@ -89,12 +143,12 @@ export class ClientRect
         {
             // interpolate movement of 'movable' between its position from last frame and now 
             const t = (i + 1) / iterations;
-            let interpolated = new Rect(
-                lerp(movable.oldX, movable.x, t),
-                lerp(movable.oldY, movable.y, t),
+            let interpolated = new ClientRect(
+                movable.oldX + (movable.x - movable.oldX) * t,
+                movable.oldY + (movable.y - movable.oldY) * t,
                 movable.w, movable.h);
 
-            const collision = Rect.detectCollision(fixed, interpolated); 
+            const collision = ClientRect.intersectRect(fixed, interpolated); 
             if (collision)
             {
                 // COLLISION IN X DIRECTION

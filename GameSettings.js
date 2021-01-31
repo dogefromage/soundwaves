@@ -12,6 +12,7 @@ module.exports =
     sqrPlayerStepDist: 0.06,
     sneakFactor: 0.5,
     chargeSpeed: 3,
+    dischargeSpeed: 0.06,
 
     // MAP
     mapSize: 3,

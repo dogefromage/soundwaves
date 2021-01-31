@@ -18,6 +18,30 @@ export class ClientGamemap
 
     }
 
+    foreachWall(action, rangeRect = null)
+    {
+        let X = 0, Y = 0, R = this.width, B = this.height;
+        if (rangeRect)
+        {
+            X = Math.max(X, Math.floor(rangeRect.x));
+            Y = Math.max(Y, Math.floor(rangeRect.y));
+            R = Math.min(R, Math.ceil(rangeRect.getRight()));
+            B = Math.min(B, Math.ceil(rangeRect.getBottom()));
+        }
+        
+        for (let j = Y; j < B; j++)
+        {
+            for (let i = X; i < R; i++)
+            {
+                if (this.pixels[j][i] == '1')
+                {
+                    const rect = new ClientRect(i, j, 1, 1);
+                    action(rect);
+                }
+            }
+        }
+    }
+
     draw(ctx, camera)
     {
         ctx.fillStyle = "#000000";

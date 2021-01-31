@@ -1,6 +1,7 @@
 import { ClientGamemap } from './ClientGamemap';
 import { ClientSoundwave } from './ClientSoundwave';
 import { ClientPlayer } from './ClientPlayer';
+import { lerp } from './ClientGameMath';
 
 export class ClientGame
 {
@@ -27,16 +28,8 @@ export class ClientGame
 
         for (const [pID, p] of this.players)
         {
-            p.update(dt);
+            p.update(dt, this.map);
         }
-
-        // if (this.mainPlayer)
-        // {
-        //     this.map.foreachWall((wall) =>
-        //     {
-        //         Rect.collide(wall, p, GameSettings.collisionIterations);
-        //     }, rangeRect);
-        // }
     }
 
     setData(serverData)
@@ -78,7 +71,14 @@ export class ClientGame
                     // loop over and set all properties
                     for (let i in serverObj)
                     {
-                        clientObj[i] = serverObj[i];
+                        if (i == 'x' || i == 'y')
+                        {
+                            clientObj[i] = lerp(clientObj[i], serverObj[i], 0.5); // choose center of both coordinates
+                        }
+                        else
+                        {
+                            clientObj[i] = serverObj[i];
+                        }
                     }
                 }
                 else if (pData[0] == 'new')
@@ -91,97 +91,6 @@ export class ClientGame
         // mainplayer - if set to undefined, join card shows up
         this.mainPlayer = this.players.get(socket.id);
     }
-
-    // /**
-    //  * updates clients array with server data.
-    //  * info displays the kind of action for every object.
-    //  * 
-    //  * if element does not exist on client -> "new"
-    //  *  - create new Element of type T
-    //  *  - arguments must be compatible with constructor
-    //  * 
-    //  * if element must be updated -> "upd"
-    //  *  - item is searched by "id"
-    //  *  - for every component sent by server, set on clientObj
-    //  * 
-    //  * if element must be deleted -> "del"
-    //  *  - delete element from array using id
-    //  */
-    // merge(clientSide, serverSide, T)
-    // {
-    //     if (!serverSide)
-    //     {
-    //         // no data sent
-    //         return;
-    //     }
-
-    //     for (let serverObj of serverSide)
-    //     {
-    //         if (serverObj.info == 'new')
-    //         {
-    //             if (clientSide.find(c => c.id == serverObj.id))
-    //             {
-    //                 console.log("object was tried to create but id already existed!");
-    //             }
-    //             else
-    //             {
-    //                 clientSide.push(new T(serverObj));
-    //             }
-    //         }
-    //         else if (serverObj.info == 'upd')
-    //         {
-    //             let clientObj = clientSide.find(c => c.id == serverObj.id);
-    //             if (clientObj)
-    //             {
-    //                 for (let i in serverObj)
-    //                 {
-    //                     clientObj[i] = serverObj[i];
-    //                 }
-    //             }
-    //             else
-    //             {
-    //                 console.log("update called on non existing array object!");
-    //             }
-    //         }
-    //         else if (serverObj.info == 'del')
-    //         {
-                
-    //             let index = clientSide.indexOf(clientSide.find(c => c.id == serverObj.id));
-    //             if (index >= 0)
-    //             {
-    //                 clientSide.splice(index, 1);
-    //             }
-    //             else
-    //             {
-    //                 console.log("delete called on non existing array object!");
-    //             }
-    //         }
-    //     }
-    // }
-
-    // /**
-    //  * send tree which gives server information about what is stored on client.
-    //  * short variable names to reduce data sent
-    //  */
-    // getTree()
-    // {
-    //     let tree = {
-    //         m: (typeof this.map !== 'undefined'), // if map is defined
-    //         p: [], // players
-    //         w: [], // soundwaves
-    //     };
-
-    //     for (let p of this.players)
-    //     {
-    //         tree.p.push(p.id);
-    //     }
-    //     for (let w of this.soundwaves)
-    //     {
-    //         tree.w.push(w.id);
-    //     }
-        
-    //     return tree;
-    // }
 
     draw(ctx, camera, w, h)
     {

@@ -1,5 +1,4 @@
 
-
 export class Input
 {
     constructor()
@@ -7,12 +6,12 @@ export class Input
         this.axisX = 0;
         this.axisY = 0;
         this.angle = 0;
-        this.keys = [];
+        this.keys = new Map();
     }
 
     getKey(key)
     {
-        return this.keys[key] || false;
+        return this.keys.get(key) || false;
     }
 
     // ADD EVENTS TO KEY
@@ -22,7 +21,7 @@ export class Input
         {
             if (event.code == key)
             {
-                this.keys[key] = true;
+                this.keys.set(key, true);
                 down(this);
             }
         });
@@ -31,7 +30,7 @@ export class Input
         {
             if (event.code == key)
             {
-                this.keys[key] = false;
+                this.keys.set(key, false);
                 up(this);
             }
         });
@@ -57,12 +56,12 @@ export class Input
         }
     }
 
-    updateAxis(sender)
+    updateAxis(sender) // cannot use 'this' because anonymous so must use 'sender' :(
     {
-        let u = sender.keys['ArrowUp'] || sender.keys['KeyW'] || false;
-        let l = sender.keys['ArrowLeft'] || sender.keys['KeyA'] || false;
-        let d = sender.keys['ArrowDown'] || sender.keys['KeyS'] || false;
-        let r = sender.keys['ArrowRight'] || sender.keys['KeyD'] || false;
+        let u = sender.getKey('ArrowUp') || sender.getKey('KeyW');
+        let l = sender.getKey('ArrowLeft') || sender.getKey('KeyA');
+        let d = sender.getKey('ArrowDown') || sender.getKey('KeyS');
+        let r = sender.getKey('ArrowRight') || sender.getKey('KeyD');
 
         sender.axisX = (r ? 1 : 0) - (l ? 1 : 0);
         sender.axisY = (d ? 1 : 0) - (u ? 1 : 0);

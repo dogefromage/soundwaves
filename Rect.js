@@ -1,4 +1,3 @@
-const { lerp }  = require('./GameMath');
 
 class Rect
 {
@@ -17,14 +16,7 @@ class Rect
     }
 
     getRange()
-    {
-        return this;
-    }
-
-    isInsideOut()
-    {
-        return this.w < 0 && this.h < 0;
-    }
+    { return this; }
 
     getLeft()
     { return this.x; }
@@ -99,18 +91,48 @@ class Rect
         );
     }
 
-    static detectCollision(fixed, movable, margin = 0)
+    static intersectPoint(rect, point, margin = 0)
+    {
+        return - margin + rect.getLeft() < point.x && margin + rect.getRight() > point.x
+            && - margin + rect.getTop() < point.y && margin + rect.getBottom() > point.y;
+    }
+
+    // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+    static intersectLine(rect, A, B)
+    {
+        let tmin = (rect.getLeft() - A.x) / (B.x - A.x); 
+        let tmax = (rect.getRight() - A.x) / (B.x - A.x); 
+
+        if (tmin > tmax)
+            tmin = [tmax, tmax = tmin][0]; // 1 line swap of doom
+
+        let tymin = (rect.getTop() - A.y) / (B.y - A.y); 
+        let tymax = (rect.getBottom() - A.y) / (B.y - A.y); 
+
+        if (tymin > tymax) 
+            tymin = [tymax, tymax = tymin][0];
+
+        if ((tmin > tymax) || (tymin > tmax)) 
+            return false; 
+
+        if (tymin > tmin) 
+            tmin = tymin; 
+
+        if (tymax < tmax) 
+            tmax = tymax; 
+
+        if (tmin > 1 || tmax < 0)
+            return false; // not between A and B
+
+        return true;
+    }
+
+    static intersectRect(fixed, movable, margin = 0)
     {
         return  - margin + fixed.getLeft()    <= movable.getRight() && 
                 + margin + fixed.getRight()   >= movable.getLeft() && 
                 - margin + fixed.getTop()     <= movable.getBottom() && 
                 + margin + fixed.getBottom()  >= movable.getTop();
-    }
-
-    static detectIntersection(rect, point, margin = 0)
-    {
-        return - margin + rect.getLeft() < point.x && margin + rect.getRight() > point.x
-            && - margin + rect.getTop() < point.y && margin + rect.getBottom() > point.y;
     }
 
     static collide(fixed, movable, iterations = 1, offsetMargin = 0.001)
@@ -122,11 +144,11 @@ class Rect
             // interpolate movement of 'movable' between its position from last frame and now 
             const t = (i + 1) / iterations;
             let interpolated = new Rect(
-                lerp(movable.oldX, movable.x, t),
-                lerp(movable.oldY, movable.y, t),
+                movable.oldX + (movable.x - movable.oldX) * t,
+                movable.oldY + (movable.y - movable.oldY) * t,
                 movable.w, movable.h);
 
-            const collision = Rect.detectCollision(fixed, interpolated); 
+            const collision = Rect.intersectRect(fixed, interpolated); 
             if (collision)
             {
                 // COLLISION IN X DIRECTION

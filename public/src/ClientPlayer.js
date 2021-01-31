@@ -18,14 +18,11 @@ export class ClientPlayer extends ClientRect
 		this.oldY = this.y;
 	}
 
-	update(dt)
+	update(dt, map)
 	{
-		this.oldX = this.x;
-		this.oldY = this.y;
-
+        //////////////////////////// LOCOMOTION /////////////////////////////////////
 		this.velocity = new Vec2(this.v.x, this.v.y);
 
-		// LOCOMOTION
 		let speed = window.gameSettings.playerSpeed;
 		if (window.input.getKey('ShiftLeft'))
 		{
@@ -40,6 +37,19 @@ export class ClientPlayer extends ClientRect
 		this.y += this.velocity.y * dt;
 
 		this.v = this.velocity;
+
+		
+        //////////////////////////// COLLISION WALLS /////////////////////////////////////
+		// optimise collision search by only checking in a specified range
+		const margin = window.gameSettings.rangeRectMargin;
+		const rangeRect = this.extend(margin);
+		// check collision
+		map.foreachWall((wall) =>
+		{
+			ClientRect.collide(wall, this, window.gameSettings.collisionIterations);
+		}, rangeRect);
+		this.oldX = this.x;
+		this.oldY = this.y;
 	}
 
 	draw(ctx, camera, self)

@@ -83,8 +83,6 @@ io.on('connection', (socket) =>
                 player.setInput(clientData.input);
             }
         }
-
-        // socket.clientTree = clientData.tree;
     });
 
     socket.on('disconnect', () => 
@@ -93,20 +91,11 @@ io.on('connection', (socket) =>
         game.removePlayer(socket.id);
         sockets.splice(sockets.indexOf(socket), 1);
     });
-
-    socket.on('die-test', () =>
-    {
-        let victim = game.players.find(p => p.id == socket.id);
-        if (victim)
-        {
-            victim.health = 0;
-        }
-    });
 });
 
 //      MAIN LOOP      //
 // loop time control
-const loopTimeGoal = 15; //ms
+const loopTimeGoal = 20; //ms
 let lastLoopTime = process.hrtime();
 
 // for loops per second measurement
@@ -146,7 +135,7 @@ function loop()
         // console.log(reducedJSON); // show data
         // console.log(reducedJSON.length); // show data size in characters
 
-        socket.emit('loop', reducedJSON);
+        socket.emit('server-data', reducedJSON);
     }
 
     // time the loop execution took (in ms)

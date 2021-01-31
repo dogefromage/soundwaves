@@ -2,7 +2,8 @@ const GameMap = require('./GameMap');
 const Player = require('./Player');
 const GameSettings = require('./GameSettings');
 const Rect = require('./Rect');
-const Color = require('./Color')
+const Color = require('./Color');
+const { Vec2 } = require('./Vector');
 
 class Game
 {
@@ -58,22 +59,12 @@ class Game
         // PLAYERS
         for (const [id, p] of this.players)
         {
-            let playerWaves = p.update(deltaTime);
+            let playerWaves = p.update(deltaTime, this.map);
 
             if (playerWaves.size > 0)
             {
                 this.soundwaves = new Map([...this.soundwaves, ...playerWaves])
             }
-
-            // COLLISION PLAYER - WALL
-            // optimise collision search by only checking in a specified range
-            const margin = GameSettings.rangeRectMargin;
-            const rangeRect = p.extend(margin);
-            // check collision
-            this.map.foreachWall((wall) =>
-            {
-                Rect.collide(wall, p, GameSettings.collisionIterations);
-            }, rangeRect);
 
             // death
             if (p.health <= 0)
@@ -86,34 +77,38 @@ class Game
         ////////////// SOUNDWAVE x PLAYER COLLISION /////////////////
         for (const [wID, w] of this.soundwaves)
         {
-            // collide with border rectangle first to improve collision performance
-            let wBorder = new Rect(w.center.x, w.center.y, 0, 0).extend(w.r);
+            // collide with border rectangle first to improve performance
+            let wBorder = w.getRange();
 
             for (const [pID, p] of this.players)
             {
-                if (!Rect.detectCollision(wBorder, p))
-                {
+                if (pID == w.sender || w.settings.damage == 0)
+                    continue;
+
+                if (!Rect.intersectRect(wBorder, p)) 
                     continue; // player was not in range of soundwave
+
+                let hit = false;
+                for (const v of w.vertices)
+                {
+                    if (!v.active)
+                        continue;
+
+                    let A = new Vec2(v.oldX, v.oldY);
+                    let B = new Vec2(v.x, v.y);
+                    if (Rect.intersectLine(p, A, B))
+                    {
+                        hit = true;
+                        break;
+                    }
                 }
 
-                if (pID != w.sender && w.settings.damage > 0)
+                if (hit)
                 {
-                    let hit = false;
-                    for (const v of w.vertices)
+                    let hurtWaves = p.hurt(w.settings.damage * w.power, w.sender);
+                    if (hurtWaves.size > 0)
                     {
-                        if (Rect.detectIntersection(p, v))
-                        {
-                            hit = true;
-                        }
-                    }
-
-                    if (hit)
-                    {
-                        let hurtWaves = p.hurt(w.settings.damage * w.power, w.sender);
-                        if (hurtWaves.size > 0)
-                        {
-                            this.soundwaves = new Map([...this.soundwaves, ...hurtWaves])
-                        }
+                        this.soundwaves = new Map([...this.soundwaves, ...hurtWaves])
                     }
                 }
             }

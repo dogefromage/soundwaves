@@ -1,8 +1,8 @@
 // import './styles.css';
-import {ClientCamera} from './ClientCamera';
-import {ClientGame} from './ClientGame';
-import {Input} from './Input';
-import {lerp} from './ClientGameMath';
+import { ClientCamera } from './ClientCamera';
+import { ClientGame } from './ClientGame';
+import { Input } from './Input';
+import { lerp } from './ClientGameMath';
 
 window.socket = io.connect(location.url);
 
@@ -22,9 +22,8 @@ const camera = new ClientCamera(0, 0, 100);
 let lastPlayerInput = {};
 let cardDisplayed = true;
 
-
-// MAIN LOOP (server triggered)
-socket.on('loop', (dataJSON) => 
+// set data
+socket.on('server-data', (dataJSON) => 
 {
     const serverData = JSON.parse(dataJSON, (key, value) =>
     {
@@ -181,7 +180,6 @@ function resize()
 resize();
 window.addEventListener('resize', resize);
 
-
 //display
 let displayHealth = 0; let displayCharge = 0;
 
@@ -231,11 +229,6 @@ function drawBars(dt)
 //     document.getElementById("nameInput").value = "gagi";
 //     joinGame();
 // }, 100);
-
-function dieTest()
-{
-    socket.emit('die-test');
-}
 
 //https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
 /**
@@ -289,5 +282,3 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
       ctx.stroke();
     }
 }
-
-
