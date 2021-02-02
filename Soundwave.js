@@ -1,4 +1,4 @@
-const RandomInteger = require('./RandomInteger');
+const RandomID = require('./RandomID');
 const Color = require('./Color');
 const Rect = require('./Rect');
 
@@ -6,7 +6,7 @@ class Soundwave // version 4 or something???!
 {
     constructor(x, y, sender, settings, color = new Color(255, 255, 255))
     {
-        this.id = RandomInteger();
+        this.id = RandomID();
         this.sender = sender;
         this.color = color;
         this.settings = settings;
@@ -28,6 +28,7 @@ class Soundwave // version 4 or something???!
                 },
                 active: true, // if ray has hit it doesn't have to be calculated again
                 x, y, // vertex' last position stored here to be sent to client
+                oldX: this.center.x, oldY: this.center.y, // for collision with player
             }
         }
         if (!this.settings.full)
@@ -49,9 +50,6 @@ class Soundwave // version 4 or something???!
 
     update(deltaTime, map)
     {
-        // soundwaves, which this soundwave may spawn
-        let newSoundWaves = [];
-
         this.age += deltaTime;
         this.r = this.age * this.settings.speed;
 
@@ -67,6 +65,9 @@ class Soundwave // version 4 or something???!
 
         for (const vertex of this.vertices)
         {
+            vertex.oldX = vertex.x;
+            vertex.oldY = vertex.y;
+
             if (!vertex.active)
             {
                 continue; // ...to next vertex
@@ -166,14 +167,12 @@ class Soundwave // version 4 or something???!
                 }
             }
         }
-
-        return newSoundWaves;
     }
 
     getData()
     {
         return {
-            id: this.id,
+            // id: this.id,
             color: this.color,
             center: this.center,
             age: this.age,
@@ -198,34 +197,34 @@ class SoundwaveSettings
 
     static walk()
     {
-        return new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 40, 300);
+        return new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 5, 300);
     }
 
     static sneak()
     {
-        return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 20, 150);
+        return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 5, 150);
     }
 
     static hurt()
     {
-        return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 30, 100);
+        return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 5, 100);
     }
 
     static death()
     {
-        return new SoundwaveSettings(0.1, 3, 0, 0, 2 * Math.PI, 30, 100);
+        return new SoundwaveSettings(0.1, 3, 0, 0, 2 * Math.PI, 5, 100);
     }
 
-    static Attack(rotation, magnitude)
+    static Attack(rotation, power)
     {
         // ln limits speed if magnitude is very large
-        let speed = Math.log1p(15 * magnitude) * 0.6;
+        let speed = Math.log1p(15 * power) * 0.6;
         // seems reasonable
         let lifetime = 2;
-        // damage rises exponentially to stop spamming
-        let damage = 0.5 * Math.expm1(magnitude);
+        // damage rises exponentially to eliminate spamming
+        let damage = 0.5 * Math.expm1(power);
         // spread similar to 1/x but offset so f(0)=PI
-        let spread = 3.1415 / (30 * magnitude + 1);
+        let spread = 3.1415 / (30 * power + 1);
 
         return new SoundwaveSettings(speed, lifetime, damage, rotation, spread, 50, 100);
     }

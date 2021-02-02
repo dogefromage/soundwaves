@@ -1,51 +1,50 @@
 // import './styles.css';
-import {ClientCamera} from './ClientCamera';
-import {ClientGame} from './ClientGame';
-import {Input} from './Input';
+import { ClientCamera } from './ClientCamera';
+import { ClientGame } from './ClientGame';
+import { Input } from './Input';
+import { lerp } from './ClientGameMath';
+import { ClientRect } from './ClientRect';
 
 window.socket = io.connect(location.url);
 
 // set up input
 const input = new Input();
+window.input = input;
 input.recordMovement();
 input.onKey('Space');
 input.onKey('ShiftLeft');
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
-let frameCount = 0;
-
-//display
-let displayStamina = 0, displayHealth = 0;
+let lastTime = new Date().getTime();
 
 const game = new ClientGame();
 const camera = new ClientCamera(0, 0, 100);
 let lastPlayerInput = {};
 let cardDisplayed = true;
 
-// MAIN LOOP (server triggered)
-socket.on('loop', (dataJSON) => 
-{
-    const serverData = JSON.parse(dataJSON);
-    // update client game with server data
-    game.update(serverData);
-    
-    //drawing
-    updateCamera();
-    game.draw(ctx, camera, w, h);
-    drawBars();
+window.debuggerRect = new ClientRect(0, 0, 0.04, 0.04);
 
-    /**
-     * This data is sent to the server.
-     * It includes the changes in player input
-     * and also the current tree of objects in the clients game.
-     * This allows the server to selectively update objects and tell client to "forget" them
-     * after they have left the frame.
-     */
-    const clientData = 
+// set data
+socket.on('server-data', (dataJSON) => 
+{
+    const serverData = JSON.parse(dataJSON, (key, value) =>
     {
-        tree: game.getTree(),
-    }
+        if (key == 'w' || key == 'p') // put waves and players back to where they came from!
+        {
+            if (value instanceof Array)
+            {
+                return new Map(value);
+            }
+        }
+            
+        return value;
+    });
+
+    // feed client game with server data
+    game.setData(serverData);
+
+    const clientData = {}
     
     let card = document.getElementById('join-window');
     if (game.mainPlayer)
@@ -83,7 +82,6 @@ socket.on('loop', (dataJSON) =>
     }
     else
     {
-        
         if (!cardDisplayed)
         {
             // display join card
@@ -96,10 +94,29 @@ socket.on('loop', (dataJSON) =>
         }
     }
 
-    socket.emit('client-data', clientData);
-
-    frameCount++;
+    if (Object.keys(clientData).length > 0) // only emit if data even exists
+    {
+        socket.emit('client-data', clientData);
+    }
 });
+
+loop()
+function loop()
+{
+    let time = new Date().getTime();
+    let dt = (time - lastTime) * 0.001;
+    lastTime = time;
+
+    // update
+    game.update(dt);
+    
+    //drawing
+    updateCamera(dt);
+    game.draw(ctx, camera, w, h);
+    drawBars(dt);
+
+    window.setTimeout(loop, 15)
+}
 
 // if you press enter in input field instead of the button
 document.getElementById("nameInput").addEventListener('keypress', (e) => {
@@ -113,7 +130,6 @@ function joinGame()
     let name = nameInput.value.trim();
     let colorInput = document.getElementById('colorInput');
     let color = colorInput.value;
-    console.log(color);
 
     socket.emit('request-join', name, color);
 
@@ -133,7 +149,7 @@ function joinGame()
 }
 window.joinGame = joinGame;
 
-function updateCamera()
+function updateCamera(dt)
 {
     let d = Math.sqrt(window.innerWidth * window.innerHeight);
     camera.zoom = Math.floor(0.5 * d);
@@ -142,14 +158,14 @@ function updateCamera()
 
     if (game.mainPlayer)
     {
-        let smoothness = 0.05;
-        camera.x += ( (game.mainPlayer.x - x) - camera.x) * smoothness;
-        camera.y += ( (game.mainPlayer.y - y) - camera.y) * smoothness;
+        let k = 1.5 * dt;
+        camera.x = lerp(camera.x, (game.mainPlayer.x - x), k);
+        camera.y = lerp(camera.y, (game.mainPlayer.y - y), k);
 
     }
     else
     {
-        if (frameCount == 1)
+        if (game.map)
         {
             camera.x = game.map.width * 0.5 - x;
             camera.y = game.map.height * 0.5 - y;
@@ -167,7 +183,10 @@ function resize()
 resize();
 window.addEventListener('resize', resize);
 
-function drawBars()
+//display
+let displayHealth = 0; let displayCharge = 0;
+
+function drawBars(dt)
 {
     if (game.mainPlayer)
     {
@@ -177,13 +196,13 @@ function drawBars()
         let X = 30;
         let Y = h - H - 30;
 
-        let smoothness = 0.3;
-        displayHealth += (game.mainPlayer.health - displayHealth) * smoothness;
-        displayStamina += (0.34 - displayStamina) * smoothness;
+        let k = 4 * dt;
+        displayHealth = lerp(displayHealth, game.mainPlayer.health, k);
+        displayCharge = lerp(displayCharge, game.mainPlayer.charge, k);
         
         let bars = [
-            { stat: displayHealth, color: "#ff2244", name: "HEALTH" },
-            // { stat: displayStamina, color: "#eeee11", name: "STAMINA" },
+            { stat: displayHealth, color: "#fc415d", name: "HEALTH" },
+            { stat: displayCharge, color: "#9664e5", name: "CHARGE" },
         ]
 
         for (let bar of bars)
@@ -194,7 +213,8 @@ function drawBars()
             ctx.fillStyle = bar.color;
             let m = 4;
             let stat = Math.max(0, Math.min(1, bar.stat));
-            roundRect(ctx, X + m, Y + m, stat * (W - 2 * m), H - 2 * m, 5, true, false);
+            let statWidth = stat * (W - 2 * m);
+            roundRect(ctx, X + m, Y + m, statWidth, H - 2 * m, Math.min(statWidth, 5), true, false);
 
             ctx.fillStyle = "#000000";
             ctx.font = "bold 16px Verdana";
@@ -207,16 +227,11 @@ function drawBars()
 }
 
 // // instant join 
-// setTimeout(() =>
+// window.setTimeout(() =>
 // {
 //     document.getElementById("nameInput").value = "gagi";
 //     joinGame();
 // }, 100);
-
-function dieTest()
-{
-    socket.emit('die-test');
-}
 
 //https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
 /**
@@ -270,5 +285,3 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
       ctx.stroke();
     }
 }
-
-

@@ -1,6 +1,10 @@
 
-function lerp (a, b, t)
+function lerp(a, b, t, clamp01 = false)
 {
+    if (clamp01)
+    {
+        t = clamp(t);
+    }
     return (1 - t) * a + t * b;
 }
 
@@ -56,21 +60,9 @@ function lerpColor(a, b, t)
     }
 }
 
-//https://stackoverflow.com/questions/11409895/whats-the-most-elegant-way-to-cap-a-number-to-a-segment
-/**
- * Returns a number whose value is limited to the given range.
- *
- * Example: limit the output of this computation to between 0 and 255
- * (x * 255).clamp(0, 255)
- *
- * @param {Number} min The lower boundary of the output range
- * @param {Number} max The upper boundary of the output range
- * @returns A number in the range [min, max]
- * @type Number
- */
-function clamp(x, min, max) 
+function clamp(t, lower = 0, upper = 1)
 {
-    return Math.min(Math.max(x, min), max);
+    return Math.min(upper, Math.max(lower, t));
 }
 
 module.exports = 

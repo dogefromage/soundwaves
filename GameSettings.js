@@ -5,14 +5,15 @@ module.exports =
     collisionIterations: 3,
     rangeRectMargin: 0.5,
 
-    // SOUNDWAVE TECHNICAL
-    soundWaveResolution: 20,
-
     // PLAYER
     playerSize: 0.04,
     playerSpeed: 0.4,
+    walkSmoothness: 5,
     sqrPlayerStepDist: 0.06,
     sneakFactor: 0.5,
+    chargeSpeed: 3,
+    dischargeSpeed: 0.06,
+    clientCorrection: 5,
 
     // MAP
     mapSize: 3,

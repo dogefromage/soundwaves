@@ -1,7 +1,16 @@
 
-export function lerp (a, b, t)
+export function lerp(a, b, t, clamp01 = true)
 {
+    if (clamp01)
+    {
+        t = clamp(t);
+    }
     return (1 - t) * a + t * b;
+}
+
+export function clamp(t, lower = 0, upper = 1)
+{
+    return Math.min(upper, Math.max(lower, t));
 }
 
 export function inverseLerp(a, b, x)
@@ -55,15 +64,3 @@ export function lerpColor(a, b, t)
         return { r: 255, g: 0, b: 255 };
     }
 }
-
-
-// module.exports = 
-// {
-//     lerp,
-//     inverseLerp,
-//     lerpVector,
-//     hexToRgb,
-//     rgbToHex,
-//     lerpColorHex,
-//     lerpColor,
-// };

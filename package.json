@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --config webpackDev.js && nodemon",
-    "dist": "webpack --config webpackDist.js"
+    "dev": "webpack --config webpack.dev.js && node index.js",
+    "prod": "webpack --config webpack.prod.js"
   },
   "author": "dogefromage",
   "license": "ISC",

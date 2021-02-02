@@ -29,14 +29,30 @@ io.on('connection', (socket) =>
     console.log("Socket connected", socket.id);
     sockets.push(socket);
 
+    socket.gameTree = 
+    {
+        map: false,
+        settings: false,
+        players: new Set(),
+        waves: new Set()
+    };
+
     socket.on('request-join', (name, color) =>
     {
         // restrict names???
         // const regex = /^[\w-]+$/;
         // if (regex.test(name))
-        if (true)
+        if (name.length > 0)
         {
-            let unique = !game.players.find(p => p.name == name);
+            let unique = true;
+            for (const [pID, p] of game.players)
+            {
+                if (p.name == name)
+                {
+                    unique = false;
+                }
+            }
+
             if (unique)
             {
                 // NAME IS VALID
@@ -53,7 +69,7 @@ io.on('connection', (socket) =>
         else
         {
             // NAME DOES NOT SATISFY REGEX
-            socket.emit('answer-join', { answer: false, reasoning: "That's not a valid name!" });
+            socket.emit('answer-join', { answer: false, reasoning: "Please enter a name!" });
         }
     });
 
@@ -61,14 +77,12 @@ io.on('connection', (socket) =>
     {
         if (clientData.input)
         {
-            const player = game.players.find(p => p.id == socket.id);
+            const player = game.players.get(socket.id);
             if (player)
             {
                 player.setInput(clientData.input);
             }
         }
-
-        socket.clientTree = clientData.tree;
     });
 
     socket.on('disconnect', () => 
@@ -76,15 +90,6 @@ io.on('connection', (socket) =>
         console.log("disconnected", socket.id);
         game.removePlayer(socket.id);
         sockets.splice(sockets.indexOf(socket), 1);
-    });
-
-    socket.on('die-test', () =>
-    {
-        let victim = game.players.find(p => p.id == socket.id);
-        if (victim)
-        {
-            victim.health = 0;
-        }
     });
 });
 
@@ -113,21 +118,24 @@ function loop()
     // SEND GAME TO CLIENTS
     for (let socket of sockets)
     {
-        const gameData = game.getData(socket.id, socket.clientTree);
-        gameData.dt = deltaTime;
+        const gameData = game.getData(socket.id, socket.gameTree);
         
         const reducedJSON = JSON.stringify(gameData, function(key, value) {
             // limit precision of floats
             if (typeof value === 'number') {
-                return parseFloat(value.toFixed(4)); // adequate, lower looks like shit
+                return parseFloat(value.toFixed(4)); // adequate, any lower looks like shit
             }
-            return value;
+            // all maps to arrays with key-value sub arrays and all sets to arrays
+            else if (value instanceof Map || value instanceof Set) {
+                return [...value];
+            }
+            return value
         });
 
         // console.log(reducedJSON); // show data
         // console.log(reducedJSON.length); // show data size in characters
 
-        socket.emit('loop', reducedJSON);
+        socket.emit('server-data', reducedJSON);
     }
 
     // time the loop execution took (in ms)

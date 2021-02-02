@@ -19,8 +19,19 @@ class GameMap
             this.pixels[j] = [];
             for (let i = 0; i < this.height; i++)
             {
-                this.pixels[j][i] = !(maze1[j][i] || maze2[j][i]);
+                // take two mazes and merge them using the 'and' operation. this opens up new walkways and makes it more open
+                this.pixels[j][i] = !(maze1[j][i] || maze2[j][i]); 
                 this.pixels[j][i] = this.pixels[j][i] ? '1':'0';
+            }
+        }
+        
+        // compress data for sending to clients
+        this.pixelString = "";
+        for (let j = 0; j < this.height; j++)
+        {
+            for (let i = 0; i < this.width; i++)
+            {
+                this.pixelString += this.pixels[j][i];
             }
         }
     }
@@ -49,21 +60,13 @@ class GameMap
         }
     }
 
-    getData(rangeRect)
+    getData()
     {
-        let pixelString = "";
-        for (let j = 0; j < this.height; j++)
-        {
-            for (let i = 0; i < this.width; i++)
-            {
-                pixelString += this.pixels[j][i];
-            }
-        }
 
         return {
             w: this.width,
             h: this.height,
-            data: pixelString,
+            data: this.pixelString,
         };
     }
 }
