@@ -95,7 +95,7 @@ io.on('connection', (socket) =>
 
 //      MAIN LOOP      //
 // loop time control
-const loopTimeGoal = 20; //ms
+const loopTimeGoal = 15; //ms
 let lastLoopTime = process.hrtime();
 
 // for loops per second measurement

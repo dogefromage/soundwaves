@@ -13,6 +13,7 @@ module.exports =
     sneakFactor: 0.5,
     chargeSpeed: 3,
     dischargeSpeed: 0.06,
+    clientCorrection: 5,
 
     // MAP
     mapSize: 3,

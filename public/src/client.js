@@ -3,6 +3,7 @@ import { ClientCamera } from './ClientCamera';
 import { ClientGame } from './ClientGame';
 import { Input } from './Input';
 import { lerp } from './ClientGameMath';
+import { ClientRect } from './ClientRect';
 
 window.socket = io.connect(location.url);
 
@@ -21,6 +22,8 @@ const game = new ClientGame();
 const camera = new ClientCamera(0, 0, 100);
 let lastPlayerInput = {};
 let cardDisplayed = true;
+
+window.debuggerRect = new ClientRect(0, 0, 0.04, 0.04);
 
 // set data
 socket.on('server-data', (dataJSON) => 

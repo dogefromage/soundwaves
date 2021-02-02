@@ -208,7 +208,7 @@ class Player extends Rect
 		let data = {
 			x: this.x,
 			y: this.y,
-			v: this.velocity,
+			// v: this.velocity,
 			cOther: this.color.toHex(),
 		}
 

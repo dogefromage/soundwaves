@@ -7,7 +7,7 @@ export class ClientPlayer extends ClientRect
 	{
 		// all properties MUST have same name as in data, because use of hasProperty() etc.
 		super(x, y, w, h);
-		this.v = v;
+		this.velocity = new Vec2(v.x, v.y);
 		this.id = id;
 		this.cSelf = cSelf;
 		this.cOther = cOther;
@@ -16,13 +16,28 @@ export class ClientPlayer extends ClientRect
 		this.name = name;
 		this.oldX = this.x;
 		this.oldY = this.y;
+		this.correction = new Vec2();
+	}
+
+	setData(serverObj)
+	{
+		window.debuggerRect.x = serverObj.x;
+		window.debuggerRect.y = serverObj.y;
+
+		const deltaPos = new Vec2(serverObj.x - this.x, serverObj.y - this.y);
+		this.correction = deltaPos;
+
+		if (serverObj.cOther)
+			this.cOther = serverObj.cOther;
+		if (serverObj.health)
+			this.health = serverObj.health;
+		if (serverObj.charge)
+			this.charge = serverObj.charge;
 	}
 
 	update(dt, map)
 	{
         //////////////////////////// LOCOMOTION /////////////////////////////////////
-		this.velocity = new Vec2(this.v.x, this.v.y);
-
 		let speed = window.gameSettings.playerSpeed;
 		if (window.input.getKey('ShiftLeft'))
 		{
@@ -33,12 +48,10 @@ export class ClientPlayer extends ClientRect
 
 		let k = Math.min(1, dt * window.gameSettings.walkSmoothness); // make lerp time relative
 		this.velocity = this.velocity.lerp(targetVel, k)
+		this.velocity = this.velocity.add(this.correction.mult(window.gameSettings.clientCorrection * dt));
 		this.x += this.velocity.x * dt; // newton
 		this.y += this.velocity.y * dt;
 
-		this.v = this.velocity;
-
-		
         //////////////////////////// COLLISION WALLS /////////////////////////////////////
 		// optimise collision search by only checking in a specified range
 		const margin = window.gameSettings.rangeRectMargin;

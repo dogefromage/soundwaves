@@ -2,6 +2,7 @@ import { ClientGamemap } from './ClientGamemap';
 import { ClientSoundwave } from './ClientSoundwave';
 import { ClientPlayer } from './ClientPlayer';
 import { lerp } from './ClientGameMath';
+import { playerSpeed } from '../../GameSettings';
 
 export class ClientGame
 {
@@ -66,20 +67,9 @@ export class ClientGame
                 }
                 else if (pData[0] == 'upd')
                 {
-                    const clientObj = this.players.get(pID);
-                    const serverObj = pData[1];
-                    // loop over and set all properties
-                    for (let i in serverObj)
-                    {
-                        if (i == 'x' || i == 'y')
-                        {
-                            clientObj[i] = lerp(clientObj[i], serverObj[i], 0.5); // choose center of both coordinates
-                        }
-                        else
-                        {
-                            clientObj[i] = serverObj[i];
-                        }
-                    }
+                    const clientP = this.players.get(pID);
+                    const serverP = pData[1];
+                    clientP.setData(serverP);
                 }
                 else if (pData[0] == 'new')
                 {
@@ -112,5 +102,10 @@ export class ClientGame
         {
             p.draw(ctx, camera, pID == socket.id);
         }
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#ff0000";
+        let camRect = camera.WorldToCanvasRect(window.debuggerRect);
+        ctx.strokeRect(camRect.x, camRect.y, camRect.w, camRect.h);
     }
 }
