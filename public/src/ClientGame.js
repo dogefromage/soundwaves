@@ -35,7 +35,7 @@ export class ClientGame
 
     setData(serverData)
     {
-        /////////////////// Map ///////////////////////
+        ////////////////////// Map ///////////////////////
         if (serverData.map)
         {
             this.map = new ClientGamemap(serverData.map);

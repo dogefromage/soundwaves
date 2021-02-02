@@ -92,7 +92,7 @@ io.on('connection', (socket) =>
         sockets.splice(sockets.indexOf(socket), 1);
     });
 });
-
+        
 //      MAIN LOOP      //
 // loop time control
 const loopTimeGoal = 15; //ms

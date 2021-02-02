@@ -1,4 +1,3 @@
-// import './styles.css';
 import { ClientCamera } from './ClientCamera';
 import { ClientGame } from './ClientGame';
 import { Input } from './Input';
