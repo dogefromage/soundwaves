@@ -1,4 +1,4 @@
-import {ClientRect} from './ClientRect'
+import Rect from '../../Rect'
 
 export class ClientCamera 
 {
@@ -36,7 +36,7 @@ export class ClientCamera
         const canPos = this.WorldToCanvas({ x: worldRect.x, y: worldRect.y });
         const canSize = this.WorldToCanvasVector({x: worldRect.w, y: worldRect.h });
 
-        return new ClientRect(canPos.x, canPos.y, canSize.x, canSize.y);
+        return new Rect(canPos.x, canPos.y, canSize.x, canSize.y);
     }
 
     CanvasToWorldRect(canRect)
@@ -44,7 +44,7 @@ export class ClientCamera
         const worldPos = this.CanvasToWorld({ x: canRect.x, y: canRect.y });
         const worldSize = this.CanvasToWorldVector({x: canRect.w, y: canRect.h });
 
-        return new ClientRect(worldPos.x, worldPos.y, worldSize.x, worldSize.y);
+        return new Rect(worldPos.x, worldPos.y, worldSize.x, worldSize.y);
     }
 
     // same but no offset

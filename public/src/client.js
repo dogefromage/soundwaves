@@ -1,35 +1,28 @@
 import { ClientCamera } from './ClientCamera';
 import { ClientGame } from './ClientGame';
 import { Input } from './Input';
-import { lerp } from './ClientGameMath';
-import { ClientRect } from './ClientRect';
+import { lerp } from '../../GameMath';
 
 window.socket = io.connect(location.url);
-
-// set up input
-const input = new Input();
-window.input = input;
-input.recordMovement();
-input.onKey('Space');
-input.onKey('ShiftLeft');
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
 let lastTime = new Date().getTime();
 
-const game = new ClientGame();
 const camera = new ClientCamera(0, 0, 100);
-let lastPlayerInput = {};
+const game = new ClientGame();
+window.input = new Input(camera, game);
 let cardDisplayed = true;
 
-window.debuggerRect = new ClientRect(0, 0, 0.04, 0.04);
+window.debuggerRects = [];
 
 // set data
 socket.on('server-data', (dataJSON) => 
 {
+    window.debuggerRects = [];
     const serverData = JSON.parse(dataJSON, (key, value) =>
     {
-        if (key == 'w' || key == 'p') // put waves and players back to where they came from!
+        if (key == 'w' || key == 'p') // put waves and players back to where they came from! (maps)
         {
             if (value instanceof Array)
             {
@@ -48,25 +41,11 @@ socket.on('server-data', (dataJSON) =>
     let card = document.getElementById('join-window');
     if (game.mainPlayer)
     {
-        // send new player input to server
-        let playerInput = 
+        let changes = window.input.getChanges();
+        if (Object.keys(changes).length > 0) // reduce data sent if no new input
         {
-            x: input.axisX,
-            y: input.axisY,
-            shoot: input.getKey('Space'),
-            sneak: input.getKey('ShiftLeft'),
-        };
-        
-        // put all inputs which have changed into new array
-        let playerInputChanges = {};
-        for (let i in playerInput)
-        {
-            if (playerInput[i] != lastPlayerInput[i])
-            {
-                lastPlayerInput[i] = playerInputChanges[i] = playerInput[i];
-            }
+            clientData.input = changes;
         }
-        clientData.input = playerInputChanges;
 
         if (cardDisplayed)
         {
@@ -81,6 +60,8 @@ socket.on('server-data', (dataJSON) =>
     }
     else
     {
+        input.getChanges(); // clears the history
+
         if (!cardDisplayed)
         {
             // display join card
@@ -189,7 +170,6 @@ function drawBars(dt)
 {
     if (game.mainPlayer)
     {
-        
         let W = Math.min(200, w * 0.3);
         let H = 30;
         let X = 30;
@@ -213,7 +193,10 @@ function drawBars(dt)
             let m = 4;
             let stat = Math.max(0, Math.min(1, bar.stat));
             let statWidth = stat * (W - 2 * m);
-            roundRect(ctx, X + m, Y + m, statWidth, H - 2 * m, Math.min(statWidth, 5), true, false);
+            if (statWidth > 1)
+            {
+                roundRect(ctx, X + m, Y + m, statWidth, H - 2 * m, Math.min(statWidth, 5), true, false);
+            }
 
             ctx.fillStyle = "#000000";
             ctx.font = "bold 16px Verdana";
@@ -224,13 +207,6 @@ function drawBars(dt)
         }
     }
 }
-
-// // instant join 
-// window.setTimeout(() =>
-// {
-//     document.getElementById("nameInput").value = "gagi";
-//     joinGame();
-// }, 100);
 
 //https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
 /**
@@ -284,3 +260,20 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
       ctx.stroke();
     }
 }
+
+// let s = 
+//     '  __ _          _                                        _'+"\n" +
+//     ' / _| | ___  __| | ___ _ __ _ __ ___   __ _ _   _ ___   (_) ___'+"\n" +
+//     '| |_| |/ _ \\/ _` |/ _ | \'__| \'_ ` _ \\ / _` | | | / __|  | |/ _ \\'+"\n" +
+//     '|  _| |  __| (_| |  __| |  | | | | | | (_| | |_| \\__  _ | | (_) |'+"\n" +
+//     '|_| |_|\\___|\\__,_|\\___|_|  |_| |_| |_|\\__,_|\\__,_|___(_)|_|\\___/';
+
+let s = 
+' ______   __         ______     _____     ______     ______     __    __     ______     __  __     ______     __     ______     ' + '\n' + 
+'/\\  ___\\ /\\ \\       /\\  ___\\   /\\  __-.  /\\  ___\\   /\\  == \\   /\\ "-./  \\   /\\  __ \\   /\\ \\/\\ \\   /\\  ___\\   /\\ \\   /\\  __ \\   ' + '\n' + 
+'\\ \\  __\\ \\ \\ \\____  \\ \\  __\\   \\ \\ \\/\\ \\ \\ \\  __\\   \\ \\  __<   \\ \\ \\-./\\ \\  \\ \\  __ \\  \\ \\ \\_\\ \\  \\ \\___  \\  \\ \\ \\  \\ \\ \\/\\ \\  ' + '\n' + 
+' \\ \\_\\    \\ \\_____\\  \\ \\_____\\  \\ \\____-  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_\\ \\ \\_\\  \\ \\_\\ \\_\\  \\ \\_____\\  \\/\\_____\\  \\ \\_\\  \\ \\_____\\ ' + '\n' + 
+'  \\/_/     \\/_____/   \\/_____/   \\/____/   \\/_____/   \\/_/ /_/   \\/_/  \\/_/   \\/_/\\/_/   \\/_____/   \\/_____/   \\/_/   \\/_____/ ' + '\n';
+                                                                                                                               
+console.log(s);
+console.log("Hello there");

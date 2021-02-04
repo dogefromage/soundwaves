@@ -87,6 +87,11 @@ class Vec2
         let delta = target.sub(this);
         return this.add(delta.mult(t))
     }
+
+    heading()
+    {
+        return Math.atan2(this.y, this.x);
+    }
 }
 
 module.exports = { Vec2 }

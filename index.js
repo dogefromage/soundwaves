@@ -4,7 +4,6 @@ const port = process.env.PORT || 5000;
 const socket = require('socket.io');
 
 //static
-// app.use(express.static('public'));
 app.use(express.static('public/dist'));
 
 //server
@@ -92,10 +91,10 @@ io.on('connection', (socket) =>
         sockets.splice(sockets.indexOf(socket), 1);
     });
 });
-        
+
 //      MAIN LOOP      //
 // loop time control
-const loopTimeGoal = 15; //ms
+const loopTimeGoal = 100; //ms
 let lastLoopTime = process.hrtime();
 
 // for loops per second measurement
@@ -125,7 +124,7 @@ function loop()
             if (typeof value === 'number') {
                 return parseFloat(value.toFixed(4)); // adequate, any lower looks like shit
             }
-            // all maps to arrays with key-value sub arrays and all sets to arrays
+            // convert all maps to arrays with key-value sub arrays and all sets to arrays
             else if (value instanceof Map || value instanceof Set) {
                 return [...value];
             }

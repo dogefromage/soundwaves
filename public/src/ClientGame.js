@@ -1,7 +1,7 @@
 import { ClientGamemap } from './ClientGamemap';
 import { ClientSoundwave } from './ClientSoundwave';
 import { ClientPlayer } from './ClientPlayer';
-import { lerp } from './ClientGameMath';
+import { lerp } from '../../GameMath';
 import { playerSpeed } from '../../GameSettings';
 
 export class ClientGame
@@ -103,9 +103,12 @@ export class ClientGame
             p.draw(ctx, camera, pID == socket.id);
         }
 
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "#ff0000";
-        let camRect = camera.WorldToCanvasRect(window.debuggerRect);
-        ctx.strokeRect(camRect.x, camRect.y, camRect.w, camRect.h);
+        for (const r of window.debuggerRects)
+        {
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "#ff0000";
+            let camRect = camera.WorldToCanvasRect(r);
+            ctx.strokeRect(camRect.x, camRect.y, camRect.w, camRect.h);
+        }
     }
 }

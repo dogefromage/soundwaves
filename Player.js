@@ -26,42 +26,47 @@ class Player extends Rect
 
 		// shooting
 		this.charging = false;
-		this.shoot = false;
 		this.charge = 0;
-		this.lastAngle = 0;
+		this.shooting = false;
+		this.angle = 0;
 
 		// when hit
 		this.brightness = 0;
 		this.hurtCooldown = 0;
 	}
 
-	setInput(input)
+	setInput(inputs)
 	{
-		// validate input
-		if (!isNaN(input.x))
-			this.input.x = Math.sign(input.x);
-		if (!isNaN(input.y)) 
-			this.input.y = Math.sign(input.y);
-
-		if (input.hasOwnProperty("shoot"))
+		for (const input of inputs)
 		{
-			if (Boolean(input.shoot))
+			/////////////////// MOVEMENT /////////////////////
+			if (!isNaN(input.x))
+				this.input.x = Math.sign(input.x); // stop cheating
+			if (!isNaN(input.y)) 
+				this.input.y = Math.sign(input.y);
+
+			/////////////////// SNEAK /////////////////////
+			if (input.hasOwnProperty("shift"))
+				this.sneaking = Boolean(input.shift);
+	
+			/////////////////// SHOOTING /////////////////////
+			if (input.hasOwnProperty('mouse'))
 			{
-				this.charging = true;
-				this.charge = 0;
-			}
-			else
-			{
-				if (this.charging)
+				if (Boolean(input.mouse))
 				{
-					this.shoot = true;
+					this.charging = true;
+					this.charge = 0;
+				}
+				else
+				{
+					if (this.charging)
+					{
+						this.shooting = true;
+						if (!isNaN(input.angle))
+							this.shootAngle = input.angle;
+					}
 				}
 			}
-		}
-
-		if (input.hasOwnProperty("sneak"))
-		{
-			this.sneaking = Boolean(input.sneak);
 		}
 	}
 
@@ -96,11 +101,6 @@ class Player extends Rect
 		this.oldY = this.y;
 
 		////////////////////////// SPAWNING WAVES & SHOOTING ////////////////////////////
-		if (this.velocity.sqrMagnitude() > 0)
-		{
-			this.lastAngle = Math.atan2(this.velocity.y, this.velocity.x);
-		}
-
 		if (this.charging)
 		{
 			// CHARGE SHOT
@@ -109,19 +109,10 @@ class Player extends Rect
 			this.charge = clamp(this.charge + dCharge);
 		}
 
-		// SHOOT
-		if (this.shoot)
+		if (this.shooting)
 		{
-			if (this.charge > 0.07)
-			{
-				let settings = SoundwaveSettings.Attack(this.lastAngle, this.charge);
-				const newWave = this.createSoundwave(settings);
-				newSoundWaves.set(newWave.id, newWave);
-			}
-
-			this.shoot = this.charging = false;
-			this.charge = 0;
-
+			this.shoot(newSoundWaves);
+			this.shooting = false;
 		}
 
 		// SPAWN SOUNDWAVE ON STEP
@@ -130,16 +121,13 @@ class Player extends Rect
 		{
 			this.lastStep = new Vec2(this.x, this.y);
 
+			let waveSettings;
 			if (this.sneaking)
-			{
-				const newWave = this.createSoundwave(SoundwaveSettings.sneak());
-				newSoundWaves.set(newWave.id, newWave);
-			}
+				waveSettings = SoundwaveSettings.sneak();
 			else
-			{
-				const newWave = this.createSoundwave(SoundwaveSettings.walk());
-				newSoundWaves.set(newWave.id, newWave);
-			}
+				waveSettings = SoundwaveSettings.walk();
+			const newWave = this.createSoundwave(waveSettings);
+			newSoundWaves.set(newWave.id, newWave);
 		}
 
 		// color
@@ -150,6 +138,19 @@ class Player extends Rect
 		this.hurtCooldown = Math.max(0, this.hurtCooldown - dt);
 
 		return newSoundWaves;
+	}
+
+	shoot(waves)
+	{
+		if (this.charge > 0.07)
+		{
+			let settings = SoundwaveSettings.Attack(this.shootAngle, this.charge);
+			const newWave = this.createSoundwave(settings);
+			waves.set(newWave.id, newWave);
+		}
+
+		this.charging = false;
+		this.charge = 0;
 	}
 
 	hurt(damage, offender)

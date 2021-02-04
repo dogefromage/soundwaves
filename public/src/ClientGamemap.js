@@ -1,4 +1,4 @@
-import {ClientRect} from './ClientRect';
+import Rect from '../../Rect';
 
 export class ClientGamemap
 {
@@ -35,7 +35,7 @@ export class ClientGamemap
             {
                 if (this.pixels[j][i] == '1')
                 {
-                    const rect = new ClientRect(i, j, 1, 1);
+                    const rect = new Rect(i, j, 1, 1);
                     action(rect);
                 }
             }
@@ -51,7 +51,7 @@ export class ClientGamemap
             {
                 if (this.pixels[j][i] == '1')
                 {
-                    const canRect = camera.WorldToCanvasRect(new ClientRect(i, j, 1, 1));
+                    const canRect = camera.WorldToCanvasRect(new Rect(i, j, 1, 1));
                     ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);   
                 }
             }
