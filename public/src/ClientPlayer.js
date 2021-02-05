@@ -26,8 +26,9 @@ export class ClientPlayer extends Rect
 
 	setData(serverObj, deltaTimeServer)
 	{
-		window.debuggerRects.push(new Rect(serverObj.x, serverObj.y, 0.04, 0.04));
-
+		// show server pos
+		// window.debuggerRects.push(new Rect(serverObj.x, serverObj.y, 0.04, 0.04));
+		
 		this.lastServerPos = this.newServerPos;
 		this.newServerPos = new Vec2(serverObj.x, serverObj.y);
 		this.serverTimeStep = deltaTimeServer;
@@ -97,7 +98,7 @@ export class ClientPlayer extends Rect
 
 	draw(ctx, camera, self)
 	{
-		if (true)//self)
+		if (self)
 		{
 			ctx.fillStyle = this.cSelf;
 		}
