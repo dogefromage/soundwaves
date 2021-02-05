@@ -67,7 +67,7 @@ export class ClientPlayer extends Rect
 			let q = window.gameSettings.clientCorrection * dt;
 			/**
 			 * FOR FUTURE:
-			 * smoothly limit correction vector to a certaint magnitude, so that
+			 * smoothly limit correction vector to a certain magnitude, so that
 			 * the player can still move if large lagspike and doesn't get held back 
 			 */
 			this.velocity = this.velocity.add(correction.mult(q));
@@ -77,6 +77,7 @@ export class ClientPlayer extends Rect
 		}
 		else
 		{
+			// interpolate between last and new pos
 			let interpolatedPosition = 
 				this.lastServerPos.lerp(this.newServerPos, this.timeSinceLastData / this.serverTimeStep);
 			this.x = interpolatedPosition.x;

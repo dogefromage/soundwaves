@@ -41,7 +41,7 @@ io.on('connection', (socket) =>
         // restrict names???
         // const regex = /^[\w-]+$/;
         // if (regex.test(name))
-        if (name.length > 0)
+        if (name.length > 0 && name.length <= 30)
         {
             let unique = true;
             for (const [pID, p] of game.players)
@@ -67,8 +67,8 @@ io.on('connection', (socket) =>
         }
         else
         {
-            // NAME DOES NOT SATISFY REGEX
-            socket.emit('answer-join', { answer: false, reasoning: "Please enter a name!" });
+            // NAME DOES NOT VALIDATE
+            socket.emit('answer-join', { answer: false, reasoning: "Your name must be of reasonable length!" });
         }
     });
 
