@@ -217,14 +217,14 @@ class SoundwaveSettings
 
     static Attack(rotation, power)
     {
-        // ln limits speed if magnitude is very large
-        let speed = Math.log1p(15 * power) * 0.6;
+        // logarithm limits speed if magnitude is very large
+        let speed = Math.log1p(15 * power) * 0.5;
         // seems reasonable
         let lifetime = 2;
         // damage rises exponentially to eliminate spamming
-        let damage = 0.5 * Math.expm1(power);
+        let damage = 0.3 * Math.expm1(power);
         // spread similar to 1/x but offset so f(0)=PI
-        let spread = 3.1415 / (30 * power + 1);
+        let spread = 3.1415 / (30 * power + 0.1);
 
         return new SoundwaveSettings(speed, lifetime, damage, rotation, spread, 50, 100);
     }

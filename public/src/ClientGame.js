@@ -29,7 +29,8 @@ export class ClientGame
 
         for (const [pID, p] of this.players)
         {
-            p.update(dt, this.map);
+            let isMainPlayer = window.socket.id == pID;
+            p.update(dt, this.map, isMainPlayer);
         }
     }
 
@@ -69,7 +70,7 @@ export class ClientGame
                 {
                     const clientP = this.players.get(pID);
                     const serverP = pData[1];
-                    clientP.setData(serverP);
+                    clientP.setData(serverP, serverData.dt);
                 }
                 else if (pData[0] == 'new')
                 {

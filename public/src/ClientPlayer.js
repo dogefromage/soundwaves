@@ -1,6 +1,5 @@
 import { Vec2 } from "../../Vector";
 import Rect from "../../Rect";
-import { Socket } from "socket.io";
 
 export class ClientPlayer extends Rect
 {
@@ -15,26 +14,26 @@ export class ClientPlayer extends Rect
 		this.health = health;
 		this.charge = 0;
 		this.name = name;
-		this.oldX = this.x;
-		this.oldY = this.y;
+		this.oldX = x;
+		this.oldY = y;
 		this.correction = new Vec2();
+
+		this.lastServerPos = new Vec2(x, y);
+		this.newServerPos = new Vec2(x, y);
+		this.serverTimeStep = 0;
+		this.timeSinceLastData = 0;
 	}
 
-	setData(serverObj)
+	setData(serverObj, deltaTimeServer)
 	{
 		window.debuggerRects.push(new Rect(serverObj.x, serverObj.y, 0.04, 0.04));
 
-		/**
-		 * the players position is predicted by the client. 
-		 * -> to avoid drifting between the two positions:
-		 * - FOR MAINPLAYER
-			* continuously substract difference between server and client pos from the clients velocity vector
-			* this will over time let the two positions converge while still
-			* ensuring stutter-free gameplay!
-		 */
-		const deltaPos = new Vec2(serverObj.x - this.x, serverObj.y - this.y);
-		this.correction = deltaPos;
+		this.lastServerPos = this.newServerPos;
+		this.newServerPos = new Vec2(serverObj.x, serverObj.y);
+		this.serverTimeStep = deltaTimeServer;
+		this.timeSinceLastData = 0;
 
+		// set remaining data
 		for (let key of ['cOther', 'health', 'charge'])
 		{
 			if (serverObj.hasOwnProperty(key))
@@ -44,11 +43,14 @@ export class ClientPlayer extends Rect
 		}
 	}
 
-	update(dt, map)
+	update(dt, map, isMainPlayer)
 	{
-		//////////////////////////// LOCOMOTION /////////////////////////////////////
-		if (window.socket.id == this.id) // is mainplayer?
+		this.timeSinceLastData += dt;
+
+		/////////////////////////////////// LOCOMOTION /////////////////////////////////////
+		if (isMainPlayer)
 		{
+			// walking
 			let speed = window.gameSettings.playerSpeed;
 			if (window.input.getKey('ShiftLeft'))
 			{
@@ -56,20 +58,31 @@ export class ClientPlayer extends Rect
 			}
 			let targetVel = new Vec2(window.input.axes.x, window.input.axes.y);
 			targetVel = targetVel.normalize(speed); // set mag to speed
-	
+			// apply
 			let k = Math.min(1, dt * window.gameSettings.walkSmoothness); // make lerp time relative
 			this.velocity = this.velocity.lerp(targetVel, k)
-			this.velocity = this.velocity.add(this.correction.mult(window.gameSettings.clientCorrection * dt));
+			// correction using last server pos
+			let correction = this.newServerPos.sub(this);
+			let q = window.gameSettings.clientCorrection * dt;
+			/**
+			 * FOR FUTURE:
+			 * smoothly limit correction vector to a certaint magnitude, so that
+			 * the player can still move if large lagspike and doesn't get held back 
+			 */
+			this.velocity = this.velocity.add(correction.mult(q));
+
+			this.x += this.velocity.x * dt; // newton
+			this.y += this.velocity.y * dt;
 		}
-		// else
-		// {
-		// 	// interpolate ???	
-		// }
+		else
+		{
+			let interpolatedPosition = 
+				this.lastServerPos.lerp(this.newServerPos, this.timeSinceLastData / this.serverTimeStep);
+			this.x = interpolatedPosition.x;
+			this.y = interpolatedPosition.y;
+		}
 
-		this.x += this.velocity.x * dt; // newton
-		this.y += this.velocity.y * dt;
-
-        //////////////////////////// COLLISION WALLS /////////////////////////////////////
+        ///////////////////////////////////// COLLISION WALLS /////////////////////////////////////
 		// optimise collision search by only checking in a specified range
 		const margin = window.gameSettings.rangeRectMargin;
 		const rangeRect = this.extend(margin);
@@ -84,7 +97,7 @@ export class ClientPlayer extends Rect
 
 	draw(ctx, camera, self)
 	{
-		if (self)
+		if (true)//self)
 		{
 			ctx.fillStyle = this.cSelf;
 		}

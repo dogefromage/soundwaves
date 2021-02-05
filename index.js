@@ -94,7 +94,7 @@ io.on('connection', (socket) =>
 
 //      MAIN LOOP      //
 // loop time control
-const loopTimeGoal = 100; //ms
+const loopTimeGoal = 50; //ms
 let lastLoopTime = process.hrtime();
 
 // for loops per second measurement
@@ -118,6 +118,7 @@ function loop()
     for (let socket of sockets)
     {
         const gameData = game.getData(socket.id, socket.gameTree);
+        gameData.dt = deltaTime; // is needed for interpolation
         
         const reducedJSON = JSON.stringify(gameData, function(key, value) {
             // limit precision of floats
