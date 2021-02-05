@@ -1,8 +1,7 @@
 import { ClientGamemap } from './ClientGamemap';
 import { ClientSoundwave } from './ClientSoundwave';
 import { ClientPlayer } from './ClientPlayer';
-import { lerp } from '../../GameMath';
-import { playerSpeed } from '../../GameSettings';
+import Rect from '../../Rect';
 
 export class ClientGame
 {
@@ -85,25 +84,50 @@ export class ClientGame
 
     draw(ctx, camera, w, h)
     {
-        // clear
+        ////////////////////////////////// CLEAR //////////////////////////////////
         ctx.fillStyle = "#000000";
         ctx.fillRect(0, 0, w, h);
 
+        ////////////////////////////////// DRAW GRID //////////////////////////////////
+        let range = camera.CanvasToWorldRect(new Rect(0, 0, w, h));
+        range = range.roundUp();
+        ctx.strokeStyle = "#050505";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let j = range.getTop(); j < range.getBottom(); j += 0.05)
+        {
+            let y = camera.WorldToCanvas({x:0, y:j}).y; // only y
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+        }
+        for (let i = range.getLeft(); i < range.getRight(); i += 0.05)
+        {
+            let x = camera.WorldToCanvas({x:i, y:0}).x; // only y
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, h);
+        }
+        ctx.stroke();
+
+        ////////////////////////////////// DRAW WAVES //////////////////////////////////
         for (const [wID, w] of this.soundwaves)
         {
             w.draw(ctx, camera);
         }
 
+        ////////////////////////////////// DRAW MAP //////////////////////////////////
         if (this.map)
         {
-            this.map.draw(ctx, camera);
+            this.map.draw(ctx, camera, range);
         }
 
+        ////////////////////////////////// DRAW PLAYERS //////////////////////////////////
         for (const [pID, p] of this.players)
         {
-            p.draw(ctx, camera, pID == socket.id);
+            let isMainPlayer = pID == socket.id
+            p.draw(ctx, camera, isMainPlayer);
         }
 
+        ////////////////////////////////// DEBUG //////////////////////////////////
         for (const r of window.debuggerRects)
         {
             ctx.lineWidth = 1;

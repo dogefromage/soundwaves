@@ -42,20 +42,13 @@ export class ClientGamemap
         }
     }
 
-    draw(ctx, camera)
+    draw(ctx, camera, range)
     {
         ctx.fillStyle = "#000000";
-        for (let j = 0; j < this.pixels.length; j++)
+        this.foreachWall((rect) =>
         {
-            for (let i = 0; i < this.pixels[j].length; i++)
-            {
-                if (this.pixels[j][i] == '1')
-                {
-                    const canRect = camera.WorldToCanvasRect(new Rect(i, j, 1, 1));
-                    ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);   
-                }
-            }
-        }
+            const canRect = camera.WorldToCanvasRect(rect);
+            ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);   
+        }, range);
     }
 }
-
