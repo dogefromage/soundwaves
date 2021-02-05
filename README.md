@@ -3,8 +3,8 @@
 npm run dev
 // Compiles the project and automatically starts it using node
 
-npm run dist
-// Compiles the project for distribution
+npm run prod
+// Compiles the project for production
 
 node index.js
-// will start run the project
+// will run the project
