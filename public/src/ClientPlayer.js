@@ -1,16 +1,16 @@
 import { Vec2 } from "../../Vector";
 import Rect from "../../Rect";
+import Color from "../../Color";
 
 export class ClientPlayer extends Rect
 {
-	constructor({ id, x, y, w, h, v, name, cSelf, cOther, health })
+	constructor({ x, y, w, h, v, name, color, b, health })
 	{
 		// all properties MUST have same name as in data, because use of hasProperty() etc.
 		super(x, y, w, h);
 		this.velocity = new Vec2(v.x, v.y);
-		this.id = id;
-		this.cSelf = cSelf;
-		this.cOther = cOther;
+		this.color = new Color(color.r, color.g, color.b, color.a);
+		this.brightness = b;
 		this.health = health;
 		this.charge = 0;
 		this.name = name;
@@ -35,7 +35,7 @@ export class ClientPlayer extends Rect
 		this.timeSinceLastData = 0;
 
 		// set remaining data
-		for (let key of ['cOther', 'health', 'charge'])
+		for (let key of ['b', 'health', 'charge'])
 		{
 			if (serverObj.hasOwnProperty(key))
 			{
@@ -100,13 +100,10 @@ export class ClientPlayer extends Rect
 	draw(ctx, camera, self)
 	{
 		if (self)
-		{
-			ctx.fillStyle = this.cSelf;
-		}
+			this.color.a = 255;
 		else
-		{
-			ctx.fillStyle = this.cOther;
-		}
+			this.color.a = Math.floor(255 * this.brightness);
+		ctx.fillStyle = this.color.toHex();
 
 		// rect
 		const canRect = camera.WorldToCanvasRect(this);

@@ -1,11 +1,10 @@
-import { ClientColor } from "./ClientColor";
+import Color from "../../Color";
 
 export class ClientSoundwave
 {
-    constructor({ id, color, center, age, settings })
+    constructor({ color, center, age, settings })
     {
-        this.id = id;
-        this.color = new ClientColor(color.r, color.g, color.b, color.a);
+        this.color = new Color(color.r, color.g, color.b, color.a);
         this.settings = settings;
         
         this.alive = true;

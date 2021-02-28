@@ -33,6 +33,8 @@ socket.on('server-data', (dataJSON) =>
         return value;
     });
 
+    console.log(serverData);
+
     // feed client game with server data
     game.setData(serverData);
 

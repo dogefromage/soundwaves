@@ -2,7 +2,7 @@
 module.exports = 
 {
     // PHYSICS
-    collisionIterations: 3,
+    collisionIterations: 1,
     rangeRectMargin: 0.5,
 
     // PLAYER

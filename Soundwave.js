@@ -172,7 +172,6 @@ class Soundwave // version 4 or something???!
     getData()
     {
         return {
-            // id: this.id,
             color: this.color,
             center: this.center,
             age: this.age,

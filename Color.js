@@ -58,20 +58,13 @@ class Color
         let m = v - c;
 
         let col;
-        if (h < 60)
-            col = [c, x, 0];
-        else if (h < 120)
-            col = [x, c, 0];
-        else if (h < 180)
-            col = [0, c, x];
-        else if (h < 240)
-            col = [0, x, c];
-        else if (h < 300)
-            col = [x, 0, c];
-        else if (h < 360)
-            col = [c, 0, x];
-        else 
-            return;
+        if (h < 60) col = [c, x, 0];
+        else if (h < 120) col = [x, c, 0];
+        else if (h < 180) col = [0, c, x];
+        else if (h < 240) col = [0, x, c];
+        else if (h < 300) col = [x, 0, c];
+        else if (h < 360) col = [c, 0, x];
+        else return;
 
         return new Color(
             Math.floor((col[0] + m) * 255),

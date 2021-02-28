@@ -61,10 +61,9 @@ class Game
         {
             let playerWaves = p.update(deltaTime, this.map);
 
-            if (playerWaves.size > 0)
-            {
-                this.soundwaves = new Map([...this.soundwaves, ...playerWaves])
-            }
+            // add new waves
+            for (const [_wID, _w] of playerWaves)
+                this.soundwaves.set(_wID, _w);
 
             // death
             if (p.health <= 0)
@@ -106,10 +105,9 @@ class Game
                 if (hit)
                 {
                     let hurtWaves = p.hurt(w.settings.damage * w.power, w.sender);
-                    if (hurtWaves.size > 0)
-                    {
-                        this.soundwaves = new Map([...this.soundwaves, ...hurtWaves])
-                    }
+                    // add new waves
+                    for (const [_w, _wID] of hurtWaves)
+                        this.soundwaves.set(_wID, _w);
                 }
             }
         }
