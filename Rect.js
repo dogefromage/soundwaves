@@ -54,15 +54,15 @@ class Rect
     setBottom(y) 
     { this.y = y - this.h; }
 
-    drawOutline(ctx, camera) 
-    {
-        var margin = 2;
-        ctx.strokeStyle = "#ffef42";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(this.x - camera.x - margin,
-            this.y - camera.y - margin,
-            this.w + 2 * margin, this.h + 2 * margin);
-    }
+    // drawOutline(ctx, camera) 
+    // {
+    //     var margin = 2;
+    //     ctx.strokeStyle = "#ffef42";
+    //     ctx.lineWidth = 4;
+    //     ctx.strokeRect(this.x - camera.x - margin,
+    //         this.y - camera.y - margin,
+    //         this.w + 2 * margin, this.h + 2 * margin);
+    // }
 
     copy()
     {
@@ -83,6 +83,15 @@ class Rect
             Math.ceil(this.w + this.x - newX),
             Math.ceil(this.h + this.y - newY),
         );
+    }
+
+    containsRect(rect)
+    {
+        if (this.x > rect.x) return false;
+        if (this.y > rect.y) return false;
+        if (this.getRight() < rect.getRight()) return false;
+        if (this.getBottom() < rect.getBottom()) return false;
+        return true;
     }
 
     static intersectPoint(rect, point, margin = 0)
