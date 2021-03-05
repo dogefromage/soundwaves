@@ -130,7 +130,7 @@ class Game
                 {
                     let hurtWaves = p.hurt(w.settings.damage * w.power, w.sender);
                     // add new waves
-                    for (const [_w, _wID] of hurtWaves)
+                    for (const [_wID, _w] of hurtWaves)
                         this.soundwaves.set(_wID, _w);
                 }
             }

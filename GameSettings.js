@@ -16,5 +16,5 @@ module.exports =
     clientCorrection: 10,
 
     // MAP
-    mapSize: 3,
+    mapSize: 2,
 };

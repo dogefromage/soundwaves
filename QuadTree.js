@@ -144,7 +144,7 @@ class QuadNode
     }
 
     /**
-     * Iterator for elements in specified bounds
+     * Generator for elements in specified bounds
      * @param {Rect} bounds 
      */
     *inRange(bounds)
@@ -167,7 +167,10 @@ class QuadNode
         // YIELD DATA
         for (const el of this.data)
         {
-            yield el;
+            if (Rect.intersectRect(bounds, el.rect))
+            {
+                yield el;
+            }
         }
     }
 }

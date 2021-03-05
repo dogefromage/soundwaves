@@ -102,7 +102,7 @@ export class ClientPlayer extends Rect
 		if (self)
 			this.color.a = 255;
 		else
-			this.color.a = Math.floor(255 * this.brightness);
+			this.color.a = Math.floor(255 * this.b);
 		ctx.fillStyle = this.color.toHex();
 
 		// rect

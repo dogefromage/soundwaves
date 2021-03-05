@@ -107,6 +107,7 @@ class Player extends Entity
 		if (this.charging)
 		{
 			this.charge += GameSettings.chargeSpeed * dt * this.velocity.sqrMagnitude();
+			this.charge = Math.min(this.charge, 1);
 		}
 
 		// SPAWN SOUNDWAVE ON STEP
@@ -130,12 +131,13 @@ class Player extends Entity
 	hurt(damage, offender)
 	{
 		super.hurt(damage, offender);
-
 		if (this.health < 0)
 		{
 			const newWave = this.createSoundwave(SoundwaveSettings.death());
-			return new Map([[newWave.id, newWave]]); // map with one wave
+			return [[newWave.id, newWave]] // one wave
 		}
+
+		return [];
 	}
 
 	createSoundwave(settings)
