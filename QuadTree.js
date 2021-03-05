@@ -1,22 +1,20 @@
 const Rect = require('./Rect');
 
-const TREE_BUCKET_SIZE = 2;
+const TREE_BUCKET_SIZE = 4;
 
 class QuadTree
 {
     constructor(bounds)
     {
-        this.root = new QuadNode(bounds, 0);
+        this.bounds = bounds;
+        this.root = new QuadNode(this.bounds, 0);
+        this.size = 0;
     }
 
-    insert(x)
+    insert(bounds, data)
     {
-        this.root.insert(x)
-    }
-
-    draw(ctx)
-    {
-        this.root.draw(ctx);
+        this.root.insert(bounds, data)
+        this.size++;
     }
 
     *[Symbol.iterator]()
@@ -31,6 +29,21 @@ class QuadTree
             
             yield nextVal.value;            
         }
+    }
+
+    inRange(bounds)
+    {
+        return this.root.inRange(bounds);
+    }
+
+    isEmpty()
+    {
+        return (this.size == 0);
+    }
+
+    clear()
+    {
+        this.root = new QuadNode(this.bounds, 0);
     }
 }
 
@@ -55,8 +68,10 @@ class QuadNode
         this.depth = depth;
     }
 
-    insert(x)
+    insert(rect, data)
     {
+        const x = { rect, data };
+        
         if (this.isLeaf)
         {
             this.data.push(x);
@@ -67,9 +82,9 @@ class QuadNode
 
                 const temp = this.data;
                 this.data = [];
-                for (const element of temp)
+                for (const el of temp)
                 {
-                    this.insert(element);
+                    this.insert(el.rect, el.data);
                 }
             }
             return;
@@ -78,14 +93,14 @@ class QuadNode
         let fitsIntoBounds = false;
         for (let i = 0; i < 4; i++)
         {
-            if(this.nextbounds[i].containsRect(x))
+            if(this.nextbounds[i].containsRect(x.rect))
             {
                 if (!this.hasSplit)
                 {
                     this.split();
                 }
 
-                this.children[i].insert(x);   // Go deeper into the tree
+                this.children[i].insert(x.rect, x.data);   // Go deeper into the tree
                 fitsIntoBounds = true;
                 break;
             }
@@ -122,29 +137,38 @@ class QuadNode
         }
 
         // YIELD DATA
-        for (const rect of this.data)
+        for (const el of this.data)
         {
-            yield { rect, depth:this.depth };
+            yield el;
         }
     }
 
-    draw(ctx)
+    /**
+     * Iterator for elements in specified bounds
+     * @param {Rect} bounds 
+     */
+    *inRange(bounds)
     {
-        // POST-ORDER PAINTING
-
+        if (!Rect.intersectRect(bounds, this.bounds))
+            return;
+        
+        // RECURSE
         if (this.hasSplit)
         {
             for (const child of this.children)
             {
-                child.draw(ctx);
+                for (const el of child.inRange(bounds))
+                {
+                    yield el;
+                }
             }
         }
-
-        let colors = ["#eb2cbf", "#f26f52", "#d811c4", "#2c96fe", "#9ba839", "#41f9ee", "#5c8e91", "#7e71be", "#2c60fb", "#ed344f", "#ec8f5f"];
-        ctx.strokeStyle = colors[this.depth % colors.length];
-
-        const { x, y, w, h } = this.bounds;
-        ctx.strokeRect(x, y, w, h);
+        
+        // YIELD DATA
+        for (const el of this.data)
+        {
+            yield el;
+        }
     }
 }
 

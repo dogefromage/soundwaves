@@ -81,7 +81,7 @@ class Player extends Entity
 	{
 		let newSoundWaves = new Map();
 
-        //////////////////////////// CHARACTER MOVEMENT /////////////////////////////////////
+        //////////////////////////// CHARACTER MOVEMENT //////////////////////////////////
 		let speed = GameSettings.playerSpeed;
 		if (this.sneaking)
 		{
@@ -102,6 +102,11 @@ class Player extends Entity
 		{
 			this.shoot(newSoundWaves);
 			this.shooting = false;
+		}
+
+		if (this.charging)
+		{
+			this.charge += GameSettings.chargeSpeed * dt * this.velocity.sqrMagnitude();
 		}
 
 		// SPAWN SOUNDWAVE ON STEP

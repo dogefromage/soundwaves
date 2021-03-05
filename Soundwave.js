@@ -43,7 +43,7 @@ class Soundwave // version 4 or something???!
         }
     }
 
-    getRange()
+    getBounds()
     {
         return new Rect(this.center.x, this.center.y, 0, 0).extend(this.r);
     }

@@ -89,8 +89,8 @@ class Rect
     {
         if (this.x > rect.x) return false;
         if (this.y > rect.y) return false;
-        if (this.getRight() < rect.getRight()) return false;
-        if (this.getBottom() < rect.getBottom()) return false;
+        if (this.getRight() < (rect.x + rect.w)) return false;
+        if (this.getBottom() < (rect.y + rect.h)) return false;
         return true;
     }
 

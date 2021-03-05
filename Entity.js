@@ -47,6 +47,11 @@ class Entity extends Rect
             this.brightness = 1;
         }
 	}
+
+	getBounds()
+	{
+		return new Rect(this.x, this.y, this.w, this.h);
+	}
 }
 
 module.exports = Entity;

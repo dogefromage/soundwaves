@@ -4,6 +4,7 @@ const GameSettings = require('./GameSettings');
 const Rect = require('./Rect');
 const Color = require('./Color');
 const { Vec2 } = require('./Vector');
+const QuadTree = require('./QuadTree');
 
 class Game
 {
@@ -12,6 +13,7 @@ class Game
         this.map = new GameMap(mapSize);
         this.players = new Map();
         this.soundwaves = new Map();
+        this.quadTree = new QuadTree(new Rect(0, 0, this.map.width, this.map.width));
     }
 
     addPlayer(id, name, colorValue)
@@ -44,6 +46,12 @@ class Game
 
     update(deltaTime)
     {
+        // clear quadtree
+        this.quadTree.clear();
+
+
+        /////////////////// UPDATE ALL ENTITIES ////////////////////
+
         // SOUNDWAVES
         for (const [id, w] of this.soundwaves)
         {
@@ -73,19 +81,35 @@ class Game
             }
         }
 
-        ////////////// SOUNDWAVE x PLAYER COLLISION /////////////////
+        ////////////////////////// BUILD QUADTREE /////////////////////////
+        for (const [id, w] of this.soundwaves)
+        {
+            this.quadTree.insert(w.getBounds(), { id, type:'w' });
+        }
+        
+        for (const [id, p] of this.players)
+        {
+            this.quadTree.insert(p.getBounds(), { id, type:'p' });
+        }
+
+        ////////////////// SOUNDWAVE collides with PLAYER /////////////////
         for (const [wID, w] of this.soundwaves)
         {
+            if (w.settings.damage == 0)
+                continue; // USELESS
+
             // collide with border rectangle first to improve performance
-            let wBorder = w.getRange();
+            let wBorder = w.getBounds();
 
-            for (const [pID, p] of this.players)
+            for (const { data: { id, type } }  of this.quadTree.inRange(wBorder))
             {
-                if (pID == w.sender || w.settings.damage == 0)
-                    continue;
+                if (type != 'p')
+                    continue
+                const pID = id;
+                const p = this.players.get(pID);
 
-                if (!Rect.intersectRect(wBorder, p)) 
-                    continue; // player was not in range of soundwave
+                if (pID == w.sender)
+                    continue;
 
                 let hit = false;
                 for (const v of w.vertices)
@@ -116,16 +140,16 @@ class Game
     getData(socketID, gameTree)
     {
         let range; // range rectangle to limit view and data sent
-        let viewDist = 2;
+        let viewDist = 2.5;
         const pos = this.players.get(socketID);
         if (pos)
         {
-            range = new Rect(pos.x, pos.y, 0, 0).extend(viewDist).roundUp();
+            range = new Rect(pos.x, pos.y, 0, 0).extend(viewDist);
         }
         else
         {
             // otherwise center of map, if in menu
-            range = new Rect(0.5 * this.map.width, 0.5 * this.map.height, 0, 0).extend(viewDist).roundUp();
+            range = new Rect(0.5 * this.map.width, 0.5 * this.map.height, 0, 0).extend(viewDist);
         }
 
         // data to be sent
@@ -149,51 +173,52 @@ class Game
             gameTree.settings = true;
         }
 
+        // temp variable for old tree
+        const oldTreePlayers = gameTree.players;
+        gameTree.players = new Set();
+        const oldTreeWaves = gameTree.waves;
+        gameTree.waves = new Set();
+
         ////////////////// Players ////////////////////
-        let playerKeys = Array.from(this.players.keys())
-        
-        // find all ids which are shared between tree and server
-        let players_both = intersection(playerKeys, gameTree.players)
-        for (const pID of players_both)
+        for (const { data: { id, type } } of this.quadTree.inRange(range))
         {
-            const serverP = this.players.get(pID)
-            const isMainPlayer = pID == socketID;
-            data.p.set(pID, ['upd', serverP.getNewData(isMainPlayer)])
-        }
-        // find all ids which are on server but not clients gametree set
-        let players_only_server = difference(playerKeys, gameTree.players);
-        for (const pID of players_only_server)
-        {
-            const serverP = this.players.get(pID)
-            data.p.set(pID, ['new', serverP.getAllData()])
-            gameTree.players.add(pID);
-        }
-        // find all ids which are still in tree but not anymore on the server
-        let players_only_tree = difference(gameTree.players, playerKeys);
-        for (const pID of players_only_tree)
-        {
-            data.p.set(pID, ['del'])
-            gameTree.players.delete(pID);
-        }
-
-        ////////////////// Waves ////////////////////
-        let waveKeys = Array.from(this.soundwaves.keys())
-        
-        // find all ids which are on server but not clients gametree set
-        let waves_only_server = difference(waveKeys, gameTree.waves);
-        for (const wID of waves_only_server)
-        {
-            const serverW = this.soundwaves.get(wID)
-            data.w.set(wID, serverW.getData());
-            gameTree.waves.add(wID);
-        }
-        // find all ids which are still in tree but not anymore on the server
-        let waves_only_tree = difference(gameTree.waves, waveKeys);
-        for (const wID of waves_only_tree)
-        {
-            gameTree.waves.delete(wID);
+            if (type == 'p') // player
+            {
+                if (oldTreePlayers.has(id))
+                {
+                    // update
+                    const serverP = this.players.get(id)
+                    const isMainPlayer = id == socketID;
+                    data.p.set(id, ['upd', serverP.getNewData(isMainPlayer)])
+                    
+                    oldTreePlayers.delete(id);
+                }
+                else
+                {
+                    // new
+                    const serverP = this.players.get(id)
+                    data.p.set(id, ['new', serverP.getAllData()])
+                }
+                gameTree.players.add(id);
+            }
+            else if (type == 'w') // wave
+            {
+                if (!oldTreeWaves.has(id))
+                {
+                    // new
+                    const serverW = this.soundwaves.get(id)
+                    data.w.set(id, serverW.getData());
+                }
+                gameTree.waves.add(id);
+            }
         }
 
+        for (const id of oldTreePlayers) // loop over the remains of this set
+        {
+            // del
+            data.p.set(id, ['del'])
+        }
+        
         // if no changes occured map must not be sent
         if (data.p.size == 0)
             delete data.p
@@ -205,17 +230,3 @@ class Game
 }
 
 module.exports = Game;
-
-function intersection(a, b)
-{
-    const A = [...a];
-    const B = new Set(b);
-    return new Set(A.filter(id => B.has(id)));
-}
-
-function difference(a, b)
-{
-    const A = [...a];
-    const B = new Set(b);
-    return new Set(A.filter(id => !B.has(id)));
-}

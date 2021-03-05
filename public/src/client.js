@@ -33,7 +33,14 @@ socket.on('server-data', (dataJSON) =>
         return value;
     });
 
-    console.log(serverData);
+    if (serverData.p)
+    {
+        for (const [key, val] of serverData.p)
+        {
+            console.log(val[0]);
+        }
+    }
+    console.log(" ");
 
     // feed client game with server data
     game.setData(serverData);
@@ -62,7 +69,7 @@ socket.on('server-data', (dataJSON) =>
     }
     else
     {
-        input.getChanges(); // clears the history
+        window.input.getChanges(); // clears the history
 
         if (!cardDisplayed)
         {
