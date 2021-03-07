@@ -22,7 +22,7 @@ socket.on('server-data', (dataJSON) =>
     window.debuggerRects = [];
     const serverData = JSON.parse(dataJSON, (key, value) =>
     {
-        if (key == 'w' || key == 'p') // put waves and players back to where they came from! (maps)
+        if (key == 'go') // put gameobjects back to where they came from! (maps)
         {
             if (value instanceof Array)
             {
@@ -32,15 +32,6 @@ socket.on('server-data', (dataJSON) =>
             
         return value;
     });
-
-    // if (serverData.p)
-    // {
-    //     for (const [key, val] of serverData.p)
-    //     {
-    //         console.log(val[0]);
-    //     }
-    // }
-    // console.log(" ");
 
     // feed client game with server data
     game.setData(serverData);
@@ -418,7 +409,5 @@ let s =
 ' _       _   _    _   _                     __     ___   _  \n' + 
 '|_  |   |_  | \\  |_  |_)  |\\/|   /\\   | |  (_       |   / \\ \n' + 
 '|   |_  |_  |_/  |_  | \\  |  |  /--\\  |_|  __)  o  _|_  \\_/ \n';
-                                                            
-
 
 console.log(s);

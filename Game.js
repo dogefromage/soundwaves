@@ -1,29 +1,37 @@
 const GameMap = require('./GameMap');
 const Player = require('./Player');
+const Entity = require('./Entity');
+const { Soundwave } = require('./Soundwave');
 const GameSettings = require('./GameSettings');
 const Rect = require('./Rect');
 const Color = require('./Color');
 const { Vec2 } = require('./Vector');
 const QuadTree = require('./QuadTree');
+const RandomID = require('./RandomID');
+const Bug = require('./Bug');
 
 class Game
 {
     constructor(mapSize)
     {
         this.map = new GameMap(mapSize);
-        this.players = new Map();
-        this.soundwaves = new Map();
+        this.gameObjects = new Map();
         this.quadTree = new QuadTree(new Rect(0, 0, this.map.width, this.map.width));
     }
 
-    addPlayer(id, name, colorValue)
+    *gameObjectsOfType(T)
     {
-        if (this.players.has(id))
+        for (const [id, go] of this.gameObjects)
         {
-            return;
+            if (go instanceof T)
+            {
+                yield [id, go];
+            }
         }
+    }
 
-        // find empty spawning space for player
+    findEmptySpawningSpace(margins = 0)
+    {
         let x, y;
         do
         {
@@ -32,198 +40,217 @@ class Game
         }
         while(this.map.pixels[y][x] == '1') // repeat if map square isn't empty
 
-        // color, 60% saturated seems good
-        let color = Color.FromHSV(360 - colorValue * 3.6, .6, 1);
+        x += margins + Math.random() * (1 - 2 * margins);
+        y += margins + Math.random() * (1 - 2 * margins);
 
-        const p = new Player(x + 0.5, y + 0.5, id, name, color);
-        this.players.set(id, p);
+        return { x, y };
+    }
+    
+    createUniqueID()
+    {
+        let id;
+        do
+        {
+            id = RandomID();
+        }
+        while (this.gameObjects.has(id));
+
+        return id;
+    }
+
+    addGameObject(go, id = undefined)
+    {
+        if (!id)
+        {
+            id = this.createUniqueID();
+        }
+
+        // create unique ID for new entity and add to map
+        this.gameObjects.set(id, go);
+    }
+
+    addPlayer(id, name, hue)
+    {
+        const { x, y } = this.findEmptySpawningSpace(0.4);
+
+        // color, 60% saturated seems good
+        let color = Color.FromHSV(360 - hue * 3.6, .6, 1);
+
+        const p = new Player(x, y, id, name, color);
+        this.addGameObject(p, id);
     }
 
     removePlayer(id)
     {
-        this.players.delete(id);
+        this.gameObjects.delete(id);
     }
 
     update(deltaTime)
     {
-        // clear quadtree
-        this.quadTree.clear();
-
-
-        /////////////////// UPDATE ALL ENTITIES ////////////////////
-
-        // SOUNDWAVES
-        for (const [id, w] of this.soundwaves)
+        if (Math.random() > 0.9)
         {
-            w.update(deltaTime, this.map);
+            const spawningSpace = this.findEmptySpawningSpace(0.2);
+            this.addGameObject(new Bug(spawningSpace.x, spawningSpace.y));
+        }
+
+
+        /////////////////// UPDATE ALL GAMEOBJECTS ////////////////////
+        let newGameObjects = []; // array for new gos
+
+        for (const [id, go] of this.gameObjects)
+        {
+            let newGOs = go.update(deltaTime, this.map);
+            newGameObjects.push(...newGOs);
 
             // IS DEAD?
-            if (!w.alive)
+            if (go.dead)
             {
-                this.soundwaves.delete(id);
+                go.onDeath();
+                this.gameObjects.delete(id);
             }
         }
  
-        // PLAYERS
-        for (const [id, p] of this.players)
-        {
-            let playerWaves = p.update(deltaTime, this.map);
-
-            // add new waves
-            for (const [_wID, _w] of playerWaves)
-                this.soundwaves.set(_wID, _w);
-
-            // death
-            if (p.health <= 0)
-            {
-                this.removePlayer(id);
-                console.log(`Player ${p.name} has unfortunately died`);
-            }
-        }
-
         ////////////////////////// BUILD QUADTREE /////////////////////////
-        for (const [id, w] of this.soundwaves)
+        this.quadTree.clear(); // clear last
+
+        for (const [id, go] of this.gameObjects)
         {
-            this.quadTree.insert(w.getBounds(), { id, type:'w' });
-        }
-        
-        for (const [id, p] of this.players)
-        {
-            this.quadTree.insert(p.getBounds(), { id, type:'p' });
+            this.quadTree.insert(go.getBounds(), [id, go]);
         }
 
         ////////////////// SOUNDWAVE collides with PLAYER /////////////////
-        for (const [wID, w] of this.soundwaves)
+        for (const [wID, wave] of this.gameObjectsOfType(Soundwave)) // get all waves
         {
-            if (w.settings.damage == 0)
-                continue; // USELESS
-
-            // collide with border rectangle first to improve performance
-            let wBorder = w.getBounds();
-
-            for (const { data: { id, type } }  of this.quadTree.inRange(wBorder))
+            if (wave.settings.damage != 0)
             {
-                if (type != 'p')
-                    continue
-                const pID = id;
-                const p = this.players.get(pID);
-
-                if (pID == w.sender)
-                    continue;
-
-                let hit = false;
-                for (const v of w.vertices)
+                // collide with border rectangle first to improve performance
+                let wBorder = wave.getBounds();
+    
+                for (const el of this.quadTree.inRange(wBorder))
                 {
-                    if (!v.active)
-                        continue;
-
-                    let A = new Vec2(v.oldX, v.oldY);
-                    let B = new Vec2(v.x, v.y);
-                    if (Rect.intersectLine(p, A, B))
+                    // only entities can be hurt
+                    if (el[1] instanceof Entity)
                     {
-                        hit = true;
-                        break;
-                    }
-                }
+                        const [ id, entity ] = el;
 
-                if (hit)
-                {
-                    let hurtWaves = p.hurt(w.settings.damage * w.power, w.sender);
-                    // add new waves
-                    for (const [_wID, _w] of hurtWaves)
-                        this.soundwaves.set(_wID, _w);
+                        if (id != wave.sender)
+                        {
+                            let hit = false;
+                            for (const vertex of wave.vertices)
+                            {
+                                if (vertex.active)
+                                {
+                                    let A = new Vec2(vertex.oldX, vertex.oldY);
+                                    let B = new Vec2(vertex.x, vertex.y);
+                                    if (Rect.intersectLine(entity.getHitbox(), A, B))
+                                    {
+                                        hit = true;
+                                        break;
+                                    }
+                                }
+                            }
+            
+                            if (hit)
+                            {
+                                let hurtGOs = entity.hurt(wave.settings.damage * wave.power, wave.sender);
+                                newGameObjects.push(...hurtGOs);
+                            }
+                        }
+                    }
                 }
             }
         }
+
+        // add new gos
+        for (const go of newGameObjects)
+        {
+            this.addGameObject(go);
+        }
     }
 
-    getData(socketID, gameTree)
+    getBlankKnowledge()
     {
-        let range; // range rectangle to limit view and data sent
+        return {
+            map: false,
+            settings: false,
+            go: new Set(),
+        };
+    }
+
+    getData(socketID, clientsKnowledge)
+    {
+        let viewRange; // range rectangle to limit view and data sent
         let viewDist = 2.5;
-        const pos = this.players.get(socketID);
+        const pos = this.gameObjects.get(socketID);
         if (pos)
         {
-            range = new Rect(pos.x, pos.y, 0, 0).extend(viewDist);
+            // client is playing
+            viewRange = new Rect(pos.x, pos.y, 0, 0).extend(viewDist);
         }
         else
         {
-            // otherwise center of map, if in menu
-            range = new Rect(0.5 * this.map.width, 0.5 * this.map.height, 0, 0).extend(viewDist);
+            // client still in menu, set to center of map
+            viewRange = new Rect(0.5 * this.map.width, 0.5 * this.map.height, 0, 0).extend(viewDist);
         }
 
         // data to be sent
         const data = 
         {
-            p: new Map(),
-            w: new Map()
+            go: new Map()
         };
 
         ////////////////// Map ////////////////////
-        if (!gameTree.map)
+        if (!clientsKnowledge.map)
         {
             data.map = this.map.getData();
-            gameTree.map = true;
+            clientsKnowledge.map = true;
         }
 
         ////////////////// Settings ////////////////////
-        if (!gameTree.settings)
+        if (!clientsKnowledge.settings)
         {
             data.settings = GameSettings;
-            gameTree.settings = true;
-        }
-
-        // temp variable for old tree
-        const oldTreePlayers = gameTree.players;
-        gameTree.players = new Set();
-        const oldTreeWaves = gameTree.waves;
-        gameTree.waves = new Set();
-
-        ////////////////// Players ////////////////////
-        for (const { data: { id, type } } of this.quadTree.inRange(range))
-        {
-            if (type == 'p') // player
-            {
-                if (oldTreePlayers.has(id))
-                {
-                    // update
-                    const serverP = this.players.get(id)
-                    const isMainPlayer = id == socketID;
-                    data.p.set(id, ['upd', serverP.getNewData(isMainPlayer)])
-                    
-                    oldTreePlayers.delete(id);
-                }
-                else
-                {
-                    // new
-                    const serverP = this.players.get(id)
-                    data.p.set(id, ['new', serverP.getAllData()])
-                }
-                gameTree.players.add(id);
-            }
-            else if (type == 'w') // wave
-            {
-                if (!oldTreeWaves.has(id))
-                {
-                    // new
-                    const serverW = this.soundwaves.get(id)
-                    data.w.set(id, serverW.getData());
-                }
-                gameTree.waves.add(id);
-            }
-        }
-
-        for (const id of oldTreePlayers) // loop over the remains of this set
-        {
-            // del
-            data.p.set(id, ['del'])
+            clientsKnowledge.settings = true;
         }
         
-        // if no changes occured map must not be sent
-        if (data.p.size == 0)
-            delete data.p
-        if (data.w.size == 0)
-            delete data.w;
+        ////////////////// GAME OBJECTS ////////////////////
+        // temp variable for old tree
+        const oldGOKnowledge = clientsKnowledge.go;
+        clientsKnowledge.go = new Set();
+        
+        for (const [id, go] of this.quadTree.inRange(viewRange))
+        {
+            const isClientsPlayer = (id == socketID);
+
+            if (oldGOKnowledge.has(id))
+            {
+                // update go
+                const updateData = go.getDataUpdate(isClientsPlayer);
+
+                if (Object.entries(updateData).length > 0) // check if object isn't empty
+                {
+                    data.go.set(id, ['upd', updateData])
+                }
+                oldGOKnowledge.delete(id);
+            }
+            else
+            {
+                // new go
+                const newData = go.getDataNew(isClientsPlayer);
+                
+                if (Object.entries(newData).length > 0) // check if object isn't empty
+                {
+                    data.go.set(id, ['new', newData, go.getType()])
+                }
+            }
+            clientsKnowledge.go.add(id);
+        }
+
+        for (const id of oldGOKnowledge) // loop over the remains of this set
+        {
+            // del
+            data.go.set(id, ['del']);
+        }
         
         return data;
     }

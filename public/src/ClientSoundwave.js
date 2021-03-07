@@ -2,15 +2,28 @@ import Color from "../../Color";
 
 export class ClientSoundwave
 {
-    constructor({ color, center, age, settings })
+    constructor({ co, ce, ag, se })
     {
-        this.color = new Color(color.r, color.g, color.b, color.a);
-        this.settings = settings;
+        this.color = new Color(co.r, co.g, co.b, co.a);
+
+        // RETRIEVE SETTINGS
+        this.settings = {};
+        const settingsProperties = [ 
+            'speed', 'lifetime', 'damage', 'rotation', 'spread', 'full', 'resolutionClient'
+        ];
+        for (let i = 0; i < se.length; i++)
+        {
+            Object.defineProperty(this.settings, settingsProperties[i], {
+                value: se[i],
+                writable: true
+            });
+        }
         
-        this.alive = true;
-        this.age = age;
+        
+        this.dead = false;
+        this.age = ag;
         this.r; // has to be set using age in update
-        this.center = center;
+        this.center = ce;
         this.vertices = [];
         for (let i = 0; i < this.settings.resolutionClient; i++)
         {
@@ -46,7 +59,7 @@ export class ClientSoundwave
         
         if (this.age / this.settings.lifetime > 1)
         {
-            this.alive = false;
+            this.dead = true;
         }
         
         this.power = 1 - this.age / this.settings.lifetime;

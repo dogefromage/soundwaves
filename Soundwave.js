@@ -1,4 +1,3 @@
-const RandomID = require('./RandomID');
 const Color = require('./Color');
 const Rect = require('./Rect');
 
@@ -6,12 +5,11 @@ class Soundwave // version 4 or something???!
 {
     constructor(x, y, sender, settings, color = new Color(255, 255, 255))
     {
-        this.id = RandomID();
         this.sender = sender;
         this.color = color;
         this.settings = settings;
         
-        this.alive = true;
+        this.dead = false;
         this.age = 0;
         this.r = 0;
         this.center = { x, y };
@@ -58,7 +56,7 @@ class Soundwave // version 4 or something???!
         
         if (this.age / this.settings.lifetime > 1)
         {
-            this.alive = false;
+            this.dead = true;
         }
         
         this.color.a = Math.max(0, 255 * this.power * this.power);
@@ -167,16 +165,33 @@ class Soundwave // version 4 or something???!
                 }
             }
         }
+
+        return [];
     }
 
-    getData()
+    onDeath()
+    {
+        
+    }
+
+    getType()
+    {
+        return 'w';
+    }
+
+    getDataNew()
     {
         return {
-            color: this.color,
-            center: this.center,
-            age: this.age,
-            settings: this.settings
+            co: this.color,
+            ce: this.center,
+            ag: this.age,
+            se: this.settings.getData()
         }
+    }
+
+    getDataUpdate()
+    {
+        return {};
     }
 }
 
@@ -192,6 +207,19 @@ class SoundwaveSettings
         this.full = spread == Math.PI * 2;
         this.resolutionServer = resolutionServer;
         this.resolutionClient = resolutionClient;
+    }
+    
+    getData()
+    {
+        return [
+            this.speed, 
+            this.lifetime, 
+            this.damage, 
+            this.rotation, 
+            this.spread, 
+            this.full, 
+            this.resolutionClient
+        ];
     }
 
     static walk()

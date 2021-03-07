@@ -18,6 +18,7 @@ const io = socket(server);
 //GAME
 const Game = require('./Game');
 const GameSettings = require('./GameSettings');
+const Player = require('./Player');
 const game = new Game(GameSettings.mapSize);
 
 const sockets = [];
@@ -28,13 +29,7 @@ io.on('connection', (socket) =>
     console.log("Socket connected", socket.id);
     sockets.push(socket);
 
-    socket.gameTree = 
-    {
-        map: false,
-        settings: false,
-        players: new Set(),
-        waves: new Set()
-    };
+    socket.gameKnowledge = game.getBlankKnowledge();
 
     socket.on('request-join', (name, color) =>
     {
@@ -44,7 +39,7 @@ io.on('connection', (socket) =>
         if (name.length > 0 && name.length <= 30)
         {
             let unique = true;
-            for (const [pID, p] of game.players)
+            for (const [pID, p] of game.gameObjectsOfType(Player))
             {
                 if (p.name == name)
                 {
@@ -76,7 +71,7 @@ io.on('connection', (socket) =>
     {
         if (clientData.input)
         {
-            const player = game.players.get(socket.id);
+            const player = game.gameObjects.get(socket.id);
             if (player)
             {
                 player.setInput(clientData.input);
@@ -117,7 +112,7 @@ function loop()
     // SEND GAME TO CLIENTS
     for (let socket of sockets)
     {
-        const gameData = game.getData(socket.id, socket.gameTree);
+        const gameData = game.getData(socket.id, socket.gameKnowledge);
         gameData.dt = deltaTime; // is needed for interpolation
         
         const reducedJSON = JSON.stringify(gameData, function(key, value) {
@@ -132,7 +127,7 @@ function loop()
             return value
         });
 
-        // console.log(reducedJSON); // show data
+        console.log(reducedJSON); // show data
         // console.log(reducedJSON.length); // show data size in characters
 
         socket.emit('server-data', reducedJSON);

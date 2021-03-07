@@ -159,7 +159,7 @@ class QuadNode
             {
                 for (const el of child.inRange(bounds))
                 {
-                    yield el;
+                    yield el; // pass on
                 }
             }
         }
@@ -169,7 +169,7 @@ class QuadNode
         {
             if (Rect.intersectRect(bounds, el.rect))
             {
-                yield el;
+                yield el.data;
             }
         }
     }

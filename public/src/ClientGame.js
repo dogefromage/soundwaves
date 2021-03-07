@@ -1,7 +1,9 @@
+import Rect from '../../Rect';
 import { ClientGamemap } from './ClientGamemap';
 import { ClientSoundwave } from './ClientSoundwave';
-import { ClientPlayer } from './ClientPlayer';
-import Rect from '../../Rect';
+import { ClientPlayer, ClientMainPlayer } from './ClientPlayers';
+import { ClientEntity } from './ClientEntity';
+import { ClientBug } from './ClientBug';
 
 export class ClientGame
 {
@@ -9,27 +11,20 @@ export class ClientGame
     {
         this.map;
         this.settings;
+        this.gameObjects = new Map();
         this.mainPlayer;
-        this.players = new Map();
-        this.soundwaves = new Map();
     }
 
     update(dt)
     {
-        // update soundwaves
-        for (const [wID, w] of this.soundwaves)
+        for (const [ id, go ] of this.gameObjects)
         {
-            w.update(dt, this.map);
-            if (!w.alive)
-            {
-                this.soundwaves.delete(wID);
-            }
-        }
+            go.update(dt, this.map);
 
-        for (const [pID, p] of this.players)
-        {
-            let isMainPlayer = window.socket.id == pID;
-            p.update(dt, this.map, isMainPlayer);
+            if (go.dead) // mainly used for soundwaves
+            {
+                this.gameObjects.delete(id);
+            }
         }
     }
 
@@ -47,39 +42,54 @@ export class ClientGame
             window.gameSettings = serverData.settings; // set globally
         }
 
-        /////////////////// Waves ///////////////////////
-        if (serverData.w)
+        /////////////////// Gameobjects ///////////////////////
+        if (serverData.go)
         {
-            for (const [wID, wData] of serverData.w)
+            for (const [id, data] of serverData.go)
             {
-                this.soundwaves.set(wID, new ClientSoundwave(wData));
+                if (data[0] == 'del')
+                {
+                    this.gameObjects.delete(id);
+                }
+                else if (data[0] == 'upd')
+                {
+                    const clientObj = this.gameObjects.get(id);
+                    clientObj.setData(data[1], serverData.dt);
+                }
+                else if (data[0] == 'new')
+                {
+                    // data: ['new', vars, type]
+
+                    let T;
+                    switch (data[2])
+                    {
+                        case 'w':
+                            T = ClientSoundwave; break;
+                        case 'b':
+                            T = ClientBug; break;
+                        case 'p':
+                        {
+                            if (id == window.socket.id)
+                                T = ClientMainPlayer; // main player
+                            else
+                                T = ClientPlayer;
+                            break;
+                        }
+                        default:
+                        {
+                            console.log("Unknown type: '" + data[2] + "'");
+                            continue;
+                        }
+                    }
+
+                    const newObj = new T(data[1]);
+                    this.gameObjects.set(id, newObj);
+                }
             }
         }
 
-        /////////////////// Players ///////////////////////
-        if (serverData.p)
-        {
-            for (const [pID, pData] of serverData.p)
-            {
-                if (pData[0] == 'del')
-                {
-                    this.players.delete(pID);
-                }
-                else if (pData[0] == 'upd')
-                {
-                    const clientP = this.players.get(pID);
-                    const serverP = pData[1];
-                    clientP.setData(serverP, serverData.dt);
-                }
-                else if (pData[0] == 'new')
-                {
-                    this.players.set(pID, new ClientPlayer(pData[1]));
-                }
-            }
-        }
-
-        // mainplayer - if set to undefined, join card shows up
-        this.mainPlayer = this.players.get(socket.id);
+        // mainplayer - if set to undefined, menu shows up
+        this.mainPlayer = this.gameObjects.get(socket.id);
     }
 
     draw(ctx, camera, w, h)
@@ -94,13 +104,13 @@ export class ClientGame
         ctx.strokeStyle = "#050505";
         ctx.lineWidth = 3;
         ctx.beginPath();
-        for (let j = range.getTop(); j < range.getBottom(); j += 0.05)
+        for (let j = range.getTop(); j < range.getBottom(); j += 0.10)
         {
             let y = camera.WorldToCanvas({x:0, y:j}).y; // only y
             ctx.moveTo(0, y);
             ctx.lineTo(w, y);
         }
-        for (let i = range.getLeft(); i < range.getRight(); i += 0.05)
+        for (let i = range.getLeft(); i < range.getRight(); i += 0.10)
         {
             let x = camera.WorldToCanvas({x:i, y:0}).x; // only y
             ctx.moveTo(x, 0);
@@ -109,9 +119,12 @@ export class ClientGame
         ctx.stroke();
 
         ////////////////////////////////// DRAW WAVES //////////////////////////////////
-        for (const [wID, w] of this.soundwaves)
+        for (const [id, go] of this.gameObjects)
         {
-            w.draw(ctx, camera);
+            if (go instanceof ClientSoundwave)
+            {
+                go.draw(ctx, camera);
+            }
         }
 
         ////////////////////////////////// DRAW MAP //////////////////////////////////
@@ -120,14 +133,25 @@ export class ClientGame
             this.map.draw(ctx, camera, range);
         }
 
-        ////////////////////////////////// DRAW PLAYERS //////////////////////////////////
-        for (const [pID, p] of this.players)
+        ////////////////////////////////// DRAW ENTITIES //////////////////////////////////
+        for (const [id, go] of this.gameObjects)
         {
-            let isMainPlayer = pID == socket.id
-            p.draw(ctx, camera, isMainPlayer);
+            if (go instanceof ClientEntity)
+            {
+                if (id != socket.id)
+                {
+                    go.draw(ctx, camera);
+                }
+            }
         }
 
-        ////////////////////////////////// DEBUG //////////////////////////////////
+        ////////////////////////////////// DRAW MAINPLAYER //////////////////////////////////
+        if (this.mainPlayer)
+        {
+            this.mainPlayer.draw(ctx, camera);
+        }
+
+        ////////////////////////////////// DRAW DEBUG //////////////////////////////////
         for (const r of window.debuggerRects)
         {
             ctx.lineWidth = 1;

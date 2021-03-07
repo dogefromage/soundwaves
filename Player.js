@@ -3,16 +3,16 @@ const Entity = require('./Entity');
 const GameSettings = require('./GameSettings');
 const { Soundwave, SoundwaveSettings } = require('./Soundwave');
 const { Vec2 } = require('./Vector.js');
-const { clamp } = require('./GameMath');
 
 class Player extends Entity
 {
 	constructor(x, y, id, name, color) 
 	{
 		const size = GameSettings.playerSize;
-		super(x, y, size, size, id, color, 1, 1.5);
+		super(x, y, size, size, color, 1, 1.5);
 		// player name
 		this.name = name;
+		this.id = id;
 
 		// for soundwave spawning
 		this.lastStep = new Vec2(this.x, this.y);
@@ -70,7 +70,7 @@ class Player extends Entity
 		{
 			let settings = SoundwaveSettings.Attack(this.shootAngle, this.charge);
 			const newWave = this.createSoundwave(settings);
-			waves.set(newWave.id, newWave);
+			waves.push(newWave);
 		}
 
 		this.charging = false;
@@ -79,7 +79,7 @@ class Player extends Entity
 
 	update(dt, map)
 	{
-		let newSoundWaves = new Map();
+		let newSoundWaves = [];
 
         //////////////////////////// CHARACTER MOVEMENT //////////////////////////////////
 		let speed = GameSettings.playerSpeed;
@@ -122,10 +122,20 @@ class Player extends Entity
 			else
 				waveSettings = SoundwaveSettings.walk();
 			const newWave = this.createSoundwave(waveSettings);
-			newSoundWaves.set(newWave.id, newWave);
+			newSoundWaves.push(newWave);
 		}
 
 		return newSoundWaves;
+	}
+
+	getType()
+	{
+		return 'p';
+	}
+
+	onDeath()
+	{
+		console.log(`Player ${this.name} has unfortunately died`);
 	}
 
 	hurt(damage, offender)
@@ -134,7 +144,7 @@ class Player extends Entity
 		if (this.health < 0)
 		{
 			const newWave = this.createSoundwave(SoundwaveSettings.death());
-			return [[newWave.id, newWave]] // one wave
+			return [newWave] // one wave
 		}
 
 		return [];
@@ -148,34 +158,33 @@ class Player extends Entity
 			this.color.copy());
 	}
 
-	getAllData(mainPlayer = true)
+	getDataNew(mainPlayer = true)
 	{
 		return {
-			name: this.name,
 			x: this.x,
 			y: this.y,
 			w: this.w,
 			h: this.h,
-			v: this.velocity,
-			color: this.color,
-			b: mainPlayer ? this.brightness : 0,
-			health: this.health,
+			na: this.name,
+			co: this.color,
+			br: this.brightness,
+			he: this.health,
 		};
 	}
 
-	getNewData(mainPlayer = true)
+	getDataUpdate(mainPlayer = true)
 	{
 		let data = {
 			x: this.x,
 			y: this.y,
-			b: this.brightness,
+			br: this.brightness,
 		}
 
 		// only sent to mainplayer
 		if (mainPlayer)
 		{
-			data.health = this.health;
-			data.charge = this.charge;
+			data.he = this.health;
+			data.ch = this.charge;
 		}
 
 		return data;

@@ -3,18 +3,19 @@ const GameSettings = require('./GameSettings');
 
 class Entity extends Rect
 {
-    constructor(x, y, w, h, id, color, health, glowTime)
+    constructor(x, y, w, h, color, health, glowTime)
     {
         super(x, y, w, h);
 		this.oldX = this.x; this.oldY = this.y;
-        this.id = id;
 		this.color = color;
         
 		this.brightness = 0;
 		this.hurtCooldown = 0;
-
+		
 		this.health = health;
         this.glowTime = glowTime;
+
+		this.dead = false;
     }
 
     update(dt, map)
@@ -33,7 +34,19 @@ class Entity extends Rect
 		// color
 		this.brightness = Math.max(0, this.brightness - dt / this.glowTime);
 		this.hurtCooldown = Math.max(0, this.hurtCooldown - dt);
+
+		if (this.health < 0)
+		{
+			this.dead = true;
+		}
+
+		return [];
     }
+
+	onDeath()
+	{
+
+	}
 
 	hurt(damage, offender)
 	{
@@ -46,11 +59,18 @@ class Entity extends Rect
             // glow for short moment
             this.brightness = 1;
         }
+
+		return [];
 	}
 
 	getBounds()
 	{
 		return new Rect(this.x, this.y, this.w, this.h);
+	}
+
+	getHitbox()
+	{
+		return this;
 	}
 }
 
