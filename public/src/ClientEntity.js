@@ -2,6 +2,7 @@ import { Vec2 } from "../../Vector";
 import Rect from "../../Rect";
 import Color from "../../Color";
 import { lerp } from '../../GameMath';
+import Glow from '../../Glow';
 
 export class ClientEntity extends Rect
 {
@@ -10,7 +11,8 @@ export class ClientEntity extends Rect
         super(x, y, w, h);
 		this.oldX = this.x; this.oldY = this.y;
 		this.color = new Color(co.r, co.g, co.b, co.a);
-        this.brightness = br;
+        this.glow = new Glow();
+		this.glow.brightness = br;
 
         // for interpolating non-mainplayers
 		this.lastServerPos = new Vec2(x, y);
@@ -34,7 +36,12 @@ export class ClientEntity extends Rect
 		}
 
 		if (serverObj.hasOwnProperty('br'))
-			this.brightness = serverObj.br;
+			this.glow.brightness = serverObj.br;
+	}
+
+	getBounds()
+	{
+		return new Rect(this.x, this.y, this.w, this.h);
 	}
     
 	update(dt, map)
@@ -59,11 +66,13 @@ export class ClientEntity extends Rect
 		}, rangeRect);
 		this.oldX = this.x;
 		this.oldY = this.y;
+
+		this.glow.update(dt);
 	}
 
 	draw(ctx, camera)
 	{
-        this.color.a = Math.floor(255 * this.brightness);
+        this.color.a = Math.floor(255 * this.glow.brightness);
 		ctx.fillStyle = this.color.toHex();
 
 		// rect

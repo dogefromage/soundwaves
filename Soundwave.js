@@ -1,23 +1,24 @@
 const Color = require('./Color');
 const Rect = require('./Rect');
-const SoundwaveSettings = require('./SoundwaveSettings');
 
 class Soundwave // version 4 or something???!
 {
-    constructor(x, y, sender, settings, color = new Color(255, 255, 255))
+    constructor(x, y, sender, settings, color, isClientSoundwave = false)
     {
         this.sender = sender;
         this.color = color;
         this.settings = settings;
+        this.isClientSoundwave = isClientSoundwave;
+        this.resolution = this.isClientSoundwave ? this.settings.resolutionClient : this.settings.resolutionServer;
         
         this.dead = false;
         this.age = 0;
         this.r = 0;
         this.center = { x, y };
         this.vertices = [];
-        for (let i = 0; i < this.settings.resolutionServer; i++)
+        for (let i = 0; i < this.resolution; i++)
         {
-            const angle = (i / this.settings.resolutionServer - 0.5) * this.settings.spread + this.settings.rotation;
+            const angle = (i / this.resolution - 0.5) * this.settings.spread + this.settings.rotation;
             this.vertices[i] = 
             {
                 dir: // normalized dir for raycasting only needs to be calculated once
@@ -192,8 +193,7 @@ class Soundwave // version 4 or something???!
                 ctx.lineTo(p.x, p.y);
             }
             ctx.fill();
-            
-
+        
             // EDGE GLOW
             var gradient2 = ctx.createRadialGradient(center.x,center.y,0, center.x,center.y,radius);
             gradient2.addColorStop(0, this.color.toHex());
@@ -246,15 +246,6 @@ class Soundwave // version 4 or something???!
     getDataUpdate()
     {
         return {};
-    }
-
-    static fromData({ co, ce, ag, se })
-    {
-        const color = new Color(co.r, co.g, co.b, co.a);
-        const settings = new SoundwaveSettings(...se);
-
-        const s = new Soundwave(ce.x, ce.y, "lol", settings, color);
-        s.age = ag;
     }
 }
 

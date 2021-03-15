@@ -1,10 +1,10 @@
 import Rect from '../../Rect';
 import { ClientGamemap } from './ClientGamemap';
-// import { ClientSoundwave } from './ClientSoundwave';
-import Soundwave from '../..Soundwave';
+import { ClientSoundwave } from './ClientSoundwave';
 import { ClientPlayer, ClientMainPlayer } from './ClientPlayers';
 import { ClientEntity } from './ClientEntity';
 import { ClientBug } from './ClientBug';
+import { Vec2 } from '../../Vector';
 
 export class ClientGame
 {
@@ -41,11 +41,8 @@ export class ClientGame
         }
         
         ////////////////// SOUNDWAVE & BUG /////////////////
-        for (const [wID, wave] of this.gameObjectsOfType(Soundwave)) // get all waves
+        for (const [wID, wave] of this.gameObjectsOfType(ClientSoundwave)) // get all waves
         {
-            // collide with border rectangle first to improve performance
-            let wBorder = wave.getBounds();
-
             for (const [ id, entity ] of this.gameObjectsOfType(ClientBug))
             {
                 if (id != wave.sender)
@@ -57,7 +54,7 @@ export class ClientGame
                         {
                             let A = new Vec2(vertex.oldX, vertex.oldY);
                             let B = new Vec2(vertex.x, vertex.y);
-                            if (Rect.intersectLine(entity.getHitbox(), A, B))
+                            if (Rect.intersectLine(entity.getBounds(), A, B))
                             {
                                 hit = true;
                                 break;
@@ -68,7 +65,7 @@ export class ClientGame
                     if (hit)
                     {
                         let hurtGOs = entity.hurt(wave.settings.damage * wave.power, wave.sender);
-                        newGameObjects.push(...hurtGOs);
+                        // newGameObjects.push(...hurtGOs);
                     }
                 }
             }
@@ -111,8 +108,7 @@ export class ClientGame
                     switch (data[2])
                     {
                         case 'w':
-                            T = Soundwave; break;
-                            // T = ClientSoundwave; break;
+                            T = ClientSoundwave; break;
                         case 'b':
                             T = ClientBug; break;
                         case 'p':
@@ -170,7 +166,7 @@ export class ClientGame
         for (const [id, go] of this.gameObjects)
         {
             // if (go instanceof ClientSoundwave)
-            if (go instanceof Soundwave)
+            if (go instanceof ClientSoundwave)
             {
                 go.draw(ctx, camera);
             }

@@ -3,16 +3,25 @@ import { ClientEntity } from "./ClientEntity";
 
 export class ClientBug extends ClientEntity
 {
-    constructor({ x, y, r, br = 1 })
+    constructor({ x, y, r, br = 0 })
     {
         super({ x, y, w: r*2, h: r*2, co: new Color(255, 255, 255, 255), br });
         this.radius = r;
     }
 
+    update(dt, map)
+    {
+        super.update(dt, map);
+    }
+
+    hurt(damage, sender)
+    {
+        this.glow.agitate();
+    }
+
     draw(ctx, camera)
     {
-        this.brightness = 1;
-        this.color.a = Math.floor(255 * this.brightness);
+        this.color.a = Math.floor(255 * this.glow.brightness);
 		ctx.fillStyle = this.color.toHex();
 
         const center = camera.WorldToCanvas({ x: this.getCenterX(), y: this.getCenterY() })

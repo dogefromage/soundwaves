@@ -8,9 +8,9 @@ class SoundwaveSettings
         this.damage = damage;
         this.rotation = rotation;
         this.spread = spread;
-        this.full = spread == Math.PI * 2;
         this.resolutionServer = resolutionServer;
         this.resolutionClient = resolutionClient;
+        this.full = this.spread > 6.2; // approx. 2*pi
     }
     
     getData()
@@ -21,7 +21,6 @@ class SoundwaveSettings
             this.damage, 
             this.rotation, 
             this.spread, 
-            this.full, 
             this.resolutionServer,
             this.resolutionClient
         ];
@@ -29,17 +28,17 @@ class SoundwaveSettings
 
     static walk()
     {
-        return new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 5, 300);
+        return new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 0, 300);
     }
 
     static sneak()
     {
-        return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 5, 150);
+        return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 0, 150);
     }
 
     static hurt()
     {
-        return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 5, 100);
+        return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 0, 100);
     }
 
     static death()

@@ -16,7 +16,7 @@ export class ClientPlayer extends ClientEntity
 		super.draw(ctx, camera);
 
 		// DRAW NAME
-        this.color.a = Math.floor(255 * this.brightness);
+        this.color.a = Math.floor(255 * this.glow.brightness);
 		ctx.fillStyle = this.color.toHex();
 		ctx.font = "bold 10px Verdana";
 		ctx.textAlign = 'center';
@@ -42,8 +42,6 @@ export class ClientMainPlayer extends ClientPlayer
             this.charge = serverObj.ch;
         if (serverObj.hasOwnProperty('he'))
             this.health = serverObj.he;
-
-        this.brightness = 1; // always 100% brightness for mainplayer
 	}
 
     /**
@@ -91,4 +89,11 @@ export class ClientMainPlayer extends ClientPlayer
 		this.oldX = this.x;
 		this.oldY = this.y;
 	}
+
+	draw(ctx, camera)
+	{
+        this.glow.brightness = 1;
+        
+		super.draw(ctx, camera);
+    }
 }

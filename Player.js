@@ -10,7 +10,7 @@ class Player extends Entity
 	constructor(x, y, id, name, color) 
 	{
 		const size = GameSettings.playerSize;
-		super(x, y, size, size, color, 1, 1.5);
+		super(x, y, size, size, color, 1);
 		// player name
 		this.name = name;
 		this.id = id;
@@ -168,7 +168,7 @@ class Player extends Entity
 			h: this.h,
 			na: this.name,
 			co: this.color,
-			br: this.brightness,
+			br: this.glow.brightness,
 			he: this.health,
 		};
 	}

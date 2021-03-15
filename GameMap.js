@@ -36,6 +36,22 @@ class GameMap
         }
     }
 
+    findEmptySpawningSpace(margins = 0)
+    {
+        let x, y;
+        do
+        {
+            x = Math.floor(Math.random() * this.width);
+            y = Math.floor(Math.random() * this.height);
+        }
+        while(this.pixels[y][x] == '1') // repeat if map square isn't empty
+
+        x += margins + Math.random() * (1 - 2 * margins);
+        y += margins + Math.random() * (1 - 2 * margins);
+
+        return { x, y };
+    }
+
     foreachWall(action, rangeRect = null)
     {
         let X = 0, Y = 0, R = this.width, B = this.height;

@@ -73,8 +73,8 @@ class Vec2
 
     rotate(a)
     {
-        cos = Math.cos(a);
-        sin = Math.sin(a);
+        const cos = Math.cos(a);
+        const sin = Math.sin(a);
 
         return new Vec2(
             this.x * cos - this.y * sin,

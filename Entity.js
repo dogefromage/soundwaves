@@ -1,19 +1,19 @@
 const Rect = require('./Rect');
 const GameSettings = require('./GameSettings');
+const Glow = require("./Glow");
 
 class Entity extends Rect
 {
-    constructor(x, y, w, h, color, health, glowTime)
+    constructor(x, y, w, h, color, health)
     {
         super(x, y, w, h);
 		this.oldX = this.x; this.oldY = this.y;
 		this.color = color;
         
-		this.brightness = 0;
+		this.glow = new Glow(GameSettings.glowRiseTime, GameSettings.glowDecayTime, 0);
 		this.hurtCooldown = 0;
 		
 		this.health = health;
-        this.glowTime = glowTime;
 
 		this.dead = false;
     }
@@ -32,7 +32,7 @@ class Entity extends Rect
 		this.oldX = this.x; this.oldY = this.y;
 
 		// color
-		this.brightness = Math.max(0, this.brightness - dt / this.glowTime);
+		this.glow.update(dt);
 		this.hurtCooldown = Math.max(0, this.hurtCooldown - dt);
 
 		if (this.health < 0)
@@ -57,7 +57,7 @@ class Entity extends Rect
             this.hurtCooldown += 0.2;
     
             // glow for short moment
-            this.brightness = 1;
+			this.glow.agitate();
         }
 
 		return [];
@@ -66,11 +66,6 @@ class Entity extends Rect
 	getBounds()
 	{
 		return new Rect(this.x, this.y, this.w, this.h);
-	}
-
-	getHitbox()
-	{
-		return this;
 	}
 }
 

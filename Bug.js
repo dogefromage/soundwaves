@@ -1,12 +1,15 @@
 const Entity = require('./Entity');
 const Color = require('./Color');
+const { Vec2 } = require('./Vector')
 
 class Bug extends Entity
 {
     constructor(x, y, r = 0.01)
     {
-        super(x - r, y - r, 2 * r, 2 * r, new Color(255, 255, 255, 255), 0.1, 1.5);
+        super(x - r, y - r, 2 * r, 2 * r, new Color(255, 255, 255, 255), 0.0001);
         this.radius = r;
+
+		this.velocity = new Vec2(0.3, 0).rotate(Math.random() * 6.23);
     }
 	
 	getType()
@@ -14,11 +17,15 @@ class Bug extends Entity
 		return 'b';
 	}
 
-    update()
+    update(dt, map)
     {
-        super.update();
-        
-		this.brightness = Math.max(0, this.brightness - dt / 1.5);
+        this.velocity = this.velocity.rotate(0.5 * (Math.random() - 0.5))
+        this.x += this.velocity.x * dt;
+        this.y += this.velocity.y * dt;
+
+		super.update(dt, map); // collisions, color ...
+
+        return [];
     }
 
     getDataNew()
@@ -30,16 +37,11 @@ class Bug extends Entity
         };
     }
 
-    hurt(damage, sender)
-    {
-        this.brightness = 1;
-    }
-
     getDataUpdate()
     {
         return {
-            // x: this.x,
-            // y: this.y,
+            x: this.x,
+            y: this.y,
             // br: this.brightness,
         }
     }

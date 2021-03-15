@@ -8,6 +8,7 @@ const Color = require('./Color');
 const { Vec2 } = require('./Vector');
 const QuadTree = require('./QuadTree');
 const RandomID = require('./RandomID');
+const BugPopulation = require('./BugPopulation');
 const Bug = require('./Bug');
 
 class Game
@@ -15,6 +16,8 @@ class Game
     constructor(mapSize)
     {
         this.map = new GameMap(mapSize);
+        const mapArea = this.map.width * this.map.height;
+        this.bugPopulation = new BugPopulation(mapArea, mapArea / 3, 0.3);
         this.gameObjects = new Map();
         this.quadTree = new QuadTree(new Rect(0, 0, this.map.width, this.map.width));
     }
@@ -29,22 +32,6 @@ class Game
             }
         }
     }
-
-    findEmptySpawningSpace(margins = 0)
-    {
-        let x, y;
-        do
-        {
-            x = Math.floor(Math.random() * this.map.width);
-            y = Math.floor(Math.random() * this.map.height);
-        }
-        while(this.map.pixels[y][x] == '1') // repeat if map square isn't empty
-
-        x += margins + Math.random() * (1 - 2 * margins);
-        y += margins + Math.random() * (1 - 2 * margins);
-
-        return { x, y };
-    }
     
     createUniqueID()
     {
@@ -58,20 +45,15 @@ class Game
         return id;
     }
 
-    addGameObject(go, id = undefined)
+    addGameObject(go, id = this.createUniqueID())
     {
-        if (!id)
-        {
-            id = this.createUniqueID();
-        }
-
         // create unique ID for new entity and add to map
         this.gameObjects.set(id, go);
     }
 
     addPlayer(id, name, hue)
     {
-        const { x, y } = this.findEmptySpawningSpace(0.4);
+        const { x, y } = this.map.findEmptySpawningSpace(0.4);
 
         // color, 60% saturated seems good
         let color = Color.FromHSV(360 - hue * 3.6, .6, 1);
@@ -87,15 +69,13 @@ class Game
 
     update(deltaTime)
     {
-        if (Math.random() > 0.9)
-        {
-            const spawningSpace = this.findEmptySpawningSpace(0.2);
-            this.addGameObject(new Bug(spawningSpace.x, spawningSpace.y));
-        }
-
-
-        /////////////////// UPDATE ALL GAMEOBJECTS ////////////////////
         let newGameObjects = []; // array for new gos
+        
+        console.log(this.bugPopulation.population);
+
+        /////////////////////////// BUGS //////////////////////////
+        let newBugs = this.bugPopulation.update(deltaTime, this.map);
+        newGameObjects.push(...newBugs);
 
         for (const [id, go] of this.gameObjects)
         {
@@ -105,6 +85,11 @@ class Game
             // IS DEAD?
             if (go.dead)
             {
+                if (go instanceof Bug)
+                {
+                    this.bugPopulation.population--;
+                }
+
                 go.onDeath();
                 this.gameObjects.delete(id);
             }
@@ -142,7 +127,7 @@ class Game
                                 {
                                     let A = new Vec2(vertex.oldX, vertex.oldY);
                                     let B = new Vec2(vertex.x, vertex.y);
-                                    if (Rect.intersectLine(entity.getHitbox(), A, B))
+                                    if (Rect.intersectLine(entity.getBounds(), A, B))
                                     {
                                         hit = true;
                                         break;
