@@ -127,7 +127,7 @@ function loop()
             return value
         });
 
-        console.log(reducedJSON); // show data
+        // console.log(reducedJSON); // show data
         // console.log(reducedJSON.length); // show data size in characters
 
         socket.emit('server-data', reducedJSON);

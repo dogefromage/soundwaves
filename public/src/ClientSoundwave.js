@@ -1,4 +1,5 @@
 import Color from "../../Color";
+import SoundwaveSettings from "../../SoundwaveSettings";
 
 export class ClientSoundwave
 {
@@ -7,19 +8,7 @@ export class ClientSoundwave
         this.color = new Color(co.r, co.g, co.b, co.a);
 
         // RETRIEVE SETTINGS
-        this.settings = {};
-        const settingsProperties = [ 
-            'speed', 'lifetime', 'damage', 'rotation', 'spread', 'full', 'resolutionClient'
-        ];
-        for (let i = 0; i < se.length; i++)
-        {
-            Object.defineProperty(this.settings, settingsProperties[i], {
-                value: se[i],
-                writable: true
-            });
-        }
-        
-        
+        this.settings = SoundwaveSettings(...se);
         this.dead = false;
         this.age = ag;
         this.r; // has to be set using age in update

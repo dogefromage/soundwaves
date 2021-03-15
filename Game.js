@@ -1,7 +1,7 @@
 const GameMap = require('./GameMap');
 const Player = require('./Player');
 const Entity = require('./Entity');
-const { Soundwave } = require('./Soundwave');
+const Soundwave = require('./Soundwave');
 const GameSettings = require('./GameSettings');
 const Rect = require('./Rect');
 const Color = require('./Color');

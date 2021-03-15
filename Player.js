@@ -1,7 +1,8 @@
 const Rect = require('./Rect');
 const Entity = require('./Entity');
 const GameSettings = require('./GameSettings');
-const { Soundwave, SoundwaveSettings } = require('./Soundwave');
+const Soundwave = require('./Soundwave');
+const SoundwaveSettings = require('./SoundwaveSettings');
 const { Vec2 } = require('./Vector.js');
 
 class Player extends Entity

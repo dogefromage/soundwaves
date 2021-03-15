@@ -14,14 +14,25 @@ class Bug extends Entity
 		return 'b';
 	}
 
+    update()
+    {
+        super.update();
+        
+		this.brightness = Math.max(0, this.brightness - dt / 1.5);
+    }
+
     getDataNew()
     {
         return {
             x: this.x,
             y: this.y,
-            r: this.radius,
-            br: this.brightness
+            r: this.radius
         };
+    }
+
+    hurt(damage, sender)
+    {
+        this.brightness = 1;
     }
 
     getDataUpdate()
@@ -33,5 +44,6 @@ class Bug extends Entity
         }
     }
 }
+
 
 module.exports = Bug;

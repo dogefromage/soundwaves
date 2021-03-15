@@ -1,5 +1,6 @@
 const Color = require('./Color');
 const Rect = require('./Rect');
+const SoundwaveSettings = require('./SoundwaveSettings');
 
 class Soundwave // version 4 or something???!
 {
@@ -169,6 +170,59 @@ class Soundwave // version 4 or something???!
         return [];
     }
 
+    draw(ctx, camera)
+    {
+        if (this.vertices.length > 0)
+        {
+            const center = camera.WorldToCanvas(this.center);
+            const radius = camera.WorldToCanvasScale(this.r);
+            // SOUNDWAVE
+            const gradient = ctx.createRadialGradient(center.x,center.y,0, center.x,center.y,radius);
+            gradient.addColorStop(0, "#00000000");
+            gradient.addColorStop(1, this.color.toHex());
+            ctx.fillStyle = gradient;
+
+            ctx.beginPath();
+            let p = camera.WorldToCanvas(this.vertices[0]);
+            ctx.moveTo(p.x, p.y);
+            for (let i = 0; i < this.vertices.length; i++)
+            {
+                let index = (i+1) % this.vertices.length;
+                p = camera.WorldToCanvas(this.vertices[index]);
+                ctx.lineTo(p.x, p.y);
+            }
+            ctx.fill();
+            
+
+            // EDGE GLOW
+            var gradient2 = ctx.createRadialGradient(center.x,center.y,0, center.x,center.y,radius);
+            gradient2.addColorStop(0, this.color.toHex());
+            gradient2.addColorStop(1, this.color.toHex());
+            ctx.strokeStyle = gradient2;
+            ctx.lineWidth = 15;
+            ctx.lineCap = 'round';
+
+            ctx.beginPath();
+            for (let a = 0; a < this.vertices.length; a++)
+            {
+                let b = (a + 1) % this.vertices.length;
+
+                let aWall = !this.vertices[a].active && !this.vertices[a].center;
+                let bWall = !this.vertices[b].active && !this.vertices[b].center;
+
+                if (aWall && bWall)
+                {
+                    let A = camera.WorldToCanvas(this.vertices[a]);
+                    let B = camera.WorldToCanvas(this.vertices[b]);
+
+                    ctx.moveTo(A.x, A.y);
+                    ctx.lineTo(B.x, B.y);
+                }
+            }
+            ctx.stroke();
+        }
+    }
+    
     onDeath()
     {
         
@@ -193,68 +247,15 @@ class Soundwave // version 4 or something???!
     {
         return {};
     }
-}
 
-class SoundwaveSettings
-{
-    constructor(speed, lifetime, damage, rotation, spread, resolutionServer, resolutionClient)
+    static fromData({ co, ce, ag, se })
     {
-        this.speed = speed;
-        this.lifetime = lifetime;
-        this.damage = damage;
-        this.rotation = rotation;
-        this.spread = spread;
-        this.full = spread == Math.PI * 2;
-        this.resolutionServer = resolutionServer;
-        this.resolutionClient = resolutionClient;
-    }
-    
-    getData()
-    {
-        return [
-            this.speed, 
-            this.lifetime, 
-            this.damage, 
-            this.rotation, 
-            this.spread, 
-            this.full, 
-            this.resolutionClient
-        ];
-    }
+        const color = new Color(co.r, co.g, co.b, co.a);
+        const settings = new SoundwaveSettings(...se);
 
-    static walk()
-    {
-        return new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 5, 300);
-    }
-
-    static sneak()
-    {
-        return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 5, 150);
-    }
-
-    static hurt()
-    {
-        return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 5, 100);
-    }
-
-    static death()
-    {
-        return new SoundwaveSettings(0.1, 3, 0, 0, 2 * Math.PI, 5, 100);
-    }
-
-    static Attack(rotation, power)
-    {
-        // logarithm limits speed if magnitude is very large
-        let speed = Math.log1p(15 * power) * 0.5;
-        // seems reasonable
-        let lifetime = 2;
-        // damage rises exponentially to eliminate spamming
-        let damage = 0.3 * Math.expm1(power);
-        // spread similar to 1/x but offset so f(0)=PI
-        let spread = 3.1415 / (30 * power + 0.1);
-
-        return new SoundwaveSettings(speed, lifetime, damage, rotation, spread, 50, 100);
+        const s = new Soundwave(ce.x, ce.y, "lol", settings, color);
+        s.age = ag;
     }
 }
 
-module.exports = { Soundwave, SoundwaveSettings };
+module.exports = Soundwave;

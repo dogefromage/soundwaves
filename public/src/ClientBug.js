@@ -3,7 +3,7 @@ import { ClientEntity } from "./ClientEntity";
 
 export class ClientBug extends ClientEntity
 {
-    constructor({ x, y, r, br })
+    constructor({ x, y, r, br = 1 })
     {
         super({ x, y, w: r*2, h: r*2, co: new Color(255, 255, 255, 255), br });
         this.radius = r;

@@ -1,6 +1,7 @@
 import Rect from '../../Rect';
 import { ClientGamemap } from './ClientGamemap';
-import { ClientSoundwave } from './ClientSoundwave';
+// import { ClientSoundwave } from './ClientSoundwave';
+import Soundwave from '../..Soundwave';
 import { ClientPlayer, ClientMainPlayer } from './ClientPlayers';
 import { ClientEntity } from './ClientEntity';
 import { ClientBug } from './ClientBug';
@@ -15,8 +16,20 @@ export class ClientGame
         this.mainPlayer;
     }
 
+    *gameObjectsOfType(T)
+    {
+        for (const [id, go] of this.gameObjects)
+        {
+            if (go instanceof T)
+            {
+                yield [id, go];
+            }
+        }
+    }
+
     update(dt)
     {
+        // UPDATE ALL GOs
         for (const [ id, go ] of this.gameObjects)
         {
             go.update(dt, this.map);
@@ -24,6 +37,40 @@ export class ClientGame
             if (go.dead) // mainly used for soundwaves
             {
                 this.gameObjects.delete(id);
+            }
+        }
+        
+        ////////////////// SOUNDWAVE & BUG /////////////////
+        for (const [wID, wave] of this.gameObjectsOfType(Soundwave)) // get all waves
+        {
+            // collide with border rectangle first to improve performance
+            let wBorder = wave.getBounds();
+
+            for (const [ id, entity ] of this.gameObjectsOfType(ClientBug))
+            {
+                if (id != wave.sender)
+                {
+                    let hit = false;
+                    for (const vertex of wave.vertices)
+                    {
+                        if (vertex.active)
+                        {
+                            let A = new Vec2(vertex.oldX, vertex.oldY);
+                            let B = new Vec2(vertex.x, vertex.y);
+                            if (Rect.intersectLine(entity.getHitbox(), A, B))
+                            {
+                                hit = true;
+                                break;
+                            }
+                        }
+                    }
+    
+                    if (hit)
+                    {
+                        let hurtGOs = entity.hurt(wave.settings.damage * wave.power, wave.sender);
+                        newGameObjects.push(...hurtGOs);
+                    }
+                }
             }
         }
     }
@@ -64,7 +111,8 @@ export class ClientGame
                     switch (data[2])
                     {
                         case 'w':
-                            T = ClientSoundwave; break;
+                            T = Soundwave; break;
+                            // T = ClientSoundwave; break;
                         case 'b':
                             T = ClientBug; break;
                         case 'p':
@@ -121,7 +169,8 @@ export class ClientGame
         ////////////////////////////////// DRAW WAVES //////////////////////////////////
         for (const [id, go] of this.gameObjects)
         {
-            if (go instanceof ClientSoundwave)
+            // if (go instanceof ClientSoundwave)
+            if (go instanceof Soundwave)
             {
                 go.draw(ctx, camera);
             }
