@@ -11,6 +11,29 @@
 </head>
 <body>
     <canvas id="canvas" width=600 height=600></canvas>
+    <!-- GAME UI -->
+    <!-- <div class="ui-container-left">
+        <div id="health-bar" class="stat-bar" data-label="HEALTH"></div>
+        <div id="charge-bar" class="stat-bar" data-label="CHARGE"></div>
+    </div> -->
+    <div class="ui-container-left">
+        <div id="health-bar" class="meter no-select">
+            <div>HEALTH</div>
+            <span style="width: 100%"></span>
+        </div>
+        <div id="charge-bar" class="meter no-select">
+            <div>CHARGE</div>
+            <span style="width: 0%"></span>
+        </div>
+    </div>
+    
+    <div class="ui-container-top">
+        <div id="xp-bar" class="meter no-select">
+            <div>XP - Level 69</div>
+            <span style="width: 69%"></span>
+        </div>
+    </div>
+    <!-- JOIN CARD -->
     <div id="join-window" class=card>
         <h1 class="no-select">fledermaus.io</h1>
         <input id=nameInput class="text-input no-outline" type=text placeholder="Player name" autocomplete="off" maxlength="30">

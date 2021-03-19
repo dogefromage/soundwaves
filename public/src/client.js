@@ -2,6 +2,7 @@ import { ClientCamera } from './ClientCamera';
 import { ClientGame } from './ClientGame';
 import { Input } from './Input';
 import { lerp } from '../../GameMath';
+import { Statusbar, XPBar } from './Bars';
 
 window.socket = io.connect(location.url);
 
@@ -15,6 +16,12 @@ window.input = new Input(camera, game);
 let cardDisplayed = true;
 
 window.debuggerRects = [];
+
+let healthBar = new Statusbar('health-bar');
+let chargeBar = new Statusbar('charge-bar');
+let xpBar = new XPBar('xp-bar');
+
+window.xp = 0.3;
 
 // set data
 socket.on('server-data', (dataJSON) => 
@@ -57,6 +64,11 @@ socket.on('server-data', (dataJSON) =>
             }, 400) // time must be same as in '.opacity-zero'
             cardDisplayed = false;
         }
+
+        // UI
+        healthBar.set(game.mainPlayer.health);
+        chargeBar.set(game.mainPlayer.charge);
+        xpBar.set(xp);
     }
     else
     {
@@ -80,7 +92,6 @@ socket.on('server-data', (dataJSON) =>
     }
 });
 
-loop()
 function loop()
 {
     let time = new Date().getTime();
@@ -93,10 +104,13 @@ function loop()
     //drawing
     updateCamera(dt);
     game.draw(ctx, camera, w, h);
-    drawBars(dt);
+    healthBar.update(dt);
+    chargeBar.update(dt);
+    xpBar.update(dt);
 
-    window.setTimeout(loop, 15)
+    window.setTimeout(loop, 15);
 }
+window.setTimeout(loop, 3);
 
 // if you press enter in input field instead of the button
 document.getElementById("nameInput").addEventListener('keypress', (e) => {
@@ -113,16 +127,16 @@ function joinGame()
 
     socket.emit('request-join', name, color);
 
-    socket.on('answer-join', ({ answer, reasoning }) => 
+    socket.on('answer-join', ([ acceptJoin, reasoning = "Please enter a name!" ]) => 
     {
         let error = document.getElementById('nameError');
-        if (answer)
+        if (acceptJoin)
         {
             error.classList.add("disabled");
         }
         else
         {
-            error.innerHTML = reasoning || 'Something must have happened!';
+            error.innerHTML = reasoning;
             error.classList.remove("disabled");
         }
     });
@@ -164,49 +178,49 @@ resize();
 window.addEventListener('resize', resize);
 
 //display
-let displayHealth = 0; let displayCharge = 0;
+// let displayHealth = 0; let displayCharge = 0;
 
-function drawBars(dt)
-{
-    if (game.mainPlayer)
-    {
-        let W = Math.min(200, w * 0.3);
-        let H = 30;
-        let X = 30;
-        let Y = h - H - 30;
+// function drawBars(dt)
+// {
+//     if (game.mainPlayer)
+//     {
+//         let W = Math.min(200, w * 0.3);
+//         let H = 30;
+//         let X = 30;
+//         let Y = h - H - 30;
 
-        let k = 4 * dt;
-        displayHealth = lerp(displayHealth, game.mainPlayer.health, k);
-        displayCharge = lerp(displayCharge, game.mainPlayer.charge, k);
+//         let k = 4 * dt;
+//         displayHealth = lerp(displayHealth, game.mainPlayer.health, k);
+//         displayCharge = lerp(displayCharge, game.mainPlayer.charge, k);
         
-        let bars = [
-            { stat: displayHealth, color: "#fc415d", name: "HEALTH" },
-            { stat: displayCharge, color: "#9664e5", name: "CHARGE" },
-        ]
+//         let bars = [
+//             { stat: displayHealth, color: "#fc415d", name: "HEALTH" },
+//             { stat: displayCharge, color: "#9664e5", name: "CHARGE" },
+//         ]
 
-        for (let bar of bars)
-        {
-            ctx.fillStyle = "#ddd";
-            roundRect(ctx, X, Y, W, H, 10, true, false);
+//         for (let bar of bars)
+//         {
+//             ctx.fillStyle = "#ddd";
+//             roundRect(ctx, X, Y, W, H, 10, true, false);
     
-            ctx.fillStyle = bar.color;
-            let m = 4;
-            let stat = Math.max(0, Math.min(1, bar.stat));
-            let statWidth = stat * (W - 2 * m);
-            if (statWidth > 1)
-            {
-                roundRect(ctx, X + m, Y + m, statWidth, H - 2 * m, Math.min(statWidth, 5), true, false);
-            }
+//             ctx.fillStyle = bar.color;
+//             let m = 4;
+//             let stat = Math.max(0, Math.min(1, bar.stat));
+//             let statWidth = stat * (W - 2 * m);
+//             if (statWidth > 1)
+//             {
+//                 roundRect(ctx, X + m, Y + m, statWidth, H - 2 * m, Math.min(statWidth, 5), true, false);
+//             }
 
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 16px Verdana";
-            ctx.textAlign = 'center';
-            ctx.fillText(bar.name, X + 0.5 * W, Y + H - 8.7);
+//             ctx.fillStyle = "#000000";
+//             ctx.font = "bold 16px Verdana";
+//             ctx.textAlign = 'center';
+//             ctx.fillText(bar.name, X + 0.5 * W, Y + H - 8.7);
 
-            Y -= 20 + H;
-        }
-    }
-}
+//             Y -= 20 + H;
+//         }
+//     }
+// }
 
 //https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
 /**

@@ -20,6 +20,7 @@ class Game
         this.bugPopulation = new BugPopulation(mapArea, mapArea / 3, 0.3);
         this.gameObjects = new Map();
         this.quadTree = new QuadTree(new Rect(0, 0, this.map.width, this.map.width));
+        this.usedNames = new Set();
     }
 
     *gameObjectsOfType(T)
@@ -60,19 +61,23 @@ class Game
 
         const p = new Player(x, y, id, name, color);
         this.addGameObject(p, id);
+        this.usedNames.add(name);
     }
 
     removePlayer(id)
     {
-        this.gameObjects.delete(id);
+        const p = this.gameObjects.get(id);
+        if (p)
+        {
+            this.usedNames.delete(p.name);
+            this.gameObjects.delete(id);
+        }
     }
 
     update(deltaTime)
     {
         let newGameObjects = []; // array for new gos
         
-        console.log(this.bugPopulation.population);
-
         /////////////////////////// BUGS //////////////////////////
         let newBugs = this.bugPopulation.update(deltaTime, this.map);
         newGameObjects.push(...newBugs);

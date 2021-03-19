@@ -33,37 +33,30 @@ io.on('connection', (socket) =>
 
     socket.on('request-join', (name, color) =>
     {
-        // restrict names???
-        // const regex = /^[\w-]+$/;
-        // if (regex.test(name))
-        if (name.length > 0 && name.length <= 30)
+        if (name.length == 0)
         {
-            let unique = true;
-            for (const [pID, p] of game.gameObjectsOfType(Player))
-            {
-                if (p.name == name)
-                {
-                    unique = false;
-                }
-            }
+            socket.emit('answer-join', [ false ]);
+        }
+        else if (name.length > 30)
+        {
+            socket.emit('answer-join', [ false, "Your name must be under 30 characters long!" ]);
+        }
+        else
+        {
+            let unique = !game.usedNames.has(name);
 
             if (unique)
             {
                 // NAME IS VALID
-                socket.emit('answer-join', { answer: true });
+                socket.emit('answer-join', [ true ]);
                 game.addPlayer(socket.id, name, color);
                 console.log(`Player ${name} joined the game (id=${socket.id})`);
             }
             else
             {
                 // NAME IS ALREADY IN USE
-                socket.emit('answer-join', { answer: false, reasoning: 'This name is already taken!' });
+                socket.emit('answer-join', [ false, 'This name is already taken!' ]);
             }
-        }
-        else
-        {
-            // NAME DOES NOT VALIDATE
-            socket.emit('answer-join', { answer: false, reasoning: "Your name must be of reasonable length!" });
         }
     });
 
@@ -126,7 +119,7 @@ function loop()
             }
             return value
         });
-
+    
         // console.log(reducedJSON); // show data
         // console.log(reducedJSON.length); // show data size in characters
 
