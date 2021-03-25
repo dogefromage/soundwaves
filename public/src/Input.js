@@ -109,6 +109,96 @@ export class Input
 
     getChanges()
     {
-        return [ this.history, this.history = [] ][0]; // reassign and return one-liner
+        return [ this.history, this.history = [] ][0]; // swap 'n' clear
+    }
+}
+
+
+
+export class TouchInput
+{
+    constructor(camera, game)
+    {
+        this.axisX = 0;
+        this.axisY = 0;
+
+        // JOYSTICK
+        const joystick = document.getElementById('joystick-handler');
+        const thumb = document.getElementById('joystick-thumb');
+
+        const setThumbPosition = (x, y) =>
+        {
+            const joystickRect = joystick.getBoundingClientRect();
+            const thumbRect = thumb.getBoundingClientRect();
+            const marginFactor = (joystickRect.width - thumbRect.width) / joystickRect.width;
+
+            thumb.style.left = 0.5 * (marginFactor * x + 1) * joystickRect.width - 0.5 * thumbRect.width + "px";
+            thumb.style.top = 0.5 * (marginFactor * y + 1) * joystickRect.height - 0.5 * thumbRect.height + "px";
+        }
+
+        const joystickClicked = (touch) => 
+        {
+            const joystickRect = joystick.getBoundingClientRect();
+            const thumbRect = thumb.getBoundingClientRect();
+            const marginFactor = (joystickRect.width - thumbRect.width) / joystickRect.width;
+            
+            let x = (touch.clientX - joystickRect.x) / joystickRect.width;
+            let y = (touch.clientY - joystickRect.y) / joystickRect.height;
+            x = (2 * x - 1) / marginFactor;
+            y = (2 * y - 1) / marginFactor;
+
+            let m = Math.hypot(x, y);
+            if (m > 1)
+            {
+                // conserve angle when limiting length
+                let angle = Math.atan2(y, x);
+                x = Math.cos(angle);
+                y = Math.sin(angle);
+            }
+        
+            this.axisX = x;
+            this.axisY = y;
+
+            // console.log(this.axisX, this.axisY);
+            
+            setThumbPosition(x, y);
+        };
+
+        joystick.addEventListener('touchstart', (e) => 
+        {
+            let touch = e.changedTouches[0];
+            if (touch)
+            {
+                joystickClicked(touch);
+            }
+        });
+
+        joystick.addEventListener('touchmove', (e) => 
+        {
+            let touch = e.changedTouches[0];
+            if (touch)
+            {
+                joystickClicked(touch);
+            }
+        });
+
+        joystick.addEventListener('touchend', (e) => 
+        {
+            setThumbPosition(0, 0);
+            this.axisX = this.axisY = 0;
+
+            // console.log(this.axisX, this.axisY);
+        });
+
+        joystick.addEventListener('touchcancel', (e) => 
+        {
+            setThumbPosition(0, 0);
+            this.axisX = this.axisY = 0;
+        });
+    }
+
+    getChanges()
+    {
+        return [];
     }
 }

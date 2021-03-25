@@ -1,46 +1,80 @@
 
 *
 {
-    font-family: Verdana, Geneva, sans-serif;
+    /* font-family: Verdana, Geneva, sans-serif; */
+    /* font-family: Andale Mono,AndaleMono,monospace; */
+    font-family: 'Trebuchet MS', sans-serif;
+    /* font-family: sans-serif, "Helvetica Neue", "Lucida Grande", Arial; */
 }
 
-body
+html
+{
+    height: 100%;
+    font-size: 18px;
+}
+
+@media (max-width: 500px), (max-height: 500px)
+{
+    html
+    {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 400px), (max-height: 400px)
+{
+    html
+    {
+        font-size: 13px;
+    }
+}
+
+.abs-full
 {
     position:absolute;
+    width: 100%;
+    height: 100%;
     bottom: 0;
     top: 0;
     left: 0;
     right: 0;
     padding: 0;
     margin: 0;
-    border: 0;
-    background-color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100%;
-    overflow-y: hidden; /* Hide vertical scrollbar */
-    overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
-canvas
+body
 {
-    position: absolute;
-    left: 0;
-    top: 0;
-    margin: 0;
-    border: 0;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    background-color: #000000;
+}
+
+.curtain
+{
+    background-color: #00000000;
+    transition: background-color .5s;
+}
+
+.darkened
+{
+    background-color: #00000077;
 }
 
 .card
 {
     position: absolute;
     background-color: #fff;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
     width: 400px;
-    height: 400px;
-    z-index: 1;
+    max-width: 75%;
+    max-height: 75%;
+    margin: auto;
     border-radius: 40px;
     box-shadow: 0px 0px 20px 0px #00000088;
+    aspect-ratio: 1;
 
     display: flex;
     justify-content: center;
@@ -48,26 +82,33 @@ canvas
     align-items: center;
 
     opacity: 1;
-    transition: 0.4s all ease-in-out;
-
+    transition: 0.4s opacity ease-in-out;
 }
 
 .card h1
 {
-    margin-bottom: 40px;
+    margin-bottom: 1em;
+    font-size: 2em;
 }
 
 .card .text-input
 {
+    font-size: inherit;
     width: 80%;
-    margin: 7px;
-    height: 50px;
+    height: 2.6em;
     border: 0;
-    border-radius: 7px;
+    border-radius: 0.5em;
     background: #ccc;
     text-align: center;
-    font-size: 16px;
     padding: 0px;
+    margin-bottom: 1em;
+    -webkit-transition: background .2s; /* 0.2 seconds transition on hover */
+    transition: background .2s;
+}
+
+.card .text-input:hover
+{
+    background: #bbb;
 }
 
 .no-outline:focus
@@ -77,21 +118,22 @@ canvas
 
 .color-input
 {
+    font-size: inherit;
     width: 80%;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 1em;;
+    border-radius: 0.3em;
 
     -webkit-appearance: none;  /* Override default CSS styles*/
     appearance: none;
-    height: 15px; /* Specified height */
+    height: 0.8em;
 
     background-image: -webkit-gradient( linear, left top, right top, color-stop(0.0,#ff0004), color-stop(0.1,#ff0098), color-stop(0.2,#cb00ff), color-stop(0.3,#2e00ff), color-stop(0.4,#0065ff), color-stop(0.5,#00ffff), color-stop(0.6,#00ff61), color-stop(0.7,#37ff00), color-stop(0.8,#d0ff00), color-stop(0.9,#ff9400), color-stop(1.0,#ff0000) );
     background-image: gradient( linear, left top, right top, color-stop(0.0,#ff0004), color-stop(0.1,#ff0098), color-stop(0.2,#cb00ff), color-stop(0.3,#2e00ff), color-stop(0.4,#0065ff), color-stop(0.5,#00ffff), color-stop(0.6,#00ff61), color-stop(0.7,#37ff00), color-stop(0.8,#d0ff00), color-stop(0.9,#ff9400), color-stop(1.0,#ff0000) );
 
     outline: none; /*Remove outline*/
     opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
-    transition: opacity .2s;
+    -webkit-transition: .1s; /* 0.2 seconds transition on hover */
+    transition: opacity .1s;
 }
 
 .color-input:hover
@@ -99,37 +141,37 @@ canvas
     opacity: 1;
 }
 
-.color-input::-webkit-slider-thumb 
+.color-input::-webkit-slider-thumb
 {
     -webkit-appearance: none; /* Override default look */
     appearance: none;
-    width: 10px; /* Set a specific slider handle width */
-    height: 25px; /* Slider handle height */
-    border-radius: 5px;
+    width: 0.7em; /* Set a specific slider handle width */
+    height: 1.6em; /* Slider handle height */
+    border-radius: 0.5em;
     background: #000000; /* Green background */
     cursor: pointer; /* Cursor on hover */
 }
 
 .color-input::-moz-range-thumb 
 {
-    width: 10px; /* Set a specific slider handle width */
-    height: 25px; /* Slider handle height */
+    width: 0.7em; /* Set a specific slider handle width */
+    height: 1.6em; /* Slider handle height */
     background: #000000; /* Green background */
     cursor: pointer; /* Cursor on hover */
 }
 
 .card button
 {
+    font-size: inherit;
     width: 80%;
-    height: 50px;
-    margin: 7px;
+    height: 2.6em;
+    /* height: 3em; */
     border: 0;
     padding: 0;
-    border-radius: 10px;
+    border-radius: 0.5em;
     background: #222;
     transition-duration: 0.1s;
     color: white;
-    font-size: 16px;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -151,8 +193,8 @@ canvas
 
 .card .error
 {
-    font-size: 16px;
     color: red;
+    margin: .7em;
 }
 
 .hidden
@@ -167,7 +209,7 @@ canvas
 
 .disabled
 {
-    display: none;
+    display: none !important;
 }
 
 /* https://reactgo.com/disable-text-selection-css/ */
@@ -186,7 +228,8 @@ canvas
     position: absolute;
     left: 0px;
     top: 0px;
-    width: 16%;
+    width: 30%;
+    max-width: 300px;
     bottom: 0px;
     display: flex;
     flex-direction: column-reverse;
@@ -207,12 +250,12 @@ canvas
 
 .meter 
 { 
-    font-size: 16px;
-    height: 1.5em;
+    height: 1.3em;
     position: relative;
-    background: #ffffff;
+    background: #ffffff44;
     border-radius: 1.5em;
-    padding: 0.35em;
+    padding: 0.45em;
+    /* padding: 0.35em; */
     display: flex;
     align-items: center;
     width: 100%;
@@ -222,10 +265,12 @@ canvas
 
 .meter div
 {
+    color: white;
+    text-shadow: 0px 0px 10px#000;
     position: absolute;
     font-weight: bold;
-    z-index: 100;
-    width: 100%;
+    left: 0;
+    right: 0;
     text-align: center;
 }
 
@@ -239,71 +284,79 @@ canvas
 
 #health-bar span 
 {
+    /* background-color: #be3045; */
     background-color: #fc415d;
 }
   
 #charge-bar span 
 {
+    /* background-color: #744db3; */
     background-color: #9664e5;
-}
-  
-#xp-bar
-{
-    width: 60%;
-    margin-top: 1.5em;
 }
 
 #xp-bar span
 {
-    background-color: rgb(106, 236, 95);
+    /* background-color: rgb(11, 129, 0); */
+    background-color: rgb(77, 168, 68);
+    /* background-color: rgb(106, 236, 95); */
 }
-
-/*
- .stat-bar
-{
-    width: 100%;
-    height: 3em;
-    border-radius: 1.5em;
-    background-color: white;
-    position: relative;
-    margin: 20px;
-    margin-top: 0px;
-    font-size: 11px;
-}
-
-.stat-bar::before
-{
-    content: attr(data-label);
-    display: flex;
-    align-items: center;
-    position: absolute;
-    left: .5em;
-    top: .5em;
-    bottom: .5em;
-    width: 85%;
-    max-width: calc(100% - 3em);
-    border-radius: 1em;
-    font-weight: bold;
-    padding: 1em;
-}
-
-#health-bar::before
-{
-    background-color: #fc415d;
-}
-
-#charge-bar::before
-{
-    background-color: #9664e5;
-}
-
+  
 #xp-bar
 {
-    margin-top: 2em;
     width: 50%;
+    margin-top: 1.5em;
 }
 
-#xp-bar::before
+/* MOBILE INPUT */
+
+.mobile-input
 {
-    background-color: #aaa;
-} */
+    display: flex;
+    align-items: center;
+}
+
+.joystick-container
+{
+    /* background-color: #00ff0044; */
+
+    width: 18%; /* ADD SETTING FOR THIS IN MENU */
+    margin: 5%;
+    aspect-ratio: 1;
+    position: relative;
+}
+
+.joystick-ring
+{
+    /* background-color: hotpink; */
+    border: solid;
+    border-color: #ffffff33;
+    border-radius: 50%;
+    
+    border-width: 3px;
+    width: calc(100%-3px);
+    aspect-ratio: 1;
+}
+
+.joystick-thumb
+{
+    width: 40%;
+    aspect-ratio: 1;
+
+    position: absolute;
+    top: 30%;
+    left: 30%;
+
+    border-radius: 50%;
+    background-color: #ffffff33;
+}
+
+.joystick-handler
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}

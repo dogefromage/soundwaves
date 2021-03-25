@@ -1,10 +1,22 @@
 import { ClientCamera } from './ClientCamera';
 import { ClientGame } from './ClientGame';
-import { Input } from './Input';
+import { Input, TouchInput } from './Input';
 import { lerp } from '../../GameMath';
 import { Statusbar, XPBar } from './Bars';
 
 window.socket = io.connect(location.url);
+
+//https://stackoverflow.com/questions/6666907/how-to-detect-a-mobile-device-with-javascript
+let isMobile = false;
+if (/Mobile|Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) 
+{
+    console.log("Platform: mobile");
+    isMobile = true;
+}
+else
+{
+    console.log("Platform: PC");
+}
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
@@ -12,8 +24,17 @@ let lastTime = new Date().getTime();
 
 const camera = new ClientCamera(0, 0, 100);
 const game = new ClientGame();
-window.input = new Input(camera, game);
-let cardDisplayed = true;
+
+if (isMobile)
+{
+    window.input = new TouchInput(camera, game);
+}
+else
+{
+    window.input = new Input(camera, game);
+}
+
+let isMenuVisible = true;
 
 window.debuggerRects = [];
 
@@ -44,46 +65,28 @@ socket.on('server-data', (dataJSON) =>
     game.setData(serverData);
 
     const clientData = {}
-    
-    let card = document.getElementById('join-window');
+
     if (game.mainPlayer)
     {
+        // INPUT
         let changes = window.input.getChanges();
         if (Object.keys(changes).length > 0) // reduce data sent if no new input
         {
             clientData.input = changes;
         }
 
-        if (cardDisplayed)
-        {
-            // remove join card
-            card.classList.add('opacity-zero');
-            setTimeout(() =>
-            {
-                card.classList.add('disabled');
-            }, 400) // time must be same as in '.opacity-zero'
-            cardDisplayed = false;
-        }
-
         // UI
         healthBar.set(game.mainPlayer.health);
         chargeBar.set(game.mainPlayer.charge);
         xpBar.set(xp);
+
+        changeMenuVisibility(false);
     }
     else
     {
         window.input.getChanges(); // clears the history
 
-        if (!cardDisplayed)
-        {
-            // display join card
-            card.classList.remove('disabled');
-            setTimeout(() => 
-            {
-                card.classList.remove('opacity-zero');
-            }, 3);
-            cardDisplayed = true;
-        }
+        changeMenuVisibility(true);
     }
 
     if (Object.keys(clientData).length > 0) // only emit if data even exists
@@ -167,6 +170,53 @@ function updateCamera(dt)
     }
 }
 
+function changeMenuVisibility(turnMenuOn)
+{
+    if (turnMenuOn == isMenuVisible)
+    {
+        return; // no need to be update if already in right state
+    }
+
+    let joinCard = document.getElementById('join-window');
+    let uiCurtain = document.getElementById('ui-curtain');
+    let touchInput = document.getElementById('mobile-input');
+
+    if (turnMenuOn)
+    {
+        // display join card
+        joinCard.classList.remove('disabled');
+        setTimeout(() => 
+        {
+            joinCard.classList.remove('opacity-zero');
+        }, 20);
+
+        // add dark curtain
+        uiCurtain.classList.add('darkened');
+        
+        // disable touchInput
+        touchInput.classList.add('disabled');
+        
+        isMenuVisible = true;
+    }
+    else
+    {
+        // remove join card
+        joinCard.classList.add('opacity-zero');
+        setTimeout(() =>
+        {
+            joinCard.classList.add('disabled');
+        }, 400) // time must be same as in '.opacity-zero'
+        
+        // remove dark curtain
+        uiCurtain.classList.remove('darkened');
+        
+        // display touchinput
+        touchInput.classList.remove('disabled');
+        
+        isMenuVisible = false;
+    }
+}
+
 // Window size
 function resize()
 {
@@ -177,103 +227,58 @@ function resize()
 resize();
 window.addEventListener('resize', resize);
 
-//display
-// let displayHealth = 0; let displayCharge = 0;
-
-// function drawBars(dt)
-// {
-//     if (game.mainPlayer)
-//     {
-//         let W = Math.min(200, w * 0.3);
-//         let H = 30;
-//         let X = 30;
-//         let Y = h - H - 30;
-
-//         let k = 4 * dt;
-//         displayHealth = lerp(displayHealth, game.mainPlayer.health, k);
-//         displayCharge = lerp(displayCharge, game.mainPlayer.charge, k);
-        
-//         let bars = [
-//             { stat: displayHealth, color: "#fc415d", name: "HEALTH" },
-//             { stat: displayCharge, color: "#9664e5", name: "CHARGE" },
-//         ]
-
-//         for (let bar of bars)
-//         {
-//             ctx.fillStyle = "#ddd";
-//             roundRect(ctx, X, Y, W, H, 10, true, false);
-    
-//             ctx.fillStyle = bar.color;
-//             let m = 4;
-//             let stat = Math.max(0, Math.min(1, bar.stat));
-//             let statWidth = stat * (W - 2 * m);
-//             if (statWidth > 1)
-//             {
-//                 roundRect(ctx, X + m, Y + m, statWidth, H - 2 * m, Math.min(statWidth, 5), true, false);
-//             }
-
-//             ctx.fillStyle = "#000000";
-//             ctx.font = "bold 16px Verdana";
-//             ctx.textAlign = 'center';
-//             ctx.fillText(bar.name, X + 0.5 * W, Y + H - 8.7);
-
-//             Y -= 20 + H;
-//         }
+// //https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
+// /**
+//  * Draws a rounded rectangle using the current state of the canvas.
+//  * If you omit the last three params, it will draw a rectangle
+//  * outline with a 5 pixel border radius
+//  * @param {CanvasRenderingContext2D} ctx
+//  * @param {Number} x The top left x coordinate
+//  * @param {Number} y The top left y coordinate
+//  * @param {Number} width The width of the rectangle
+//  * @param {Number} height The height of the rectangle
+//  * @param {Number} [radius = 5] The corner radius; It can also be an object 
+//  *                 to specify different radii for corners
+//  * @param {Number} [radius.tl = 0] Top left
+//  * @param {Number} [radius.tr = 0] Top right
+//  * @param {Number} [radius.br = 0] Bottom right
+//  * @param {Number} [radius.bl = 0] Bottom left
+//  * @param {Boolean} [fill = false] Whether to fill the rectangle.
+//  * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
+//  */
+// function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+//     if (typeof stroke === 'undefined') {
+//       stroke = true;
+//     }
+//     if (typeof radius === 'undefined') {
+//       radius = 5;
+//     }
+//     if (typeof radius === 'number') {
+//       radius = {tl: radius, tr: radius, br: radius, bl: radius};
+//     } else {
+//       var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+//       for (var side in defaultRadius) {
+//         radius[side] = radius[side] || defaultRadius[side];
+//       }
+//     }
+//     ctx.beginPath();
+//     ctx.moveTo(x + radius.tl, y);
+//     ctx.lineTo(x + width - radius.tr, y);
+//     ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+//     ctx.lineTo(x + width, y + height - radius.br);
+//     ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+//     ctx.lineTo(x + radius.bl, y + height);
+//     ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+//     ctx.lineTo(x, y + radius.tl);
+//     ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+//     ctx.closePath();
+//     if (fill) {
+//       ctx.fill();
+//     }
+//     if (stroke) {
+//       ctx.stroke();
 //     }
 // }
-
-//https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-on-html-canvas
-/**
- * Draws a rounded rectangle using the current state of the canvas.
- * If you omit the last three params, it will draw a rectangle
- * outline with a 5 pixel border radius
- * @param {CanvasRenderingContext2D} ctx
- * @param {Number} x The top left x coordinate
- * @param {Number} y The top left y coordinate
- * @param {Number} width The width of the rectangle
- * @param {Number} height The height of the rectangle
- * @param {Number} [radius = 5] The corner radius; It can also be an object 
- *                 to specify different radii for corners
- * @param {Number} [radius.tl = 0] Top left
- * @param {Number} [radius.tr = 0] Top right
- * @param {Number} [radius.br = 0] Bottom right
- * @param {Number} [radius.bl = 0] Bottom left
- * @param {Boolean} [fill = false] Whether to fill the rectangle.
- * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
- */
-function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
-    if (typeof stroke === 'undefined') {
-      stroke = true;
-    }
-    if (typeof radius === 'undefined') {
-      radius = 5;
-    }
-    if (typeof radius === 'number') {
-      radius = {tl: radius, tr: radius, br: radius, bl: radius};
-    } else {
-      var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
-      for (var side in defaultRadius) {
-        radius[side] = radius[side] || defaultRadius[side];
-      }
-    }
-    ctx.beginPath();
-    ctx.moveTo(x + radius.tl, y);
-    ctx.lineTo(x + width - radius.tr, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
-    ctx.lineTo(x + width, y + height - radius.br);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
-    ctx.lineTo(x + radius.bl, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
-    ctx.lineTo(x, y + radius.tl);
-    ctx.quadraticCurveTo(x, y, x + radius.tl, y);
-    ctx.closePath();
-    if (fill) {
-      ctx.fill();
-    }
-    if (stroke) {
-      ctx.stroke();
-    }
-}
 
 // let s = 
 //     '  __ _          _                                        _'+"\n" +
