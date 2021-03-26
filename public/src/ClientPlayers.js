@@ -55,12 +55,12 @@ export class ClientMainPlayer extends ClientPlayer
 		/////////////////////////////////// LOCOMOTION /////////////////////////////////////
         // walking
         let speed = window.gameSettings.playerSpeed;
-        if (window.input.getKey('ShiftLeft'))
-        {
-            speed *= window.gameSettings.sneakFactor;
-        }
-        let targetVel = new Vec2(window.input.axes.x, window.input.axes.y);
-        targetVel = targetVel.normalize(speed); // set mag to speed
+        // if (window.input.getKey('ShiftLeft'))
+        // {
+        //     speed *= window.gameSettings.sneakFactor;
+        // }
+        let targetVel = new Vec2(window.input.axisX, window.input.axisY);
+        targetVel = targetVel.mult(speed);
         // apply
         let k = Math.min(1, dt * window.gameSettings.walkSmoothness); // make lerp time relative
         this.velocity = this.velocity.lerp(targetVel, k)

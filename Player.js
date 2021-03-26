@@ -35,19 +35,34 @@ class Player extends Entity
 		for (const input of inputs)
 		{
 			/////////////////// MOVEMENT /////////////////////
-			if (!isNaN(input.x))
-				this.input.x = Math.sign(input.x); // stop cheating
-			if (!isNaN(input.y)) 
-				this.input.y = Math.sign(input.y);
-
-			/////////////////// SNEAK /////////////////////
-			if (input.hasOwnProperty("shift"))
-				this.sneaking = Boolean(input.shift);
-	
-			/////////////////// SHOOTING /////////////////////
-			if (input.hasOwnProperty('mouse'))
+			if (input.hasOwnProperty('x'))
 			{
-				if (Boolean(input.mouse))
+				let x = parseFloat(input.x);
+				if (!isNaN(x))
+				{
+					this.input.x = x;
+				}
+			}
+			if (input.hasOwnProperty('y'))
+			{
+				let y = parseFloat(input.y);
+				if (!isNaN(y))
+				{
+					this.input.y = y;
+				}
+			}
+
+			let m = Math.hypot(this.input.x, this.input.y); // error and cheat prevention
+			if (m > 1)
+			{
+				this.input.x /= m;
+				this.input.y /= m;
+			}
+
+			/////////////////// SHOOTING /////////////////////
+			if (input.hasOwnProperty('charge'))
+			{
+				if (Boolean(input.charge))
 				{
 					this.charging = true;
 					this.charge = 0;
@@ -84,16 +99,16 @@ class Player extends Entity
 
         //////////////////////////// CHARACTER MOVEMENT //////////////////////////////////
 		let speed = GameSettings.playerSpeed;
-		if (this.sneaking)
-		{
-			speed *= GameSettings.sneakFactor;
-		}
+		// if (this.sneaking)
+		// {
+		// 	speed *= GameSettings.sneakFactor;
+		// }
 		let targetVel = this.input.copy();
-		targetVel = targetVel.normalize(speed); // set mag to speed
+		targetVel = targetVel.mult(speed);
 
 		let k = Math.min(1, dt * GameSettings.walkSmoothness); // make lerp time relative
 		this.velocity = this.velocity.lerp(targetVel, k)
-		this.x += this.velocity.x * dt; // newton
+		this.x += this.velocity.x * dt; // integrate
 		this.y += this.velocity.y * dt;
 		
 		//////////////////////////// GENERAL ENTITY UPDATES ////////////////////////////
@@ -118,10 +133,15 @@ class Player extends Entity
 			this.lastStep = new Vec2(this.x, this.y);
 
 			let waveSettings;
-			if (this.sneaking)
+			// if (this.sneaking)
+			if (this.velocity.sqrMagnitude() < GameSettings.playerSpeed * GameSettings.playerSpeed * 0.33) // MAKE WAVE SIZE DEPENDENT ON SPEED
+			{
 				waveSettings = SoundwaveSettings.sneak();
+			}
 			else
+			{
 				waveSettings = SoundwaveSettings.walk();
+			}
 			const newWave = this.createSoundwave(waveSettings);
 			newSoundWaves.push(newWave);
 		}
