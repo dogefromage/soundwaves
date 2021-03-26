@@ -1,6 +1,7 @@
 import { Vec2 } from "../../Vector";
 import Rect from "../../Rect";
 import { ClientEntity } from "./ClientEntity";
+import SoundwaveSettings from "../../SoundwaveSettings";
 
 export class ClientPlayer extends ClientEntity
 {
@@ -32,6 +33,22 @@ export class ClientMainPlayer extends ClientPlayer
         super({ x, y, w, h, na, co, br })
         this.health = he;
 		this.charge = 0;
+
+        // AIMING ASSIST
+        this.isCharging = false;
+        this.angle = 0;
+        window.input.addEventListener('chargestart', () =>
+        {
+            this.isCharging = true;
+        });
+        window.input.addEventListener('chargemove', (e) =>
+        {
+            this.angle = e.angle;
+        });
+        window.input.addEventListener('chargestop', (e) =>
+        {
+            this.isCharging = false;
+        });
     }
     
 	setData(serverObj, deltaTimeServer)
@@ -93,6 +110,23 @@ export class ClientMainPlayer extends ClientPlayer
 	draw(ctx, camera)
 	{
         this.glow.brightness = 1;
+
+        // AIMINGASSIST
+        if (this.isCharging)
+        {
+            const playerPos = camera.WorldToCanvas({ x: this.getCenterX(), y: this.getCenterY() });
+            const settings = SoundwaveSettings.Attack(this.angle, this.charge);
+            const radius = 40;
+
+            this.color.a = Math.floor(255 * this.charge);
+            ctx.strokeStyle = this.color.toHex();
+            ctx.lineWidth = 7;
+
+            ctx.beginPath();
+            ctx.ellipse(playerPos.x, playerPos.y, radius, radius, 
+                settings.rotation, -0.5 * settings.spread, 0.5 * settings.spread);
+            ctx.stroke();
+        }
         
 		super.draw(ctx, camera);
     }

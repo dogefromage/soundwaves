@@ -60,6 +60,6 @@ export class XPBar extends Statusbar
         super.update(dt);
 
         let lvl = Math.floor(this.currentValue);
-        this.text.innerHTML = "XP - Level " + lvl;
+        this.text.innerHTML = "Level " + lvl;
     }
 }
