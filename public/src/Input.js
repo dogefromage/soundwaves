@@ -266,6 +266,11 @@ export class Input
             let touch = e.changedTouches[0];
             if (touch)
             {
+                if (touch.clientX < 0.4 * window.innerWidth) // left 40% of screen not good
+                {
+                    return;
+                }
+
                 let deltaX = touch.clientX - this.touchAimStartX;
                 let angle = this.lastTouchAngle + calcTouchAngle(deltaX);
 
