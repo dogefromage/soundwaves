@@ -27,6 +27,9 @@ const game = new ClientGame();
 
 window.input = new Input(camera, game);
 
+// disable rightclick
+document.addEventListener('contextmenu', event => event.preventDefault());
+
 let isMenuVisible = true;
 
 window.debuggerRects = [];
@@ -36,6 +39,34 @@ let chargeBar = new Statusbar('charge-bar');
 let xpBar = new XPBar('xp-bar');
 
 window.xp = 0.3;
+
+document.getElementById('fullscreen-button').addEventListener('click', () =>
+{
+    let fullScreenMode = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen; // This will return true or false depending on if it's full screen or not.
+
+    if (fullScreenMode)
+    {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { /* Safari */
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE11 */
+            document.msExitFullscreen();
+        }
+    }
+    else
+    {
+        const docElement = document.documentElement;
+
+        if (docElement.requestFullscreen) {
+            docElement.requestFullscreen();
+        } else if (docElement.webkitRequestFullscreen) { /* Safari */
+            docElement.webkitRequestFullscreen();
+        } else if (docElement.msRequestFullscreen) { /* IE11 */
+            docElement.msRequestFullscreen();
+        }
+    }
+});
 
 // set data
 socket.on('server-data', (dataJSON) => 

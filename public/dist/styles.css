@@ -369,3 +369,13 @@ body
     bottom: 0;
     left: 50%;
 }
+
+#fullscreen-button
+{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 3em;
+    height: 3em;
+    background-color: red;
+}

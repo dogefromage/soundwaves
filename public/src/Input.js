@@ -137,6 +137,13 @@ export class Input
             setThumbPosition(x, y);
         };
 
+        const touchOptions = 
+        {
+            passive: false
+        };
+
+        this.leftTouchIdentifier;
+
         joystick.addEventListener('touchstart', (e) => 
         {
             e.preventDefault();
@@ -144,20 +151,31 @@ export class Input
             let touch = e.changedTouches[0];
             if (touch)
             {
+                this.leftTouchIdentifier = touch.identifier;
                 joystickClicked(touch);
             }
-        });
+        }, touchOptions);
 
         joystick.addEventListener('touchmove', (e) => 
         {
             e.preventDefault();
 
-            let touch = e.changedTouches[0];
+            // get the correct touch event
+            let touch;
+            for (let t of e.changedTouches)
+            {
+                if (t.identifier == this.leftTouchIdentifier)
+                {
+                    touch = t;
+                    break;
+                }
+            }
+
             if (touch)
             {
                 joystickClicked(touch);
             }
-        });
+        }, touchOptions);
 
         joystick.addEventListener('touchend', (e) => 
         {
@@ -165,7 +183,7 @@ export class Input
 
             setThumbPosition(0, 0);
             this.axisX = this.axisY = 0;
-        });
+        }, touchOptions);
 
         joystick.addEventListener('touchcancel', (e) => 
         {
@@ -173,7 +191,7 @@ export class Input
             
             setThumbPosition(0, 0);
             this.axisX = this.axisY = 0;
-        });
+        }, touchOptions);
 
         /////////////////////// SHIFT ///////////////////////
         this.onKey('ShiftLeft'); // also when pressed and released
@@ -240,6 +258,7 @@ export class Input
         const aimArea = document.getElementById('aiming-handler');
         this.touchAimStartX = 0;
         this.lastTouchAngle = 0;
+        this.rightTouchIdentifier;
 
         aimArea.addEventListener('touchstart', (e) =>
         {
@@ -248,11 +267,13 @@ export class Input
             let touch = e.changedTouches[0];
             if (touch)
             {
+                this.rightTouchIdentifier = touch.identifier;
+
                 this.touchAimStartX = touch.clientX;
 
                 this.events.get('chargestart').invoke();
             }
-        });
+        }, touchOptions);
 
         const calcTouchAngle = (deltaX) =>
         {
@@ -263,26 +284,40 @@ export class Input
         {
             e.preventDefault();
 
-            let touch = e.changedTouches[0];
+            // get the correct touch event
+            let touch;
+            for (let t of e.changedTouches)
+            {
+                if (t.identifier == this.rightTouchIdentifier)
+                {
+                    touch = t;
+                    break;
+                }
+            }
+
             if (touch)
             {
-                if (touch.clientX < 0.4 * window.innerWidth) // left 40% of screen not good
-                {
-                    return;
-                }
-
                 let deltaX = touch.clientX - this.touchAimStartX;
+
                 let angle = this.lastTouchAngle + calcTouchAngle(deltaX);
 
                 this.events.get('chargemove').invoke({ angle });
             }
-        });
+        }, touchOptions);
 
         aimArea.addEventListener('touchend', (e) =>
         {
-            e.preventDefault();
+            // get the correct touch event
+            let touch;
+            for (let t of e.changedTouches)
+            {
+                if (t.identifier == this.rightTouchIdentifier)
+                {
+                    touch = t;
+                    break;
+                }
+            }
 
-            let touch = e.changedTouches[0];
             if (touch)
             {
                 let deltaX = touch.clientX - this.touchAimStartX;
@@ -291,7 +326,7 @@ export class Input
 
                 this.events.get('chargestop').invoke({ angle });
             }
-        });
+        }, touchOptions);
     }
 
     addEventListener(eventName, callback)
