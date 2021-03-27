@@ -40,6 +40,7 @@ let xpBar = new XPBar('xp-bar');
 
 window.xp = 0.3;
 
+/////////// FULLSCREEN /////////// 
 document.getElementById('fullscreen-button').addEventListener('click', () =>
 {
     let fullScreenMode = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen; // This will return true or false depending on if it's full screen or not.
@@ -67,6 +68,63 @@ document.getElementById('fullscreen-button').addEventListener('click', () =>
         }
     }
 });
+
+const evaluatePercentileHeight = (element, percentage) =>
+{
+    const rect = element.parentElement.getBoundingClientRect();
+    return rect.height * percentage;
+}
+
+////////////////// ALL SQUARE CONTAINERS :( ///////////////////////
+const updateSquares = () =>
+{
+    const makeSquare = (element) =>
+    {
+        const styles = window.getComputedStyle(element, null)
+        let width = styles.getPropertyValue('width');
+        if (/%/.test(width))
+            width = evaluatePercentileHeight(element, parseFloat(width) * 0.01);
+        else
+            width = parseFloat(width);
+        let maxHeight = styles.getPropertyValue('max-height');
+        if (/%/.test(maxHeight))
+            maxHeight = evaluatePercentileHeight(element, parseFloat(maxHeight) * 0.01);
+        else
+            maxHeight = parseFloat(maxHeight);
+
+        if (isNaN(width))
+        {
+            return;
+        }
+
+        if (!isNaN(maxHeight) && maxHeight < width)
+        {
+            element.style.width = maxHeight + "px";
+            element.style.height = maxHeight + "px";
+        }
+        else
+        {
+            element.style.height = width + "px";
+        }
+    }
+
+    const squares = document.getElementsByClassName('square');
+    
+    for (let square of squares)
+    {
+        makeSquare(square);
+    }
+};
+updateSquares();
+
+window.addEventListener('resize', () =>
+{
+    updateSquares();
+});
+
+document.getElementById('join-window').classList.remove('hidden');
+document.getElementById('mobile-input').classList.remove('hidden');
+document.getElementById('mobile-input').classList.add('disabled');
 
 // set data
 socket.on('server-data', (dataJSON) => 
