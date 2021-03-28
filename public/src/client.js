@@ -122,6 +122,7 @@ window.addEventListener('resize', () =>
     updateSquares();
 });
 
+/// unclean
 document.getElementById('join-window').classList.remove('hidden');
 document.getElementById('mobile-input').classList.remove('hidden');
 document.getElementById('mobile-input').classList.add('disabled');
