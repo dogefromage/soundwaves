@@ -54,7 +54,7 @@ runEveryNthHour(() =>
     // make directory if doesn't exist
     fs.mkdir(folderPath, 0777, function(err) 
     {
-        if (err) 
+        if (err)
         {
             if (err.code != 'EEXIST')
             {

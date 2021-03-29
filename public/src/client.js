@@ -230,24 +230,41 @@ function updateCamera(dt)
 {
     let d = Math.sqrt(window.innerWidth * window.innerHeight);
     camera.zoom = Math.floor(0.5 * d);
+
+    const screenCenter = 
+    { 
+        x: 0.5 * window.innerWidth, 
+        y: 0.5 * window.innerHeight 
+    };
     
-    let { x, y } = camera.CanvasToWorldVector({ x: 0.5 * window.innerWidth, y: 0.5 * window.innerHeight });
+    const worldScreenCenter = camera.CanvasToWorldVector(screenCenter);
+    
+    let camTarget;
 
     if (game.mainPlayer)
     {
-        let k = 1.5 * dt;
-        camera.x = lerp(camera.x, (game.mainPlayer.x - x), k);
-        camera.y = lerp(camera.y, (game.mainPlayer.y - y), k);
-
-    }
-    else
-    {
-        if (game.map)
+        camTarget = 
         {
-            camera.x = game.map.width * 0.5 - x;
-            camera.y = game.map.height * 0.5 - y;
+            x: game.mainPlayer.x - worldScreenCenter.x,
+            y: game.mainPlayer.y - worldScreenCenter.y,
         }
     }
+    else if (game.map)
+    {
+        camTarget = 
+        {
+            x: game.map.width * 0.5 - worldScreenCenter.x,
+            y: game.map.height * 0.5 - worldScreenCenter.y,
+        }
+    }
+
+    if (camTarget)
+    {
+        let k = 1.5 * dt;
+        camera.x = lerp(camera.x, camTarget.x, k);
+        camera.y = lerp(camera.y, camTarget.y, k);
+    }
+
 }
 
 function changeMenuVisibility(turnMenuOn)
