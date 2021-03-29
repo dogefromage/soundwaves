@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 6969;
 const socket = require('socket.io');
+const Logger = require('./Logger');
 
 //static
 app.use(express.static('public/dist'));
@@ -9,7 +10,7 @@ app.use(express.static('public/dist'));
 //server
 const server = app.listen(port, () =>
 {
-    console.log(`app listening on port ${port}`);
+    console.log(`fledermaus.io listening on port ${port}`);
 });
 
 //socket setup
@@ -26,8 +27,9 @@ const sockets = [];
 //connect to client socket
 io.on('connection', (socket) => 
 {
-    console.log("Socket connected", socket.id);
     sockets.push(socket);
+
+    Logger().connects++;
 
     socket.gameKnowledge = game.getBlankKnowledge();
 
@@ -50,7 +52,8 @@ io.on('connection', (socket) =>
                 // NAME IS VALID
                 socket.emit('answer-join', [ true ]);
                 game.addPlayer(socket.id, name, color);
-                console.log(`Player ${name} joined the game (id=${socket.id})`);
+                
+                Logger().joins++;
             }
             else
             {
@@ -74,7 +77,7 @@ io.on('connection', (socket) =>
 
     socket.on('disconnect', () => 
     {
-        console.log("disconnected", socket.id);
+        // console.log("disconnected", socket.id);
         game.removePlayer(socket.id);
         sockets.splice(sockets.indexOf(socket), 1);
     });
@@ -141,9 +144,3 @@ function loop()
     setTimeout(loop, timeoutTime);
 }
 
-// setInterval(() => 
-// {
-//     console.log(`Loops per second: ${ Math.floor(loopCount / passedTime) }`);
-//     loopCount = 0;
-//     passedTime = 0;
-// }, 10000);

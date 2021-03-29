@@ -17,7 +17,7 @@ class Game
     {
         this.map = new GameMap(mapSize);
         const mapArea = this.map.width * this.map.height;
-        this.bugPopulation = new BugPopulation(mapArea, mapArea / 3, 0.3);
+        this.bugPopulation = new BugPopulation(mapArea, mapArea, 0.3);
         this.gameObjects = new Map();
         this.quadTree = new QuadTree(new Rect(0, 0, this.map.width, this.map.width));
         this.usedNames = new Set();
@@ -33,6 +33,11 @@ class Game
             }
         }
     }
+
+    getGameObjectByID(id)
+    {
+        return this.gameObjects.get(id);
+    }
     
     createUniqueID()
     {
@@ -44,6 +49,17 @@ class Game
         while (this.gameObjects.has(id));
 
         return id;
+    }
+
+    addNewGOsFromArray(arr)
+    {
+        if (arr)
+        {
+            for (let el of arr)
+            {
+                this.addGameObject(el);
+            }
+        }
     }
 
     addGameObject(go, id = this.createUniqueID())
@@ -76,16 +92,15 @@ class Game
 
     update(deltaTime)
     {
-        let newGameObjects = []; // array for new gos
-        
-        /////////////////////////// BUGS //////////////////////////
+        /////////////////////////// SPAWN BUGS //////////////////////////
         let newBugs = this.bugPopulation.update(deltaTime, this.map);
-        newGameObjects.push(...newBugs);
+        this.addNewGOsFromArray(newBugs);
 
+        ////////////////////////// ENTITIES ///////////////////////
         for (const [id, go] of this.gameObjects)
         {
-            let newGOs = go.update(deltaTime, this.map);
-            newGameObjects.push(...newGOs);
+            let updateGOs = go.update(deltaTime, this.map);
+            this.addNewGOsFromArray(updateGOs);
 
             // IS DEAD?
             if (go.dead)
@@ -95,7 +110,9 @@ class Game
                     this.bugPopulation.population--;
                 }
 
-                go.onDeath();
+                let deathGOs = go.onDeath(this);
+                this.addNewGOsFromArray(deathGOs);
+                
                 this.gameObjects.delete(id);
             }
         }
@@ -108,7 +125,7 @@ class Game
             this.quadTree.insert(go.getBounds(), [id, go]);
         }
 
-        ////////////////// SOUNDWAVE collides with PLAYER /////////////////
+        ////////////////// SOUNDWAVE collides with ENTITIES /////////////////
         for (const [wID, wave] of this.gameObjectsOfType(Soundwave)) // get all waves
         {
             if (wave.settings.damage != 0)
@@ -128,7 +145,7 @@ class Game
                             let hit = false;
                             for (const vertex of wave.vertices)
                             {
-                                if (vertex.active)
+                                if (vertex.oldActive)
                                 {
                                     let A = new Vec2(vertex.oldX, vertex.oldY);
                                     let B = new Vec2(vertex.x, vertex.y);
@@ -139,22 +156,16 @@ class Game
                                     }
                                 }
                             }
-            
+
                             if (hit)
                             {
                                 let hurtGOs = entity.hurt(wave.settings.damage * wave.power, wave.sender);
-                                newGameObjects.push(...hurtGOs);
+                                this.addNewGOsFromArray(hurtGOs);
                             }
                         }
                     }
                 }
             }
-        }
-
-        // add new gos
-        for (const go of newGameObjects)
-        {
-            this.addGameObject(go);
         }
     }
 

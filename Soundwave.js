@@ -27,6 +27,7 @@ class Soundwave // version 4 or something???!
                     y: Math.sin(angle)
                 },
                 active: true, // if ray has hit it doesn't have to be calculated again
+                oldActive: true, // for col. detection
                 x, y, // vertex' last position stored here to be sent to client
                 oldX: this.center.x, oldY: this.center.y, // for collision with player
             }
@@ -38,6 +39,7 @@ class Soundwave // version 4 or something???!
                 x: this.center.x, 
                 y: this.center.y, 
                 active: false,
+                oldActive: false, // for col. detection
                 center: true,
             });
         }
@@ -70,6 +72,7 @@ class Soundwave // version 4 or something???!
 
             if (!vertex.active)
             {
+                vertex.oldActive = false;
                 continue; // ...to next vertex
             }
 

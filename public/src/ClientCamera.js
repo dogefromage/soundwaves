@@ -34,7 +34,7 @@ export class ClientCamera
     WorldToCanvasRect(worldRect)
     {
         const canPos = this.WorldToCanvas({ x: worldRect.x, y: worldRect.y });
-        const canSize = this.WorldToCanvasVector({x: worldRect.w, y: worldRect.h });
+        const canSize = this.WorldToCanvasVector({ x: worldRect.w, y: worldRect.h });
 
         return new Rect(canPos.x, canPos.y, canSize.x, canSize.y);
     }
