@@ -146,6 +146,11 @@ class Player extends Entity
 			newSoundWaves.push(newWave);
 		}
 
+		if (isNaN(this.x) || isNaN(this.y))
+		{
+			throw new Error(`Player's position is not a number! id=${this.id}`);
+		}
+
 		return newSoundWaves;
 	}
 
@@ -206,6 +211,7 @@ class Player extends Entity
 		{
 			data.he = this.health;
 			data.ch = this.charge;
+			data.xp = this.xp.getLogarithmic();
 		}
 
 		return data;

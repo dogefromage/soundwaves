@@ -1,6 +1,7 @@
 const Rect = require('./Rect');
 const GameSettings = require('./GameSettings');
 const Glow = require("./Glow");
+const XP = require('./XP');
 
 class Entity extends Rect
 {
@@ -16,6 +17,9 @@ class Entity extends Rect
 		this.health = health;
 
 		this.dead = false;
+
+		this.xp = new XP();
+		this.lastAttacker = null;
     }
 
     update(dt, map)
@@ -43,17 +47,22 @@ class Entity extends Rect
 		return [];
     }
 
-	onDeath()
+	onDeath(game)
 	{
 
 	}
 
-	hurt(damage, offender)
+	giveXP(xp)
+	{
+		this.xp.add(xp);
+	}
+
+	hurt(damage, attacker)
 	{
         if (this.hurtCooldown <= 0)
         {
             this.health -= damage;
-            this.lastOffender = offender;
+            this.lastAttacker = attacker;
             this.hurtCooldown += 0.2;
     
             // glow for short moment

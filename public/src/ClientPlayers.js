@@ -33,6 +33,7 @@ export class ClientMainPlayer extends ClientPlayer
         super({ x, y, w, h, na, co, br })
         this.health = he;
 		this.charge = 0;
+		this.xp = 0;
 
         // AIMING ASSIST
         this.isCharging = false;
@@ -59,6 +60,8 @@ export class ClientMainPlayer extends ClientPlayer
             this.charge = serverObj.ch;
         if (serverObj.hasOwnProperty('he'))
             this.health = serverObj.he;
+        if (serverObj.hasOwnProperty('xp'))
+            this.xp = serverObj.xp;
 	}
 
     /**

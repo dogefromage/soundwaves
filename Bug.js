@@ -4,12 +4,13 @@ const { Vec2 } = require('./Vector')
 
 class Bug extends Entity
 {
-    constructor(x, y, r = 0.01)
+    constructor(x, y, xp, r = 0.01)
     {
         super(x - r, y - r, 2 * r, 2 * r, new Color(255, 255, 255, 255), 0.0001);
         this.radius = r;
+        this.xp = xp; // xp is only number because it never changes
 
-		this.velocity = new Vec2(0.3, 0).rotate(Math.random() * 6.23);
+		this.velocity = new Vec2(0.3, 0).rotate(Math.random() * 6.283);
     }
 	
 	getType()
@@ -28,6 +29,19 @@ class Bug extends Entity
         return [];
     }
 
+    onDeath(game)
+    {
+        const attacker = game.getGameObjectByID(this.lastAttacker);
+        
+        if (attacker)
+        {
+            if (attacker.giveXP)
+            {
+                attacker.giveXP(this.xp);
+            }
+        }
+    }
+
     getDataNew()
     {
         return {
@@ -42,7 +56,6 @@ class Bug extends Entity
         return {
             x: this.x,
             y: this.y,
-            // br: this.brightness,
         }
     }
 }

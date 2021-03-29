@@ -10,12 +10,12 @@ window.socket = io.connect(location.url);
 let isMobile = false;
 if (/Mobile|Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) 
 {
-    console.log("Platform: mobile");
+    // console.log("Platform: mobile");
     isMobile = true;
 }
 else
 {
-    console.log("Platform: PC");
+    // console.log("Platform: PC");
 }
 
 const ctx = document.getElementById('canvas').getContext('2d');
@@ -37,8 +37,6 @@ window.debuggerRects = [];
 let healthBar = new Statusbar('health-bar');
 let chargeBar = new Statusbar('charge-bar');
 let xpBar = new XPBar('xp-bar');
-
-window.xp = 0.3;
 
 /////////// FULLSCREEN /////////// 
 document.getElementById('fullscreen-button').addEventListener('click', () =>
@@ -160,7 +158,7 @@ socket.on('server-data', (dataJSON) =>
         // UI
         healthBar.set(game.mainPlayer.health);
         chargeBar.set(game.mainPlayer.charge);
-        xpBar.set(xp);
+        xpBar.set(game.mainPlayer.xp);
 
         changeMenuVisibility(false);
     }
