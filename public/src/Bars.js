@@ -31,17 +31,9 @@ export class Statusbar
 
             let compStyle = window.getComputedStyle(this.bar, null);
             let barWidth = parseFloat(compStyle.getPropertyValue("width"));
-            let barHeight = parseFloat(compStyle.getPropertyValue("height"));
 
-            if (barHeight >= barWidth)
-            {
-                let newHeight = Math.max(3, Math.round(barWidth)) + "px";
-                this.bar.style.height = newHeight;
-            }
-            else
-            {
-                this.bar.style.height = "100%";
-            }
+            let newHeight = Math.max(3, Math.round(barWidth)) + "px";
+            this.bar.style.height = newHeight;
         }
     }
 }

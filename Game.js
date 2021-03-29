@@ -130,16 +130,17 @@ class Game
         {
             if (wave.settings.damage != 0)
             {
-                // collide with border rectangle first to improve performance
-                let wBorder = wave.getBounds();
+                // get all objects inside waves range using quadtree
+                let wBounds = wave.getBounds();
     
-                for (const el of this.quadTree.inRange(wBorder))
+                for (const el of this.quadTree.inRange(wBounds))
                 {
                     // only entities can be hurt
                     if (el[1] instanceof Entity)
                     {
                         const [ id, entity ] = el;
 
+                        // player can't shoot itself
                         if (id != wave.sender)
                         {
                             let hit = false;

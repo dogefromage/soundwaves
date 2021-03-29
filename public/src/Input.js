@@ -257,7 +257,7 @@ export class Input
         /////////////////////// TOUCH AIMING ///////////////////////
         const aimArea = document.getElementById('aiming-handler');
         this.touchAimStartX = 0;
-        this.lastTouchAngle = 0;
+        this.touchAimStartY = 0;
         this.rightTouchIdentifier;
 
         aimArea.addEventListener('touchstart', (e) =>
@@ -270,15 +270,11 @@ export class Input
                 this.rightTouchIdentifier = touch.identifier;
 
                 this.touchAimStartX = touch.clientX;
+                this.touchAimStartY = touch.clientY;
 
                 this.events.get('chargestart').invoke();
             }
         }, touchOptions);
-
-        const calcTouchAngle = (deltaX) =>
-        {
-            return 0.06 * deltaX; // add setting in menu for this
-        };
 
         aimArea.addEventListener('touchmove', (e) =>
         {
@@ -297,9 +293,9 @@ export class Input
 
             if (touch)
             {
-                let deltaX = touch.clientX - this.touchAimStartX;
-
-                let angle = this.lastTouchAngle + calcTouchAngle(deltaX);
+                let dx = touch.clientX - this.touchAimStartX;
+                let dy = touch.clientY - this.touchAimStartY;
+                let angle = Math.atan2(dy, dx);
 
                 this.events.get('chargemove').invoke({ angle });
             }
@@ -320,9 +316,9 @@ export class Input
 
             if (touch)
             {
-                let deltaX = touch.clientX - this.touchAimStartX;
-                let angle = this.lastTouchAngle + calcTouchAngle(deltaX);
-                this.lastTouchAngle = angle;
+                let dx = touch.clientX - this.touchAimStartX;
+                let dy = touch.clientY - this.touchAimStartY;
+                let angle = Math.atan2(dy, dx);
 
                 this.events.get('chargestop').invoke({ angle });
             }
