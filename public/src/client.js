@@ -130,7 +130,7 @@ socket.on('server-data', (dataJSON) =>
     window.debuggerRects = [];
     const serverData = JSON.parse(dataJSON, (key, value) =>
     {
-        if (key == 'go') // put gameobjects back to where they came from! (maps)
+        if (key == 'go')
         {
             if (value instanceof Array)
             {
@@ -209,21 +209,22 @@ function joinGame()
     let color = colorInput.value;
 
     socket.emit('request-join', name, color);
-
-    socket.on('answer-join', ([ acceptJoin, reasoning = "Please enter a name!" ]) => 
-    {
-        let error = document.getElementById('nameError');
-        if (acceptJoin)
-        {
-            error.classList.add("disabled");
-        }
-        else
-        {
-            error.innerHTML = reasoning;
-            error.classList.remove("disabled");
-        }
-    });
 }
+
+socket.on('answer-join', ([ acceptJoin, reasoning = "Please enter a name!" ]) => 
+{
+    let error = document.getElementById('nameError');
+    if (acceptJoin)
+    {
+        error.classList.add("disabled");
+    }
+    else
+    {
+        error.innerHTML = reasoning;
+        error.classList.remove("disabled");
+    }
+});
+
 window.joinGame = joinGame;
 
 function updateCamera(dt)

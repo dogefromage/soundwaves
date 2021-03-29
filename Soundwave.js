@@ -16,6 +16,28 @@ class Soundwave // version 4 or something???!
         this.r = 0;
         this.center = { x, y };
         this.vertices = [];
+        
+        if (this.settings.full)
+        {
+            this.bounds = 
+            {
+                left: -1,
+                top: -1,
+                right: 1,
+                bottom: 1,
+            }
+        }
+        else
+        {
+            this.bounds = 
+            {
+                left: -0,
+                top: -0,
+                right: 0,
+                bottom: 0,
+            }
+        }
+
         for (let i = 0; i < this.resolution; i++)
         {
             const angle = (i / this.resolution - 0.5) * this.settings.spread + this.settings.rotation;
@@ -34,7 +56,17 @@ class Soundwave // version 4 or something???!
         }
         if (!this.settings.full)
         {
-            // center vertex makes the circle segment into a circle sector (lol)
+            // calculate boundsw
+            for (let v of this.vertices)
+            {
+                const dir = v.dir;
+                this.bounds.left = Math.min(this.bounds.left, dir.x);
+                this.bounds.right = Math.max(this.bounds.right, dir.x);
+                this.bounds.top = Math.min(this.bounds.top, dir.y);
+                this.bounds.bottom = Math.max(this.bounds.bottom, dir.y);
+            }
+            
+            // adds another vertex in the center to make soundwave pie-shaped
             this.vertices.push({
                 x: this.center.x, 
                 y: this.center.y, 
@@ -47,7 +79,14 @@ class Soundwave // version 4 or something???!
 
     getBounds()
     {
-        return new Rect(this.center.x, this.center.y, 0, 0).extend(this.r);
+        // return new Rect(this.center.x, this.center.y, 0, 0).extend(this.r);
+        
+        let left =   this.center.x + this.r * this.bounds.left;
+        let right =  this.center.x + this.r * this.bounds.right;
+        let top =    this.center.y + this.r * this.bounds.top;
+        let bottom = this.center.y + this.r * this.bounds.bottom;
+
+        return new Rect(left, top, right - left, bottom - top);
     }
 
     update(deltaTime, map)
