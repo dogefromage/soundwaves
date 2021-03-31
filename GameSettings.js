@@ -19,5 +19,5 @@ module.exports =
     hurtCooldown: 0.3, // s
 
     // MAP
-    mapSize: 2,
+    mapSize: 3,
 };
