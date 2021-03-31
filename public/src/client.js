@@ -177,8 +177,6 @@ socket.on('server-data', (dataJSON) =>
 
 socket.on('scoreboard', (topPlayers) =>
 {
-    console.log("received scoreboard");
-
     const scoreboard = document.getElementById('scoreboard');
 
     // delete last entries
