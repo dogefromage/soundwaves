@@ -78,7 +78,7 @@ io.on('connection', (socket) =>
     socket.on('disconnect', () => 
     {
         // console.log("disconnected", socket.id);
-        game.removePlayer(socket.id);
+        game.deleteGameObject(socket.id);
         sockets.splice(sockets.indexOf(socket), 1);
     });
 });
@@ -87,10 +87,6 @@ io.on('connection', (socket) =>
 // loop time control
 const loopTimeGoal = 50; //ms
 let lastLoopTime = process.hrtime();
-
-// for loops per second measurement
-let loopCount = 0;
-let passedTime = 0;
 
 setTimeout(loop, loopTimeGoal);
 function loop()
@@ -114,7 +110,7 @@ function loop()
         const reducedJSON = JSON.stringify(gameData, function(key, value) {
             // limit precision of floats
             if (typeof value === 'number') {
-                return parseFloat(value.toFixed(4)); // adequate, any lower looks like shit
+                return parseFloat(value.toFixed(3)); // adequate, any lower looks like shit
             }
             // convert all maps to arrays with key-value sub arrays and all sets to arrays
             else if (value instanceof Map || value instanceof Set) {
@@ -129,6 +125,13 @@ function loop()
         socket.emit('server-data', reducedJSON);
     }
 
+    let newScoreboard = game.getNewScoreboard(10);
+    // has new scoreboard?
+    if (newScoreboard)
+    {
+        io.emit('scoreboard', newScoreboard);
+    }
+
     // time the loop execution took (in ms)
     const executionTime = process.hrtime(executionStart)[1] / 1000000;
     let timeoutTime = loopTimeGoal - executionTime;
@@ -138,9 +141,5 @@ function loop()
         console.log("Cant keep up! Last deltaTime: ", deltaTime, "s - (expected: ", loopTimeGoal / 1000,"s)");
     }
 
-    loopCount++;
-    passedTime += deltaTime;
-
     setTimeout(loop, timeoutTime);
 }
-

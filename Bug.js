@@ -4,13 +4,15 @@ const { Vec2 } = require('./Vector')
 
 class Bug extends Entity
 {
-    constructor(x, y, xp, r = 0.01)
+    constructor(x, y, xp, color = undefined, r = 0.01)
     {
-        super(x - r, y - r, 2 * r, 2 * r, new Color(255, 255, 255, 255), 0.0001);
+        super(x - r, y - r, 2 * r, 2 * r, color || new Color(255, 255, 255, 255), 0.0001);
         this.radius = r;
         this.xp = xp; // xp is only number because it never changes
 
 		this.velocity = new Vec2(0.3, 0).rotate(Math.random() * 6.283);
+
+        this.isWhite = color == undefined;
     }
 	
 	getType()
@@ -44,11 +46,20 @@ class Bug extends Entity
 
     getDataNew()
     {
-        return {
+        let data = 
+        {
             x: this.x,
             y: this.y,
-            r: this.radius
+            r: this.radius,
+            br: this.glow.brightness,
         };
+
+        if (!this.isWhite)
+        {
+            data.co = this.color;
+        }
+
+        return data;
     }
 
     getDataUpdate()

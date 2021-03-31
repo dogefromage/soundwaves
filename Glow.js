@@ -1,7 +1,7 @@
 
 class Glow
 {
-    constructor(glowRiseTime = 0.5, glowDecayTime = 1.5, brightness = 0)
+    constructor(glowRiseTime = 0.3, glowDecayTime = 1.5, brightness = 0)
     {
         this.brightness = brightness;
         this.glowDecayTime = glowDecayTime;

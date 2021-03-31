@@ -4,6 +4,9 @@ const GameSettings = require('./GameSettings');
 const Soundwave = require('./Soundwave');
 const SoundwaveSettings = require('./SoundwaveSettings');
 const { Vec2 } = require('./Vector.js');
+const { clamp } = require('./GameMath');
+const Glow = require('./Glow');
+const Bug = require('./Bug');
 
 class Player extends Entity
 {
@@ -28,6 +31,8 @@ class Player extends Entity
 		this.charge = 0;
 		this.shooting = false;
 		this.angle = 0;
+
+		this.glow = new Glow(0.1); // replace old glow with snappier one
 	}
 
 	setInput(inputs)
@@ -82,7 +87,7 @@ class Player extends Entity
 
 	shoot(waves)
 	{
-		if (this.charge > 0.07)
+		if (this.charge > 0.05)
 		{
 			let settings = SoundwaveSettings.Attack(this.shootAngle, this.charge);
 			const newWave = this.createSoundwave(settings);
@@ -99,10 +104,6 @@ class Player extends Entity
 
         //////////////////////////// CHARACTER MOVEMENT //////////////////////////////////
 		let speed = GameSettings.playerSpeed;
-		// if (this.sneaking)
-		// {
-		// 	speed *= GameSettings.sneakFactor;
-		// }
 		let targetVel = this.input.copy();
 		targetVel = targetVel.mult(speed);
 
@@ -122,8 +123,9 @@ class Player extends Entity
 
 		if (this.charging)
 		{
-			this.charge += GameSettings.chargeSpeed * dt * this.velocity.sqrMagnitude();
-			this.charge = Math.min(this.charge, 1);
+			this.charge += GameSettings.chargeSpeed * this.velocity.sqrMagnitude() * dt;
+			this.charge -= GameSettings.dischargeSpeed * dt;
+			this.charge = clamp(this.charge, 0, 1);
 		}
 
 		// SPAWN SOUNDWAVE ON STEP
@@ -161,7 +163,22 @@ class Player extends Entity
 
 	onDeath()
 	{
-		console.log(`Player ${this.name} has unfortunately died`);
+		// take log of level to determine amount of bugs spawned
+		let nBugs = Math.log1p(2 * this.xp.logarithmicValue);
+		nBugs = clamp(nBugs, 1, 7);
+
+		let bugs = []; 
+		for (let i = 0; i < nBugs; i++)
+		{
+			let xpVal = this.xp.value / nBugs;
+			xpVal *= Math.random() * 0.4 + 0.6; // between 60% and 100%
+			let radius = Math.random() * 0.005 + 0.01;
+			let b = new Bug(this.getCenterX(), this.getCenterY(), xpVal, this.color.copy(), radius);
+			b.glow.brightness = 1;
+			bugs.push(b);
+		}
+
+		return bugs;
 	}
 
 	hurt(damage, offender)
@@ -203,7 +220,7 @@ class Player extends Entity
 		let data = {
 			x: this.x,
 			y: this.y,
-			br: this.brightness,
+			br: this.glow.brightness,
 		}
 
 		// only sent to mainplayer

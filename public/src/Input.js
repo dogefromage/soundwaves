@@ -194,7 +194,7 @@ export class Input
         }, touchOptions);
 
         /////////////////////// SHIFT ///////////////////////
-        this.onKey('ShiftLeft'); // also when pressed and released
+        this.onKey('ShiftLeft', updateAxes, updateAxes); // also when pressed and released
     
         /////////////////////// MOUSE ///////////////////////
         const calcAngle = (x, y) => // calcs angle of vector from player to cursor or finger

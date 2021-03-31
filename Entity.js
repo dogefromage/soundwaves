@@ -11,8 +11,8 @@ class Entity extends Rect
 		this.oldX = this.x; this.oldY = this.y;
 		this.color = color;
         
-		this.glow = new Glow(GameSettings.glowRiseTime, GameSettings.glowDecayTime, 0);
-		this.hurtCooldown = 0;
+		this.glow = new Glow();
+		this.hurtCooldown = GameSettings.spawnCooldown;
 		
 		this.health = health;
 
@@ -63,7 +63,7 @@ class Entity extends Rect
         {
             this.health -= damage;
             this.lastAttacker = attacker;
-            this.hurtCooldown += 0.2;
+            this.hurtCooldown += GameSettings.hurtCooldown;
     
             // glow for short moment
 			this.glow.agitate();
