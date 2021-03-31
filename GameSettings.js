@@ -15,6 +15,9 @@ module.exports =
     dischargeSpeed: 0.06,
     clientCorrection: 10,
 
+    spawnCooldown: 0.5, // s
+    hurtCooldown: 0.3, // s
+
     // MAP
     mapSize: 2,
 };

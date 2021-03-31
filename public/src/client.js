@@ -175,6 +175,37 @@ socket.on('server-data', (dataJSON) =>
     }
 });
 
+socket.on('scoreboard', (topPlayers) =>
+{
+    console.log("received scoreboard");
+
+    const scoreboard = document.getElementById('scoreboard');
+
+    // delete last entries
+    while (scoreboard.lastChild) 
+    {
+        scoreboard.removeChild(scoreboard.lastChild);
+    }
+
+    for (let i = 0; i < topPlayers.length; i++)
+    {
+        const [ name, score ] = topPlayers[i];
+        const msg = (i + 1) + ". " + name + "  -  Level " + Math.floor(score);
+        const para = document.createElement('p');
+        para.innerHTML = msg;
+
+        if (game.mainPlayer)
+        {
+            if (game.mainPlayer.name == name)
+            {
+                para.style.color = "#ffffff";
+            }
+        }
+
+        scoreboard.appendChild(para);
+    }
+});
+
 function loop()
 {
     let time = new Date().getTime();

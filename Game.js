@@ -17,10 +17,11 @@ class Game
     {
         this.map = new GameMap(mapSize);
         const mapArea = this.map.width * this.map.height;
-        this.bugPopulation = new BugPopulation(mapArea, mapArea, 0.3);
+        this.bugPopulation = new BugPopulation(mapArea, mapArea / 2, 0.3);
         this.gameObjects = new Map();
         this.quadTree = new QuadTree(new Rect(0, 0, this.map.width, this.map.width));
         this.usedNames = new Set();
+        this.lastScoreboard = [];
     }
 
     *gameObjectsOfType(T)
@@ -80,14 +81,24 @@ class Game
         this.usedNames.add(name);
     }
 
-    removePlayer(id)
+    deleteGameObject(id, go = undefined)
     {
-        const p = this.gameObjects.get(id);
-        if (p)
+        if (go == undefined)
         {
-            this.usedNames.delete(p.name);
-            this.gameObjects.delete(id);
+            go = this.gameObjects.get(id)
         }
+
+        if (go instanceof Bug)
+        {
+            this.bugPopulation.population--;
+        }
+
+        if (go instanceof Player)
+        {
+            this.usedNames.delete(go.name);
+        }
+        
+        this.gameObjects.delete(id);
     }
 
     update(deltaTime)
@@ -105,15 +116,10 @@ class Game
             // IS DEAD?
             if (go.dead)
             {
-                if (go instanceof Bug)
-                {
-                    this.bugPopulation.population--;
-                }
-
                 let deathGOs = go.onDeath(this);
                 this.addNewGOsFromArray(deathGOs);
-                
-                this.gameObjects.delete(id);
+
+                this.deleteGameObject(id, go);
             }
         }
  
@@ -255,6 +261,57 @@ class Game
         }
         
         return data;
+    }
+
+    getTopPlayers(N)
+    {
+        let playerScores = [];
+        for (let [ id, p ] of this.gameObjectsOfType(Player))
+        {
+            playerScores.push([ p.name, p.xp.logarithmicValue ]);
+        }
+
+        playerScores.sort((a, b) => b[1] - a[1]); // sort descending
+
+        let topPlayers = playerScores.slice(0, N); // return largest 10 values
+        
+        // snip off decimal places to reduce updates
+        for (let i = 0; i < topPlayers.length; i++)
+        {
+            topPlayers[i][1] = Math.floor(topPlayers[i][1]);
+        }
+
+        return topPlayers;
+    }
+
+    getNewScoreboard(N)
+    {
+        let scoreboard = this.getTopPlayers(N);
+
+        // compare this with old scoreboard
+        let same = false;
+        if (scoreboard.length == this.lastScoreboard.length)
+        {
+            same = true;
+            Outerloop:
+            for (let i = 0; i < scoreboard.length; i++)
+            {
+                for (let j = 0; j < 2; j++)
+                {
+                    if (scoreboard[i][j] != this.lastScoreboard[i][j])
+                    {
+                        same = false;
+                        break Outerloop;
+                    }
+                }
+            }
+        }
+
+        if (!same)
+        {
+            this.lastScoreboard = scoreboard;
+            return scoreboard;
+        }
     }
 }
 

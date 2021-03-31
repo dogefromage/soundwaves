@@ -20,8 +20,18 @@ class BugPopulation
         if (Math.random() < probability)
         {
             const spawningSpace = map.findEmptySpawningSpace(0.2);
-            let xp = Math.random() * 0.1 + 0.05;
-            newBugs.push(new Bug(spawningSpace.x, spawningSpace.y, xp));
+            
+            let xp = Math.random() * 0.2 + 0.1;
+            let r = 0.008;
+            
+            if (Math.random() > 0.8)
+            {
+                // fat
+                xp += 0.15;
+                r += 0.005;
+            }
+
+            newBugs.push(new Bug(spawningSpace.x, spawningSpace.y, xp, undefined, r));
             this.population++;
         }
 

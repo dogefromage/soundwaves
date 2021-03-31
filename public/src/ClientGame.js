@@ -43,9 +43,10 @@ export class ClientGame
         ////////////////// SOUNDWAVE & BUG /////////////////
         for (const [wID, wave] of this.gameObjectsOfType(ClientSoundwave)) // get all waves
         {
+            const wBounds = wave.getBounds();
             for (const [ id, entity ] of this.gameObjectsOfType(ClientBug))
             {
-                if (id != wave.sender)
+                if (Rect.intersectRect(wBounds, entity))
                 {
                     let hit = false;
                     for (const vertex of wave.vertices)
@@ -64,8 +65,7 @@ export class ClientGame
     
                     if (hit)
                     {
-                        let hurtGOs = entity.hurt(wave.settings.damage * wave.power, wave.sender);
-                        // newGameObjects.push(...hurtGOs);
+                        entity.hurt(wave.settings.damage * wave.power, wave.sender);
                     }
                 }
             }
@@ -165,7 +165,6 @@ export class ClientGame
         ////////////////////////////////// DRAW WAVES //////////////////////////////////
         for (const [id, go] of this.gameObjects)
         {
-            // if (go instanceof ClientSoundwave)
             if (go instanceof ClientSoundwave)
             {
                 go.draw(ctx, camera);
