@@ -8,7 +8,7 @@ module.exports =
     entry: './public/src/client.js',
     output:
     {
-        path: path.resolve(__dirname, 'public/dist'),
+        path: path.resolve(__dirname, 'public/dist/static'),
         filename: 'main.js',
     },
     resolve: 

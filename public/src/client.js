@@ -1,10 +1,7 @@
-import { ClientCamera } from './ClientCamera';
 import { ClientGame } from './ClientGame';
-import { Input } from './Input';
-import { lerp } from '../../GameMath';
 import { Statusbar, XPBar } from './Bars';
 
-window.socket = io.connect(location.url);
+window.socket = io.connect(location.host, { roomId: location.pathname });
 
 //https://stackoverflow.com/questions/6666907/how-to-detect-a-mobile-device-with-javascript
 let isMobile = false;
@@ -22,11 +19,7 @@ const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
 let lastTime = new Date().getTime();
 
-const camera = new ClientCamera(0, 0, 100);
 const game = new ClientGame();
-
-window.input = new Input(camera, game);
-
 // disable rightclick
 document.addEventListener('contextmenu', event => event.preventDefault());
 
@@ -149,7 +142,7 @@ socket.on('server-data', (dataJSON) =>
     if (game.mainPlayer)
     {
         // INPUT
-        let changes = window.input.getChanges();
+        let changes = game.input.getChanges();
         if (Object.keys(changes).length > 0) // reduce data sent if no new input
         {
             clientData.input = changes;
@@ -164,7 +157,7 @@ socket.on('server-data', (dataJSON) =>
     }
     else
     {
-        window.input.getChanges(); // clears the history
+        game.input.getChanges(); // clears the history
 
         changeMenuVisibility(true);
     }
@@ -174,6 +167,10 @@ socket.on('server-data', (dataJSON) =>
         socket.emit('client-data', clientData);
     }
 });
+
+socket.on('room-not-found', () => alert("room not found"));
+
+socket.on('room-closed', () => alert("room closed"));
 
 socket.on('scoreboard', (topPlayers) =>
 {
@@ -214,8 +211,7 @@ function loop()
     game.update(dt);
     
     //drawing
-    updateCamera(dt);
-    game.draw(ctx, camera, w, h);
+    game.draw(ctx, w, h);
     healthBar.update(dt);
     chargeBar.update(dt);
     xpBar.update(dt);
@@ -255,47 +251,6 @@ socket.on('answer-join', ([ acceptJoin, reasoning = "Please enter a name!" ]) =>
 });
 
 window.joinGame = joinGame;
-
-function updateCamera(dt)
-{
-    let d = Math.sqrt(window.innerWidth * window.innerHeight);
-    camera.zoom = Math.floor(0.5 * d);
-
-    const screenCenter = 
-    { 
-        x: 0.5 * window.innerWidth, 
-        y: 0.5 * window.innerHeight 
-    };
-    
-    const worldScreenCenter = camera.CanvasToWorldVector(screenCenter);
-    
-    let camTarget;
-
-    if (game.mainPlayer)
-    {
-        camTarget = 
-        {
-            x: game.mainPlayer.x - worldScreenCenter.x,
-            y: game.mainPlayer.y - worldScreenCenter.y,
-        }
-    }
-    else if (game.map)
-    {
-        camTarget = 
-        {
-            x: game.map.width * 0.5 - worldScreenCenter.x,
-            y: game.map.height * 0.5 - worldScreenCenter.y,
-        }
-    }
-
-    if (camTarget)
-    {
-        let k = 1.5 * dt;
-        camera.x = lerp(camera.x, camTarget.x, k);
-        camera.y = lerp(camera.y, camTarget.y, k);
-    }
-
-}
 
 function changeMenuVisibility(turnMenuOn)
 {

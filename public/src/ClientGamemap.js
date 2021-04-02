@@ -2,8 +2,10 @@ import Rect from '../../Rect';
 
 export class ClientGamemap
 {
-    constructor({w: width, h: height, data})
+    constructor(game, { w: width, h: height, data })
     {
+        this.game = game;
+        
         this.width = width;
         this.height = height;
         this.pixels = [];

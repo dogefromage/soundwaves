@@ -1,6 +1,6 @@
+"use strict";
 const Rect = require('./Rect');
 const Entity = require('./Entity');
-const GameSettings = require('./GameSettings');
 const Soundwave = require('./Soundwave');
 const SoundwaveSettings = require('./SoundwaveSettings');
 const { Vec2 } = require('./Vector.js');
@@ -10,10 +10,11 @@ const Bug = require('./Bug');
 
 class Player extends Entity
 {
-	constructor(x, y, id, name, color) 
+	constructor(game, x, y, id, name, color) 
 	{
-		const size = GameSettings.playerSize;
-		super(x, y, size, size, color, 1);
+		const size = game.settings.playerSize;
+		super(game, x, y, size, size, color, 1);
+
 		// player name
 		this.name = name;
 		this.id = id;
@@ -39,7 +40,7 @@ class Player extends Entity
 	{
 		for (const input of inputs)
 		{
-			/////////////////// MOVEMENT /////////////////////
+			///////////////////// MOVEMENT /////////////////////
 			if (input.hasOwnProperty('x'))
 			{
 				let x = parseFloat(input.x);
@@ -78,7 +79,9 @@ class Player extends Entity
 					{
 						this.shooting = true;
 						if (!isNaN(input.angle))
+						{
 							this.shootAngle = input.angle;
+						}
 					}
 				}
 			}
@@ -103,11 +106,11 @@ class Player extends Entity
 		let newSoundWaves = [];
 
         //////////////////////////// CHARACTER MOVEMENT //////////////////////////////////
-		let speed = GameSettings.playerSpeed;
+		let speed = this.game.settings.playerSpeed;
 		let targetVel = this.input.copy();
 		targetVel = targetVel.mult(speed);
 
-		let k = Math.min(1, dt * GameSettings.walkSmoothness); // make lerp time relative
+		let k = Math.min(1, dt * this.game.settings.walkSmoothness); // make lerp time relative
 		this.velocity = this.velocity.lerp(targetVel, k)
 		this.x += this.velocity.x * dt; // integrate
 		this.y += this.velocity.y * dt;
@@ -123,20 +126,21 @@ class Player extends Entity
 
 		if (this.charging)
 		{
-			this.charge += GameSettings.chargeSpeed * this.velocity.sqrMagnitude() * dt;
-			this.charge -= GameSettings.dischargeSpeed * dt;
+			this.charge += this.game.settings.chargeSpeed * this.velocity.sqrMagnitude() * dt;
+			this.charge -= this.game.settings.dischargeSpeed * dt;
 			this.charge = clamp(this.charge, 0, 1);
 		}
 
 		// SPAWN SOUNDWAVE ON STEP
 		let distanceWalkedSqr = this.lastStep.sub(new Vec2(this.x, this.y)).sqrMagnitude();
-		if (distanceWalkedSqr > GameSettings.sqrPlayerStepDist)
+		const playerStepD = this.game.settings.playerStepDistance;
+		if (distanceWalkedSqr > playerStepD * playerStepD)
 		{
 			this.lastStep = new Vec2(this.x, this.y);
 
 			let waveSettings;
-			// if (this.sneaking)
-			if (this.velocity.sqrMagnitude() < GameSettings.playerSpeed * GameSettings.playerSpeed * 0.33) // MAKE WAVE SIZE DEPENDENT ON SPEED
+			let sqrMaxSneakVel = 0.33 * this.game.settings.playerSpeed * this.game.settings.playerSpeed;
+			if (this.velocity.sqrMagnitude() < sqrMaxSneakVel) // FOR FUTURE: MAKE WAVE SIZE DEPENDENT ON SPEED
 			{
 				waveSettings = SoundwaveSettings.sneak();
 			}
@@ -147,12 +151,7 @@ class Player extends Entity
 			const newWave = this.createSoundwave(waveSettings);
 			newSoundWaves.push(newWave);
 		}
-
-		if (isNaN(this.x) || isNaN(this.y))
-		{
-			throw new Error(`Player's position is not a number! id=${this.id}`);
-		}
-
+		
 		return newSoundWaves;
 	}
 
@@ -195,7 +194,7 @@ class Player extends Entity
 
 	createSoundwave(settings)
 	{
-		return new Soundwave(this.getCenterX(), this.getCenterY(), 
+		return new Soundwave(this.game, this.getCenterX(), this.getCenterY(), 
 			this.id, 
 			settings, 
 			this.color.copy());

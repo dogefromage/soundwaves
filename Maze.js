@@ -1,6 +1,5 @@
 
 
-
 function depthfirst(squares, x, y)
 {
     squares[y][x] = true;
@@ -72,10 +71,10 @@ function generateMaze(w, h)
 
     for (let j = 0; j < (h * 2 + 1); j++)
     {
-        squares[j] = [];
+        squares.push([]);
         for (let i = 0; i < (w * 2 + 1); i++)
         {
-            squares[j][i] = false;
+            squares[j].push(false);
         }
     }
 

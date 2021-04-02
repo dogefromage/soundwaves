@@ -6,9 +6,10 @@ import Glow from '../../Glow';
 
 export class ClientEntity extends Rect
 {
-    constructor({ x, y, w, h, co, br })
+    constructor(game, { x, y, w, h, co, br })
     {
-        super(x, y, w, h);
+		super(x, y, w, h);
+		this.game = game;
 		this.oldX = this.x; this.oldY = this.y;
 		this.color = new Color(co.r, co.g, co.b, co.a);
         this.glow = new Glow();
@@ -17,7 +18,7 @@ export class ClientEntity extends Rect
         // for interpolating non-mainplayers
 		this.lastServerPos = new Vec2(x, y);
 		this.newServerPos = new Vec2(x, y);
-		this.serverTimeStep = 0;
+		this.serverTimeStep = null;
 		this.timeSinceLastData = 0;
     }
 
@@ -30,8 +31,17 @@ export class ClientEntity extends Rect
 		{
 			this.lastServerPos = this.newServerPos;
 			this.newServerPos = new Vec2(serverObj.x, serverObj.y);
-			// rolling average of timestep
-			this.serverTimeStep = lerp(this.serverTimeStep, deltaTimeServer, 0.2);
+
+			if (this.serverTimeStep)
+			{
+				// rolling average of timestep
+				this.serverTimeStep = lerp(this.serverTimeStep, deltaTimeServer, 0.2);
+			}
+			else
+			{
+				this.serverTimeStep = deltaTimeServer;
+			}
+
 			this.timeSinceLastData = 0;
 		}
 
@@ -46,28 +56,38 @@ export class ClientEntity extends Rect
     
 	update(dt, map)
 	{
-		this.timeSinceLastData += dt;
-
-        // interpolate between last and new pos
-        const t = this.timeSinceLastData / this.serverTimeStep;
-        // LINEAR INTERPOLATION (change to quadratic in future for smoother results)
-        const interpolatedPosition = this.lastServerPos.lerp(this.newServerPos, t);
-        this.x = interpolatedPosition.x;
-        this.y = interpolatedPosition.y;
-
-        ///////////////////////////////////// COLLISION WALLS /////////////////////////////////////
-		// optimise collision search by only checking in a specified range
-		const margin = window.gameSettings.rangeRectMargin;
-		const rangeRect = this.extend(margin);
-		// check collision
-		map.foreachWall((wall) =>
+		// quick and easy way to make update run only 
+		// after two server data sends, so that 
+		// the interpolation code works right away
+		if (this.serverTimeStep)
 		{
-			Rect.collide(wall, this, window.gameSettings.collisionIterations);
-		}, rangeRect);
-		this.oldX = this.x;
-		this.oldY = this.y;
+			this.timeSinceLastData += dt;
 
-		this.glow.update(dt);
+			// interpolate between last and new pos
+			const t = this.timeSinceLastData / this.serverTimeStep;
+			// LINEAR INTERPOLATION (change to quadratic in future for smoother results)
+			const interpolatedPosition = this.lastServerPos.lerp(this.newServerPos, t);
+			this.x = interpolatedPosition.x;
+			this.y = interpolatedPosition.y;
+
+			///////////////////////////////////// COLLISION WALLS /////////////////////////////////////
+			// optimise collision search by only checking in a specified range
+			const rangeRect = this.extend(this.game.settings.colDetectionRange);
+			// check collision
+			map.foreachWall((wall) =>
+			{
+				Rect.collide(wall, this);
+			}, rangeRect);
+			this.oldX = this.x;
+			this.oldY = this.y;
+
+			this.glow.update(dt);
+
+			if (isNaN(this.x) || isNaN(this.y))
+			{
+				throw new Error('Entities pos NaN');
+			}
+		}
 	}
 
 	draw(ctx, camera)

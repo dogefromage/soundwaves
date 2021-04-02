@@ -30,9 +30,8 @@ class InputEvent
 
 export class Input
 {
-    constructor(camera, game)
+    constructor(game)
     {
-        this.camera = camera;
         this.game = game;
 
         /////////////////////// EVENTS ///////////////////////
@@ -84,8 +83,8 @@ export class Input
 
             if (this.getKey('ShiftLeft'))
             {
-                x *= window.gameSettings.sneakFactor;
-                y *= window.gameSettings.sneakFactor;
+                x *= this.game.settings.sneakFactor;
+                y *= this.game.settings.sneakFactor;
             }
 
             this.axisX = x;
@@ -199,7 +198,7 @@ export class Input
         /////////////////////// MOUSE ///////////////////////
         const calcAngle = (x, y) => // calcs angle of vector from player to cursor or finger
         {
-            let mousePos = camera.CanvasToWorld({ x, y });
+            let mousePos = this.game.camera.CanvasToWorld({ x, y });
             let playerCenter = new Vec2(game.mainPlayer.getCenterX(), game.mainPlayer.getCenterY());
             let deltaPos = playerCenter.sub(mousePos).mult(-1); // flip dir bc. sub function can only be called on vector
             return Number(deltaPos.heading().toFixed(3));
@@ -244,7 +243,7 @@ export class Input
                 return;
             };
 
-            if (game.mainPlayer) // PROBABLY changes nothing
+            if (game.mainPlayer) // PROBABLY no effect
             {
                 let angle = calcAngle(e.offsetX, e.offsetY);
 

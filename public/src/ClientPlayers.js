@@ -5,9 +5,9 @@ import SoundwaveSettings from "../../SoundwaveSettings";
 
 export class ClientPlayer extends ClientEntity
 {
-	constructor({ x, y, w, h, na, co, br })
+	constructor(game, { x, y, w, h, na, co, br })
 	{
-		super({ x, y, w, h, co, br });
+		super(game, { x, y, w, h, co, br });
 		this.name = na;
         this.velocity = new Vec2();
 	}
@@ -19,18 +19,18 @@ export class ClientPlayer extends ClientEntity
 		// DRAW NAME
         this.color.a = Math.floor(255 * this.glow.brightness);
 		ctx.fillStyle = this.color.toHex();
-		ctx.font = "bold 10px Verdana";
+		ctx.font = "bold 14px Trebuchet MS";
 		ctx.textAlign = 'center';
 		let textPos = camera.WorldToCanvas({ x: this.getCenterX(), y: this.getBottom() });
-		ctx.fillText(this.name, textPos.x, textPos.y + 14);
+		ctx.fillText(this.name, textPos.x, textPos.y + 18);
 	}
 }
 
 export class ClientMainPlayer extends ClientPlayer
 {
-	constructor({ x, y, w, h, na, co, br, he })
+	constructor(game, { x, y, w, h, na, co, br, he })
     {
-        super({ x, y, w, h, na, co, br })
+        super(game, { x, y, w, h, na, co, br })
         this.health = he;
 		this.charge = 0;
 		this.xp = 0;
@@ -38,15 +38,15 @@ export class ClientMainPlayer extends ClientPlayer
         // AIMING ASSIST
         this.isCharging = false;
         this.angle = 0;
-        window.input.addEventListener('chargestart', () =>
+        this.game.input.addEventListener('chargestart', () =>
         {
             this.isCharging = true;
         });
-        window.input.addEventListener('chargemove', (e) =>
+        this.game.input.addEventListener('chargemove', (e) =>
         {
             this.angle = e.angle;
         });
-        window.input.addEventListener('chargestop', (e) =>
+        this.game.input.addEventListener('chargestop', (e) =>
         {
             this.isCharging = false;
         });
@@ -72,21 +72,17 @@ export class ClientMainPlayer extends ClientPlayer
      */
 	update(dt, map)
 	{
-		/////////////////////////////////// LOCOMOTION /////////////////////////////////////
+		/////////////////////////////////// MOVEMENT /////////////////////////////////////
         // walking
-        let speed = window.gameSettings.playerSpeed;
-        // if (window.input.getKey('ShiftLeft'))
-        // {
-        //     speed *= window.gameSettings.sneakFactor;
-        // }
-        let targetVel = new Vec2(window.input.axisX, window.input.axisY);
+        let speed = this.game.settings.playerSpeed;
+        let targetVel = new Vec2(this.game.input.axisX, this.game.input.axisY);
         targetVel = targetVel.mult(speed);
         // apply
-        let k = Math.min(1, dt * window.gameSettings.walkSmoothness); // make lerp time relative
+        let k = Math.min(1, dt * this.game.settings.walkSmoothness); // make lerp time relative
         this.velocity = this.velocity.lerp(targetVel, k)
         // correction using last server pos
         let correction = this.newServerPos.sub(this);
-        let q = window.gameSettings.clientCorrection * dt;
+        let q = this.game.settings.clientCorrection * dt;
         /**
          * FOR FUTURE:
          * smoothly limit correction vector to a certain magnitude, so that
@@ -99,15 +95,20 @@ export class ClientMainPlayer extends ClientPlayer
 
         ///////////////////////////////////// COLLISION WALLS /////////////////////////////////////
 		// optimise collision search by only checking in a specified range
-		const margin = window.gameSettings.rangeRectMargin;
+		const margin = this.game.settings.colDetectionRange;
 		const rangeRect = this.extend(margin);
 		// check collision
 		map.foreachWall((wall) =>
 		{
-			Rect.collide(wall, this, window.gameSettings.collisionIterations);
+			Rect.collide(wall, this);
 		}, rangeRect);
 		this.oldX = this.x;
 		this.oldY = this.y;
+
+        if (isNaN(this.x) || isNaN(this.y))
+        {
+            throw new Error('Mainplayer pos NaN');
+        }
 	}
 
 	draw(ctx, camera)

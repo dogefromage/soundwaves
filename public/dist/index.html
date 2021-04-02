@@ -1,64 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="description" content="fledermaus.io is a game, where you become a bat and eat bugs through the help of echolocation!">
-    <meta name="keywords" content="fledermaus, iogame, game, battle royal"> <!-- google doesn't really care about keywords -->
-    <meta name="author" content="dogefromage">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <link rel="stylesheet" href="styles.css" type="text/css">
-    <title>fledermaus.io</title>
-</head>
-<body class="abs-full">
-    <!-- CANVAS -->
-    <canvas id="canvas" width=420 height=69 class="abs-full"></canvas>
-    <!-- GAME UI CONTAINER -->
-    <div id="game-ui" class="abs-full">
-        <div class="ui-container-left">
-            <div id="scoreboard" class="scoreboard no-select">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="fledermaus.io is a game, where you become a bat and eat bugs through the help of echolocation!">
+        <meta name="keywords" content="fledermaus, iogame, game, battle royal"> <!-- google doesn't really care about keywords -->
+        <meta name="author" content="dogefromage">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <link rel="stylesheet" href="styles.css" type="text/css">
+        <title>fledermaus.io</title>
+    </head>
+    <body class="abs-full">
+        <!-- CANVAS -->
+        <canvas id="canvas" width=420 height=69 class="abs-full"></canvas>
+        <!-- GAME UI CONTAINER -->
+        <div id="game-ui" class="abs-full">
+            <div class="ui-container-left">
+                <div id="scoreboard" class="scoreboard no-select">
+                </div>
+                <div id="charge-bar" class="meter no-select">
+                    <div>CHARGE</div>
+                    <span style="width: 0%"></span>
+                </div>
+                <div id="health-bar" class="meter no-select">
+                    <div>HEALTH</div>
+                    <span style="width: 100%"></span>
+                </div>
             </div>
-            <div id="charge-bar" class="meter no-select">
-                <div>CHARGE</div>
-                <span style="width: 0%"></span>
-            </div>
-            <div id="health-bar" class="meter no-select">
-                <div>HEALTH</div>
-                <span style="width: 100%"></span>
+            <div class="ui-container-top">
+                <div id="xp-bar" class="meter no-select">
+                    <div>Level 0</div>
+                    <span style="width: 0%"></span>
+                </div>
             </div>
         </div>
-        <div class="ui-container-top">
-            <div id="xp-bar" class="meter no-select">
-                <div>Level 0</div>
-                <span style="width: 0%"></span>
+        <!-- Curtain infront of UI when menu is out -->
+        <div id="ui-curtain" class="abs-full curtain darkened"></div>
+        <!-- MENU CONTAINER -->
+        <div id="menu" class="abs-full">
+            <div id="join-window" class="card square hidden">
+                <h1 class="no-select">fledermaus.io</h1>
+                <input id=nameInput class="text-input no-outline" type=text placeholder="Player name" autocomplete="off" maxlength="30">
+                <input id=colorInput class="color-input" type=range min="1" max="100" value="50">
+                <script> document.getElementById('colorInput').value = Math.floor(Math.random() * 100); </script>
+                <button onclick="joinGame()">Join game</button>
+                <p id="nameError" class="disabled error">ERROR</p>
             </div>
         </div>
-    </div>
-    <!-- Curtain infront of UI when menu is out -->
-    <div id="ui-curtain" class="abs-full curtain darkened"></div>
-    <!-- MENU CONTAINER -->
-    <div id="menu" class="abs-full">
-        <div id="join-window" class="card square hidden">
-            <h1 class="no-select">fledermaus.io</h1>
-            <input id=nameInput class="text-input no-outline" type=text placeholder="Player name" autocomplete="off" maxlength="30">
-            <input id=colorInput class="color-input" type=range min="1" max="100" value="50">
-            <script> document.getElementById('colorInput').value = Math.floor(Math.random() * 100); </script>
-            <button onclick="joinGame()">Join game</button>
-            <p id="nameError" class="disabled error">ERROR</p>
+        
+        <!-- MOBILE INPUT -->
+        <div id="mobile-input" class="mobile-input abs-full hidden">
+            <div class="joystick-container square">
+                <div id="joystick-thumb" class="joystick-thumb"></div>
+                <div class="joystick-ring"></div>
+                <div id="joystick-handler" class="joystick-handler"></div>
+            </div>
+            <div id="aiming-handler" class="aiming-handler"></div>
         </div>
-    </div>
-    
-    <!-- MOBILE INPUT -->
-    <div id="mobile-input" class="mobile-input abs-full hidden">
-        <div class="joystick-container square">
-            <div id="joystick-thumb" class="joystick-thumb"></div>
-            <div class="joystick-ring"></div>
-            <div id="joystick-handler" class="joystick-handler"></div>
-        </div>
-        <div id="aiming-handler" class="aiming-handler"></div>
-    </div>
 
-    <div id='fullscreen-button'></div>
+        <div id='fullscreen-button'></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.1/socket.io.js"></script>
-    <script src="main.js"></script></body>
+        <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" 
+                integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" 
+                crossorigin="anonymous"></script>
+        <script src="main.js"></script>
+    </body>
 </html>

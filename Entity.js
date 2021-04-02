@@ -1,18 +1,20 @@
 const Rect = require('./Rect');
-const GameSettings = require('./GameSettings');
 const Glow = require("./Glow");
 const XP = require('./XP');
 
 class Entity extends Rect
 {
-    constructor(x, y, w, h, color, health)
+    constructor(game, x, y, w, h, color, health)
     {
         super(x, y, w, h);
+		
+        this.game = game;
+
 		this.oldX = this.x; this.oldY = this.y;
 		this.color = color;
         
 		this.glow = new Glow();
-		this.hurtCooldown = GameSettings.spawnCooldown;
+		this.hurtCooldown = this.game.settings.spawnCooldown;
 		
 		this.health = health;
 
@@ -26,12 +28,11 @@ class Entity extends Rect
     {
         //////////////////////////// COLLISION WALLS /////////////////////////////////////
 		// optimise collision search by only checking in a specified range
-		const margin = GameSettings.rangeRectMargin;
-		const rangeRect = this.extend(margin);
+		const rangeRect = this.extend(this.game.settings.colDetectionRange);
 		// check collision
 		map.foreachWall((wall) =>
 		{
-			Rect.collide(wall, this, GameSettings.collisionIterations);
+			Rect.collide(wall, this);
 		}, rangeRect);
 		this.oldX = this.x; this.oldY = this.y;
 
@@ -42,6 +43,11 @@ class Entity extends Rect
 		if (this.health < 0)
 		{
 			this.dead = true;
+		}
+
+		if (isNaN(this.x) || isNaN(this.y))
+		{
+			throw new Error(`Entities position is NaN! id=${this.id}`);
 		}
 
 		return [];
@@ -63,7 +69,7 @@ class Entity extends Rect
         {
             this.health -= damage;
             this.lastAttacker = attacker;
-            this.hurtCooldown += GameSettings.hurtCooldown;
+            this.hurtCooldown += this.game.settings.hitCooldown;
     
             // glow for short moment
 			this.glow.agitate();

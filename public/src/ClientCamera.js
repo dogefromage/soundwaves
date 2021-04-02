@@ -1,9 +1,11 @@
 import Rect from '../../Rect'
+import { lerp } from '../../GameMath'; 
 
 export class ClientCamera 
 {
-    constructor(x = 0, y = 0, zoom = 1) 
+    constructor(game, x = 0, y = 0, zoom = 1) 
     {
+        this.game = game;
         this.x = x; // camera offset in WORLD! coordinates
         this.y = y;
         this.zoom = zoom;
@@ -72,5 +74,45 @@ export class ClientCamera
     CanvasToWorldScale(canvasScale)
     {
         return canvasScale / this.zoom;
+    }
+    
+    update(dt)
+    {
+        let d = Math.sqrt(window.innerWidth * window.innerHeight);
+        this.zoom = Math.floor(0.5 * d);
+
+        const screenCenter = 
+        { 
+            x: 0.5 * window.innerWidth, 
+            y: 0.5 * window.innerHeight 
+        };
+        
+        const worldScreenCenter = this.CanvasToWorldVector(screenCenter);
+        
+        let camTarget;
+
+        if (this.game.mainPlayer)
+        {
+            camTarget = 
+            {
+                x: this.game.mainPlayer.x - worldScreenCenter.x,
+                y: this.game.mainPlayer.y - worldScreenCenter.y,
+            }
+        }
+        else if (this.game.map)
+        {
+            camTarget = 
+            {
+                x: this.game.map.width * 0.5 - worldScreenCenter.x,
+                y: this.game.map.height * 0.5 - worldScreenCenter.y,
+            }
+        }
+
+        if (camTarget)
+        {
+            let k = 1.5 * dt;
+            this.x = lerp(this.x, camTarget.x, k);
+            this.y = lerp(this.y, camTarget.y, k);
+        }
     }
 }
