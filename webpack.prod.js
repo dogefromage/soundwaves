@@ -3,10 +3,10 @@ const path = require('path');
 module.exports = 
 {
     mode: 'production',
-    entry: './public/src/client.js',
+    entry: './src/clientside/client.js',
     output:
     {
-        path: path.resolve(__dirname, 'public/dist/static'),
+        path: path.resolve(__dirname, 'src/clientside/static'),
         filename: 'main.js',
     },
 }

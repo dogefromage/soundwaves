@@ -1,0 +1,403 @@
+
+*
+{
+    /* font-family: Verdana, Geneva, sans-serif; */
+    /* font-family: Andale Mono,AndaleMono,monospace; */
+    font-family: 'Trebuchet MS', sans-serif;
+    /* font-family: sans-serif, "Helvetica Neue", "Lucida Grande", Arial; */
+}
+
+html
+{
+    height: 100%;
+    font-size: 18px;
+}
+
+@media (max-width: 500px), (max-height: 500px)
+{
+    html
+    {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 400px), (max-height: 400px)
+{
+    html
+    {
+        font-size: 13px;
+    }
+}
+
+.abs-full
+{
+    position:absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+}
+
+body
+{
+    overflow-y: hidden;
+    overflow-x: hidden;
+    background-color: #000000;
+}
+
+.curtain
+{
+    background-color: #00000000;
+    transition: background-color .5s;
+}
+
+.darkened
+{
+    background-color: #00000077;
+}
+
+.card
+{
+    position: absolute;
+    background-color: #fff;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 400px;
+    max-width: 75%;
+    max-height: 75%;
+    min-width: 230px;
+    min-height: 230px;
+    margin: auto;
+    border-radius: 40px;
+    box-shadow: 0px 0px 20px 0px #00000088;
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+
+    opacity: 1;
+    transition: 0.4s opacity ease-in-out;
+}
+
+.card h1
+{
+    margin-bottom: 0.6em;
+    font-size: 2.2em;
+}
+
+.card .text-input
+{
+    font-size: inherit;
+    width: 80%;
+    height: 2.6em;
+    border: 0;
+    border-radius: 0.5em;
+    background: #ccc;
+    text-align: center;
+    padding: 0px;
+    margin-bottom: 1em;
+    -webkit-transition: background .2s; /* 0.2 seconds transition on hover */
+    transition: background .2s;
+}
+
+.card .text-input:hover
+{
+    background: #bbb;
+}
+
+.no-outline:focus
+{
+    outline: none;
+}
+
+.color-input
+{
+    font-size: inherit;
+    width: 80%;
+    margin-bottom: 1em;;
+    border-radius: 0.3em;
+
+    -webkit-appearance: none;  /* Override default CSS styles*/
+    appearance: none;
+    height: 0.8em;
+
+    background-image: -webkit-gradient( linear, left top, right top, color-stop(0.0,#ff0004), color-stop(0.1,#ff0098), color-stop(0.2,#cb00ff), color-stop(0.3,#2e00ff), color-stop(0.4,#0065ff), color-stop(0.5,#00ffff), color-stop(0.6,#00ff61), color-stop(0.7,#37ff00), color-stop(0.8,#d0ff00), color-stop(0.9,#ff9400), color-stop(1.0,#ff0000) );
+    background-image: gradient( linear, left top, right top, color-stop(0.0,#ff0004), color-stop(0.1,#ff0098), color-stop(0.2,#cb00ff), color-stop(0.3,#2e00ff), color-stop(0.4,#0065ff), color-stop(0.5,#00ffff), color-stop(0.6,#00ff61), color-stop(0.7,#37ff00), color-stop(0.8,#d0ff00), color-stop(0.9,#ff9400), color-stop(1.0,#ff0000) );
+
+    outline: none; /*Remove outline*/
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .1s; /* 0.2 seconds transition on hover */
+    transition: opacity .1s;
+}
+
+.color-input:hover
+{
+    opacity: 1;
+}
+
+.color-input::-webkit-slider-thumb
+{
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 0.7em; /* Set a specific slider handle width */
+    height: 1.6em; /* Slider handle height */
+    border-radius: 0.5em;
+    background: #000000; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.color-input::-moz-range-thumb 
+{
+    width: 0.7em; /* Set a specific slider handle width */
+    height: 1.6em; /* Slider handle height */
+    background: #000000; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.card button
+{
+    font-size: inherit;
+    width: 80%;
+    height: 2.6em;
+    /* height: 3em; */
+    border: 0;
+    padding: 0;
+    border-radius: 0.5em;
+    background: #222;
+    transition-duration: 0.1s;
+    color: white;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.card button:active
+{
+    background: #000;
+}
+
+.card button:focus
+{
+    outline: none;
+}
+
+.card .error
+{
+    color: red;
+    margin: .7em;
+}
+
+.hidden
+{
+    visibility: hidden;
+}
+
+.opacity-zero
+{
+    opacity: 0;
+}
+
+.disabled
+{
+    display: none !important;
+}
+
+/* https://reactgo.com/disable-text-selection-css/ */
+.no-select
+{
+    -ms-user-select:none;
+    -moz-user-select:none;
+    -webkit-user-select:none;
+    -webkit-touch-callout: none;
+    -khtml-user-select: none;
+     user-select:none;
+}
+
+.ui-container-left
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 23%;
+    max-width: 300px;
+    bottom: 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 0px;
+}
+
+.ui-container-top
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    height: 15%;
+    display: flex;
+    justify-content: center;
+    padding: 0px;
+}
+
+.meter 
+{ 
+    height: 1.3em;
+    position: relative;
+    background: #ffffff44;
+    border-radius: 1.5em;
+    padding: 0.45em;
+    /* padding: 0.35em; */
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 1.5em;
+    margin-top: 0;
+}
+
+.meter div
+{
+    color: white;
+    text-shadow: 0px 0px 10px#000;
+    position: absolute;
+    font-weight: bold;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+
+.meter span
+{
+    display: block;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0.75em;
+    /* overflow: hidden; */
+}
+
+#health-bar span 
+{
+    /* background-color: #be3045; */
+    background-color: #fc415d;
+}
+  
+#charge-bar span 
+{
+    /* background-color: #744db3; */
+    background-color: #9664e5;
+}
+
+#xp-bar span
+{
+    /* background-color: rgb(11, 129, 0); */
+    background-color: rgb(77, 168, 68);
+    /* background-color: rgb(106, 236, 95); */
+}
+  
+#xp-bar
+{
+    width: 40%;
+    margin-top: 1.5em;
+}
+
+/* MOBILE INPUT */
+
+.mobile-input
+{
+    display: flex;
+    align-items: center;
+}
+
+.joystick-container
+{
+    width: 18%;
+    /* height: var(--joystick-size); */
+    margin: 5%;
+    position: relative;
+}
+
+.joystick-ring
+{
+    border: solid;
+    border-color: #ffffff33;
+    border-radius: 50%;
+    
+    border-width: 3px;
+    width: calc(100% - 3px);
+    height: calc(100% - 3px);
+}
+
+.joystick-thumb
+{
+    width: 40%;
+    height: 40%;
+
+    position: absolute;
+    top: 30%; /* center at beginning */
+    left: 30%;
+
+    border-radius: 50%;
+    background-color: #ffffff33;
+}
+
+.joystick-handler
+{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.aiming-handler
+{
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+}
+
+#fullscreen-button
+{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 3em;
+    height: 3em;
+    background-color: #ffffff33;
+}
+
+.scoreboard
+{
+    width: 100%;
+    height: 25%;
+    overflow: hidden;
+    border-radius: 0.3em;
+    margin: 1.5em;
+    margin-bottom: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0.3em;
+    background-color: #ffffff33;
+}
+
+.scoreboard p
+{
+    font-size: 0.8em;
+    margin: 0;
+    margin-bottom: 0.4em;
+    color: #ffffffaa;
+}
