@@ -35,6 +35,11 @@ app.get('/:id', (req, res) =>
     res.sendFile(path.join(__dirname, 'src/clientside/index.html'));
 });
 
+app.use((req, res, next) =>
+{
+    res.status(404).sendFile(path.join(__dirname, 'src/clientside/404.html'));
+});
+
 const gameRooms = new Map();
 
 function addRoom(id = createUniqueRoomID())

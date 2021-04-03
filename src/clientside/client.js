@@ -3,18 +3,6 @@ import { Statusbar, XPBar } from './Bars';
 
 window.socket = io.connect(location.host, { roomId: location.pathname });
 
-//https://stackoverflow.com/questions/6666907/how-to-detect-a-mobile-device-with-javascript
-let isMobile = false;
-if (/Mobile|Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) 
-{
-    // console.log("Platform: mobile");
-    isMobile = true;
-}
-else
-{
-    // console.log("Platform: PC");
-}
-
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
 let lastTime = new Date().getTime();
@@ -32,12 +20,17 @@ let chargeBar = new Statusbar('charge-bar');
 let xpBar = new XPBar('xp-bar');
 
 /////////// FULLSCREEN /////////// 
-document.getElementById('fullscreen-button').addEventListener('click', () =>
+const fullscreenButton = document.getElementById('fullscreen-button');
+fullscreenButton.addEventListener('click', () =>
 {
     let fullScreenMode = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen; // This will return true or false depending on if it's full screen or not.
 
     if (fullScreenMode)
     {
+        fullscreenButton.classList.remove('fa-compress');
+        fullscreenButton.classList.add('fa-expand');
+
+
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.webkitExitFullscreen) { /* Safari */
@@ -48,6 +41,8 @@ document.getElementById('fullscreen-button').addEventListener('click', () =>
     }
     else
     {
+        fullscreenButton.classList.remove('fa-expand');
+        fullscreenButton.classList.add('fa-compress');
         const docElement = document.documentElement;
 
         if (docElement.requestFullscreen) {
@@ -301,6 +296,46 @@ function changeMenuVisibility(turnMenuOn)
         isMenuVisible = false;
     }
 }
+
+// MOBILE MODE
+let isMobile = false;
+
+let touchInput = document.getElementById('mobile-input');
+let modeIcon = document.getElementById('input-type-button');
+modeIcon.addEventListener('click', () =>
+{
+    switchMobileMode(!isMobile);
+});
+
+function switchMobileMode(turnMobileOn)
+{
+    isMobile = turnMobileOn;
+    
+    if (turnMobileOn)
+    {
+        if (!isMenuVisible)
+        {
+            touchInput.classList.remove('disabled');
+        }
+        
+        modeIcon.classList.remove('fa-mobile-alt');
+        modeIcon.classList.add('fa-mouse');
+    }
+    else
+    {
+        touchInput.classList.add('disabled');
+        
+        modeIcon.classList.remove('fa-mouse');
+        modeIcon.classList.add('fa-mobile-alt');
+    }
+}
+
+//https://stackoverflow.com/questions/6666907/how-to-detect-a-mobile-device-with-javascript
+if (/Mobile|Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) 
+{
+    switchMobileMode(true);
+}
+
 
 // Window size
 function resize()
