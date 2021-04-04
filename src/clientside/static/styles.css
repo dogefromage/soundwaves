@@ -51,6 +51,7 @@ body
 
 .curtain
 {
+    pointer-events: none;
     background-color: #00000000;
     transition: background-color .5s;
 }
@@ -60,20 +61,52 @@ body
     background-color: #00000077;
 }
 
+@media (orientation: portrait)
+{
+    .card
+    {
+        width: 75vw;
+        height: 75vw;
+    }
+
+    @media (min-width: 533.33px)
+    {
+        .card
+        {
+            width: 400px;
+            height: 400px;
+        }
+    }
+}
+
+@media (orientation: landscape)
+{
+    .card
+    {
+        width: 75vh;
+        height: 75vh;
+    }
+
+    @media (min-height: 533.33px)
+    {
+        .card
+        {
+            width: 400px;
+            height: 400px;
+        }
+    }
+}
+
 .card
 {
     position: absolute;
-    background-color: #fff;
+    margin: auto;
     left: 0;
     right: 0;
     top: 0;
     bottom: 0;
-    width: 400px;
-    max-width: 75%;
-    max-height: 75%;
-    min-width: 230px;
-    min-height: 230px;
-    margin: auto;
+
+    background-color: #fff;
     border-radius: 40px;
     box-shadow: 0px 0px 20px 0px #00000088;
 
@@ -250,7 +283,7 @@ body
     padding: 0px;
 }
 
-.meter 
+.meter
 { 
     height: 1.3em;
     position: relative;
@@ -303,7 +336,7 @@ body
     background-color: rgb(77, 168, 68);
     /* background-color: rgb(106, 236, 95); */
 }
-  
+
 #xp-bar
 {
     width: 40%;
@@ -320,8 +353,9 @@ body
 
 .joystick-container
 {
-    width: 18%;
-    /* height: var(--joystick-size); */
+    --joystick-size: 1;
+    width: calc(20vw * var(--joystick-size));
+    height: calc(20vw * var(--joystick-size));
     margin: 5%;
     position: relative;
 }
@@ -333,8 +367,8 @@ body
     border-radius: 50%;
     
     border-width: 3px;
-    width: calc(100% - 3px);
-    height: calc(100% - 3px);
+    width: calc(100% - 6px);
+    height: calc(100% - 6px);
 }
 
 .joystick-thumb
@@ -415,4 +449,27 @@ body
     margin: 0;
     margin-bottom: 0.4em;
     color: #ffffffaa;
+}
+
+.settings-panel
+{
+    position: absolute;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 80%;
+    height: 80%;
+
+    background-color: #fff;
+    border-radius: 40px;
+    box-shadow: 0px 0px 20px 0px #00000088;
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    /* opacity: 1;
+    transition: 0.4s opacity ease-in-out; */
 }

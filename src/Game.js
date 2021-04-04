@@ -87,6 +87,11 @@ class Game
         const p = new Player(this, x, y, id, name, color);
         this.addGameObject(p, id);
         this.usedNames.add(name);
+
+        setTimeout(() =>
+        {
+            p.dead = true;
+        }, 5000);
     }
 
     deleteGameObject(id, go = undefined)

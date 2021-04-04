@@ -164,16 +164,10 @@ class GameRoom
         {
             setTimeout(() =>
             {
-                try
+                if (this.update)
                 {
                     this.update();
                 }
-                catch (e)
-                {
-                    console.log("update could not be called");
-                    console.trace();
-                }
-                
             }, timeoutTime);
         }
     }

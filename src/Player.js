@@ -172,7 +172,7 @@ class Player extends Entity
 			let xpVal = this.xp.value / nBugs;
 			xpVal *= Math.random() * 0.4 + 0.6; // between 60% and 100%
 			let radius = Math.random() * 0.005 + 0.01;
-			let b = new Bug(this.getCenterX(), this.getCenterY(), xpVal, this.color.copy(), radius);
+			let b = new Bug(this.game, this.getCenterX(), this.getCenterY(), xpVal, this.color.copy(), radius);
 			b.glow.brightness = 1;
 			bugs.push(b);
 		}
