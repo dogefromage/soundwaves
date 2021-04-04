@@ -163,9 +163,9 @@ function loop()
     
     //drawing
     game.draw(ctx, w, h);
-    // healthBar.update(dt);
-    // chargeBar.update(dt);
-    // xpBar.update(dt);
+    healthBar.update(dt);
+    chargeBar.update(dt);
+    xpBar.update(dt);
 
     window.requestAnimationFrame(loop);
 }
