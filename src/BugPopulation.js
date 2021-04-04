@@ -2,8 +2,9 @@ const Bug = require('./Bug');
 
 class BugPopulation
 {
-    constructor(mapArea, maxPopulation, spawningProbability)
+    constructor(game, mapArea, maxPopulation, spawningProbability)
     {
+        this.game = game;
         this.mapArea = mapArea;
         this.population = 0;
         this.maxPopulation = maxPopulation;
@@ -31,7 +32,7 @@ class BugPopulation
                 r += 0.005;
             }
 
-            newBugs.push(new Bug(spawningSpace.x, spawningSpace.y, xp, undefined, r));
+            newBugs.push(new Bug(this.game, spawningSpace.x, spawningSpace.y, xp, undefined, r));
             this.population++;
         }
 

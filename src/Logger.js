@@ -49,7 +49,7 @@ function getDate(andTime)
  */
 runEveryNthHour(() =>
 {
-    const folderPath = path.join(__dirname, 'logs');
+    const folderPath = path.join(__dirname, '../logs');
     
     // make directory if doesn't exist
     fs.mkdir(folderPath, 0777, function(err) 

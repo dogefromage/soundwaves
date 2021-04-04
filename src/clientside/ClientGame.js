@@ -1,15 +1,21 @@
-import Rect from '../../Rect';
+import Rect from '../Rect';
 import { ClientGamemap } from './ClientGamemap';
 import { ClientSoundwave } from './ClientSoundwave';
 import { ClientPlayer, ClientMainPlayer } from './ClientPlayers';
 import { ClientEntity } from './ClientEntity';
 import { ClientBug } from './ClientBug';
-import { Vec2 } from '../../Vector';
+import { Vec2 } from '../Vector';
+import { GameSettings } from '../GameSettings';
+import { ClientCamera } from './ClientCamera';
+import { Input } from './Input';
 
 export class ClientGame
 {
     constructor()
     {
+        this.camera = new ClientCamera(this, 0, 0, 100);
+        this.input = new Input(this);
+
         this.map;
         this.settings;
         this.gameObjects = new Map();
@@ -70,6 +76,8 @@ export class ClientGame
                 }
             }
         }
+
+        this.camera.update(dt);
     }
 
     setData(serverData)
@@ -77,13 +85,13 @@ export class ClientGame
         ////////////////////// Map ///////////////////////
         if (serverData.map)
         {
-            this.map = new ClientGamemap(serverData.map);
+            this.map = new ClientGamemap(this, serverData.map);
         }
 
         /////////////////// Settings ///////////////////////
         if (serverData.settings)
         {
-            window.gameSettings = serverData.settings; // set globally
+            this.settings = GameSettings.FromArray(serverData.settings);
         }
 
         /////////////////// Gameobjects ///////////////////////
@@ -126,7 +134,7 @@ export class ClientGame
                         }
                     }
 
-                    const newObj = new T(data[1]);
+                    const newObj = new T(this, data[1]);
                     this.gameObjects.set(id, newObj);
                 }
             }
@@ -136,63 +144,57 @@ export class ClientGame
         this.mainPlayer = this.gameObjects.get(socket.id);
     }
 
-    draw(ctx, camera, w, h)
+    draw(ctx, w, h)
     {
         ////////////////////////////////// CLEAR //////////////////////////////////
         ctx.fillStyle = "#000000";
         ctx.fillRect(0, 0, w, h);
 
         ////////////////////////////////// DRAW GRID //////////////////////////////////
-        let range = camera.CanvasToWorldRect(new Rect(0, 0, w, h));
+        let range = this.camera.CanvasToWorldRect(new Rect(0, 0, w, h));
         range = range.roundUp();
         ctx.strokeStyle = "#050505";
         ctx.lineWidth = 3;
         ctx.beginPath();
         for (let j = range.getTop(); j < range.getBottom(); j += 0.10)
         {
-            let y = camera.WorldToCanvas({x:0, y:j}).y; // only y
+            let y = this.camera.WorldToCanvas({x:0, y:j}).y; // only y
             ctx.moveTo(0, y);
             ctx.lineTo(w, y);
         }
         for (let i = range.getLeft(); i < range.getRight(); i += 0.10)
         {
-            let x = camera.WorldToCanvas({x:i, y:0}).x; // only y
+            let x = this.camera.WorldToCanvas({x:i, y:0}).x; // only y
             ctx.moveTo(x, 0);
             ctx.lineTo(x, h);
         }
         ctx.stroke();
 
         ////////////////////////////////// DRAW WAVES //////////////////////////////////
-        for (const [id, go] of this.gameObjects)
+        for (const [id, go] of this.gameObjectsOfType(ClientSoundwave))
         {
-            if (go instanceof ClientSoundwave)
-            {
-                go.draw(ctx, camera);
-            }
+            go.draw(ctx, this.camera);
         }
 
         ////////////////////////////////// DRAW MAP //////////////////////////////////
         if (this.map)
         {
-            this.map.draw(ctx, camera, range);
+            this.map.draw(ctx, this.camera, range);
         }
 
         ////////////////////////////////// DRAW ENTITIES //////////////////////////////////
-        for (const [id, go] of this.gameObjects)
+        for (const [id, go] of this.gameObjectsOfType(ClientEntity))
         {
-            if (go instanceof ClientEntity)
+            if (id != socket.id) // not mainplayer
             {
-                if (id != socket.id)
-                {
-                    go.draw(ctx, camera);
-                }
+                go.draw(ctx, this.camera);
             }
         }
 
         ////////////////////////////////// DRAW MAINPLAYER //////////////////////////////////
         if (this.mainPlayer)
         {
-            this.mainPlayer.draw(ctx, camera);
+            this.mainPlayer.draw(ctx, this.camera);
         }
 
         ////////////////////////////////// DRAW DEBUG //////////////////////////////////
@@ -200,7 +202,7 @@ export class ClientGame
         {
             ctx.lineWidth = 1;
             ctx.strokeStyle = "#ff0000";
-            let camRect = camera.WorldToCanvasRect(r);
+            let camRect = this.camera.WorldToCanvasRect(r);
             ctx.strokeRect(camRect.x, camRect.y, camRect.w, camRect.h);
         }
     }

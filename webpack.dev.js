@@ -3,16 +3,10 @@ const path = require('path');
 module.exports = 
 {
     mode: 'development',
-    // devtool: 'inline-nosources-source-map',
-    // devtool: 'inline-cheap-module-source-map',
-    entry: './public/src/client.js',
+    entry: './src/clientside/client.js',
     output:
     {
-        path: path.resolve(__dirname, 'public/dist'),
+        path: path.resolve(__dirname, 'src/clientside/static'),
         filename: 'main.js',
     },
-    resolve: 
-    {
-
-    }
 }

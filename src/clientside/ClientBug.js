@@ -1,11 +1,11 @@
-import Color from "../../Color";
+import Color from "../Color";
 import { ClientEntity } from "./ClientEntity";
 
 export class ClientBug extends ClientEntity
 {
-    constructor({ x, y, r, br = 0, co = new Color(255, 255, 255, 255) })
+    constructor(game, { x, y, r, br = 0, co = new Color(255, 255, 255, 255) })
     {
-        super({ x, y, w: r*2, h: r*2, co, br });
+        super(game, { x, y, w: r*2, h: r*2, co, br });
         this.radius = r;
     }
 

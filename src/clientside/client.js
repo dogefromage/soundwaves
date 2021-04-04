@@ -1,36 +1,30 @@
-import { ClientCamera } from './ClientCamera';
 import { ClientGame } from './ClientGame';
-import { Input } from './Input';
-import { lerp } from '../../GameMath';
 import { Statusbar, XPBar } from './Bars';
+import { UserSettings } from './UserSettings';
 
-window.socket = io.connect(location.url);
-
-//https://stackoverflow.com/questions/6666907/how-to-detect-a-mobile-device-with-javascript
-let isMobile = false;
-if (/Mobile|Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) 
-{
-    // console.log("Platform: mobile");
-    isMobile = true;
-}
-else
-{
-    // console.log("Platform: PC");
-}
+window.socket = io.connect(location.host, { roomId: location.pathname });
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
 let lastTime = new Date().getTime();
 
-const camera = new ClientCamera(0, 0, 100);
+// takes old settings automatically from localStorage if exists
+const userSettings = new UserSettings();
+
+// joystickSize
+const updateJoystickSize = () =>
+{
+    const joystick = document.getElementById('joystick-container');
+    joystick.style.setProperty('--joystick-size', userSettings.joystickSize);
+}
+updateJoystickSize();
+userSettings.addEventListener('joystickSize', updateJoystickSize);
+
 const game = new ClientGame();
-
-window.input = new Input(camera, game);
-
 // disable rightclick
 document.addEventListener('contextmenu', event => event.preventDefault());
 
-let isMenuVisible = true;
+let isJoinCardVisible = true;
 
 window.debuggerRects = [];
 
@@ -39,12 +33,17 @@ let chargeBar = new Statusbar('charge-bar');
 let xpBar = new XPBar('xp-bar');
 
 /////////// FULLSCREEN /////////// 
-document.getElementById('fullscreen-button').addEventListener('click', () =>
+const fullscreenButton = document.getElementById('fullscreen-button');
+fullscreenButton.addEventListener('click', () =>
 {
     let fullScreenMode = document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen; // This will return true or false depending on if it's full screen or not.
 
     if (fullScreenMode)
     {
+        fullscreenButton.classList.remove('fa-compress');
+        fullscreenButton.classList.add('fa-expand');
+
+
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.webkitExitFullscreen) { /* Safari */
@@ -55,6 +54,8 @@ document.getElementById('fullscreen-button').addEventListener('click', () =>
     }
     else
     {
+        fullscreenButton.classList.remove('fa-expand');
+        fullscreenButton.classList.add('fa-compress');
         const docElement = document.documentElement;
 
         if (docElement.requestFullscreen) {
@@ -66,64 +67,6 @@ document.getElementById('fullscreen-button').addEventListener('click', () =>
         }
     }
 });
-
-const evaluatePercentileHeight = (element, percentage) =>
-{
-    const rect = element.parentElement.getBoundingClientRect();
-    return rect.height * percentage;
-}
-
-////////////////// ALL SQUARE CONTAINERS :( ///////////////////////
-const updateSquares = () =>
-{
-    const makeSquare = (element) =>
-    {
-        const styles = window.getComputedStyle(element, null)
-        let width = styles.getPropertyValue('width');
-        if (/%/.test(width))
-            width = evaluatePercentileHeight(element, parseFloat(width) * 0.01);
-        else
-            width = parseFloat(width);
-        let maxHeight = styles.getPropertyValue('max-height');
-        if (/%/.test(maxHeight))
-            maxHeight = evaluatePercentileHeight(element, parseFloat(maxHeight) * 0.01);
-        else
-            maxHeight = parseFloat(maxHeight);
-
-        if (isNaN(width))
-        {
-            return;
-        }
-
-        if (!isNaN(maxHeight) && maxHeight < width)
-        {
-            element.style.width = maxHeight + "px";
-            element.style.height = maxHeight + "px";
-        }
-        else
-        {
-            element.style.height = width + "px";
-        }
-    }
-
-    const squares = document.getElementsByClassName('square');
-    
-    for (let square of squares)
-    {
-        makeSquare(square);
-    }
-};
-updateSquares();
-
-window.addEventListener('resize', () =>
-{
-    updateSquares();
-});
-
-/// unclean
-document.getElementById('join-window').classList.remove('hidden');
-document.getElementById('mobile-input').classList.remove('hidden');
-document.getElementById('mobile-input').classList.add('disabled');
 
 // set data
 socket.on('server-data', (dataJSON) => 
@@ -150,7 +93,7 @@ socket.on('server-data', (dataJSON) =>
     if (game.mainPlayer)
     {
         // INPUT
-        let changes = window.input.getChanges();
+        let changes = game.input.getChanges();
         if (Object.keys(changes).length > 0) // reduce data sent if no new input
         {
             clientData.input = changes;
@@ -161,13 +104,13 @@ socket.on('server-data', (dataJSON) =>
         chargeBar.set(game.mainPlayer.charge);
         xpBar.set(game.mainPlayer.xp);
 
-        changeMenuVisibility(false);
+        changeJoinCardVisibility(false);
     }
     else
     {
-        window.input.getChanges(); // clears the history
+        game.input.getChanges(); // clears the history
 
-        changeMenuVisibility(true);
+        changeJoinCardVisibility(true);
     }
 
     if (Object.keys(clientData).length > 0) // only emit if data even exists
@@ -175,6 +118,10 @@ socket.on('server-data', (dataJSON) =>
         socket.emit('client-data', clientData);
     }
 });
+
+socket.on('room-not-found', () => alert("room not found"));
+
+socket.on('room-closed', () => alert("room closed"));
 
 socket.on('scoreboard', (topPlayers) =>
 {
@@ -215,15 +162,14 @@ function loop()
     game.update(dt);
     
     //drawing
-    updateCamera(dt);
-    game.draw(ctx, camera, w, h);
-    healthBar.update(dt);
-    chargeBar.update(dt);
-    xpBar.update(dt);
+    game.draw(ctx, w, h);
+    // healthBar.update(dt);
+    // chargeBar.update(dt);
+    // xpBar.update(dt);
 
-    window.setTimeout(loop, 15);
+    window.requestAnimationFrame(loop);
 }
-window.setTimeout(loop, 3);
+window.requestAnimationFrame(loop);
 
 // if you press enter in input field instead of the button
 document.getElementById("nameInput").addEventListener('keypress', (e) => {
@@ -257,59 +203,19 @@ socket.on('answer-join', ([ acceptJoin, reasoning = "Please enter a name!" ]) =>
 
 window.joinGame = joinGame;
 
-function updateCamera(dt)
+/////////////////////// JOIN CARD ////////////////////////////
+
+function changeJoinCardVisibility(turnJoinCardOn)
 {
-    let d = Math.sqrt(window.innerWidth * window.innerHeight);
-    camera.zoom = Math.floor(0.5 * d);
-
-    const screenCenter = 
-    { 
-        x: 0.5 * window.innerWidth, 
-        y: 0.5 * window.innerHeight 
-    };
-    
-    const worldScreenCenter = camera.CanvasToWorldVector(screenCenter);
-    
-    let camTarget;
-
-    if (game.mainPlayer)
-    {
-        camTarget = 
-        {
-            x: game.mainPlayer.x - worldScreenCenter.x,
-            y: game.mainPlayer.y - worldScreenCenter.y,
-        }
-    }
-    else if (game.map)
-    {
-        camTarget = 
-        {
-            x: game.map.width * 0.5 - worldScreenCenter.x,
-            y: game.map.height * 0.5 - worldScreenCenter.y,
-        }
-    }
-
-    if (camTarget)
-    {
-        let k = 1.5 * dt;
-        camera.x = lerp(camera.x, camTarget.x, k);
-        camera.y = lerp(camera.y, camTarget.y, k);
-    }
-
-}
-
-function changeMenuVisibility(turnMenuOn)
-{
-    if (turnMenuOn == isMenuVisible)
+    if (turnJoinCardOn == isJoinCardVisible)
     {
         return; // no need to be update if already in right state
     }
 
-    let joinCard = document.getElementById('join-window');
+    let joinCard = document.getElementById('join-card');
     let uiCurtain = document.getElementById('ui-curtain');
-    let touchInput = document.getElementById('mobile-input');
 
-    if (turnMenuOn)
+    if (turnJoinCardOn)
     {
         // display join card
         joinCard.classList.remove('disabled');
@@ -320,11 +226,8 @@ function changeMenuVisibility(turnMenuOn)
 
         // add dark curtain
         uiCurtain.classList.add('darkened');
-        
-        // disable touchInput
-        touchInput.classList.add('disabled');
-        
-        isMenuVisible = true;
+
+        isJoinCardVisible = true;
     }
     else
     {
@@ -338,25 +241,83 @@ function changeMenuVisibility(turnMenuOn)
         // remove dark curtain
         uiCurtain.classList.remove('darkened');
         
-        if (isMobile)
-        {
-            // display touchinput
-            touchInput.classList.remove('disabled');
-        }
-        
-        isMenuVisible = false;
+        isJoinCardVisible = false;
     }
 }
 
-// Window size
-function resize()
+/////////////////////// TOGGLE MOBILE ////////////////////////////
+let isMobile = false;
+
+let touchInput = document.getElementById('mobile-input');
+let modeIcon = document.getElementById('input-type-button');
+modeIcon.addEventListener('click', () =>
+{
+    switchMobileMode(!isMobile);
+});
+
+function switchMobileMode(turnMobileOn)
+{
+    isMobile = turnMobileOn;
+    
+    if (turnMobileOn)
+    {
+        touchInput.classList.remove('disabled');
+        
+        modeIcon.classList.remove('fa-mobile-alt');
+        modeIcon.classList.add('fa-mouse');
+    }
+    else
+    {
+        touchInput.classList.add('disabled');
+        
+        modeIcon.classList.remove('fa-mouse');
+        modeIcon.classList.add('fa-mobile-alt');
+    }
+}
+//https://stackoverflow.com/questions/6666907/how-to-detect-a-mobile-device-with-javascript
+if (/Mobile|Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) 
+{
+    switchMobileMode(true);
+}
+
+
+//////////////// RESIZE CANVAS /////////////////////
+function resizeCanvas()
 {
     const can = document.getElementById('canvas');
     w = can.width = window.innerWidth;
     h = can.height = window.innerHeight;
 }
-resize();
-window.addEventListener('resize', resize);
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+/////////////////// SETTINGS ////////////////////
+
+const settingsPanel = document.getElementById('settings-panel');
+const settingsButton = document.getElementById('settings-button');
+let isSettingsPanelOn = false;
+function switchSettingsPanel(turnOn)
+{
+    if (turnOn)
+    {
+        settingsPanel.classList.remove('disabled');
+        isSettingsPanelOn = true;
+
+        userSettings.display(settingsPanel);
+    }
+    else
+    {
+        settingsPanel.classList.add('disabled');
+        isSettingsPanelOn = false;
+    }
+}
+settingsButton.addEventListener('click', () =>
+{
+    switchSettingsPanel(!isSettingsPanelOn);
+});
+
+
+
 
 // let s = 
 //     '  __ _          _                                        _'+"\n" +

@@ -2,7 +2,7 @@ const GameMap = require('./GameMap');
 const Player = require('./Player');
 const Entity = require('./Entity');
 const Soundwave = require('./Soundwave');
-const GameSettings = require('./GameSettings');
+const { GameSettings } = require('./GameSettings');
 const Rect = require('./Rect');
 const Color = require('./Color');
 const { Vec2 } = require('./Vector');
@@ -13,14 +13,22 @@ const Bug = require('./Bug');
 
 class Game
 {
-    constructor(mapSize)
+    constructor(settings = new GameSettings())
     {
-        this.map = new GameMap(mapSize);
+        this.settings = settings;
+
+        this.map = new GameMap(this, this.settings.mapSize);
+
         const mapArea = this.map.width * this.map.height;
-        this.bugPopulation = new BugPopulation(mapArea, mapArea / 2, 0.3);
+        this.bugPopulation = new BugPopulation(this, mapArea, mapArea / 2, 0.3);
+
         this.gameObjects = new Map();
+
+        // start val... gets reset every update
         this.quadTree = new QuadTree(new Rect(0, 0, this.map.width, this.map.width));
+
         this.usedNames = new Set();
+
         this.lastScoreboard = [];
     }
 
@@ -76,9 +84,14 @@ class Game
         // color, 60% saturated seems good
         let color = Color.FromHSV(360 - hue * 3.6, .6, 1);
 
-        const p = new Player(x, y, id, name, color);
+        const p = new Player(this, x, y, id, name, color);
         this.addGameObject(p, id);
         this.usedNames.add(name);
+
+        // setTimeout(() =>
+        // {
+        //     p.dead = true;
+        // }, 5000);
     }
 
     deleteGameObject(id, go = undefined)
@@ -116,7 +129,7 @@ class Game
             // IS DEAD?
             if (go.dead)
             {
-                let deathGOs = go.onDeath(this);
+                let deathGOs = go.onDeath();
                 this.addNewGOsFromArray(deathGOs);
 
                 this.deleteGameObject(id, go);
@@ -217,7 +230,7 @@ class Game
         ////////////////// Settings ////////////////////
         if (!clientsKnowledge.settings)
         {
-            data.settings = GameSettings;
+            data.settings = this.settings.toArray();
             clientsKnowledge.settings = true;
         }
         

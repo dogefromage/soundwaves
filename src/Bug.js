@@ -4,9 +4,9 @@ const { Vec2 } = require('./Vector')
 
 class Bug extends Entity
 {
-    constructor(x, y, xp, color = undefined, r = 0.01)
+    constructor(game, x, y, xp, color = undefined, r = 0.01)
     {
-        super(x - r, y - r, 2 * r, 2 * r, color || new Color(255, 255, 255, 255), 0.0001);
+        super(game, x - r, y - r, 2 * r, 2 * r, color || new Color(255, 255, 255, 255), 0.0001);
         this.radius = r;
         this.xp = xp; // xp is only number because it never changes
 
@@ -31,9 +31,9 @@ class Bug extends Entity
         return [];
     }
 
-    onDeath(game)
+    onDeath()
     {
-        const attacker = game.getGameObjectByID(this.lastAttacker);
+        const attacker = this.game.getGameObjectByID(this.lastAttacker);
         
         if (attacker)
         {

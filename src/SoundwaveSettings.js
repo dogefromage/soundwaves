@@ -28,22 +28,22 @@ class SoundwaveSettings
 
     static walk()
     {
-        return new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 0, 300);
+        return new SoundwaveSettings(0.6, 2, 0, 0, 2 * Math.PI, 0, 100);
     }
 
     static sneak()
     {
-        return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 0, 150);
+        return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 0, 50);
     }
 
     static hurt()
     {
-        return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 0, 100);
+        return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 0, 60);
     }
 
     static death()
     {
-        return new SoundwaveSettings(0.1, 3, 0, 0, 2 * Math.PI, 5, 100);
+        return new SoundwaveSettings(0.1, 3, 0, 0, 2 * Math.PI, 0, 50);
     }
 
     static Attack(rotation, power)
@@ -57,7 +57,7 @@ class SoundwaveSettings
         // spread similar to 1/x but offset so f(0)=PI
         let spread = 3.1415 / (30 * power + 0.1);
 
-        return new SoundwaveSettings(speed, lifetime, damage, rotation, spread, 50, 100);
+        return new SoundwaveSettings(speed, lifetime, damage, rotation, spread, 30, 50);
     }
 }
 

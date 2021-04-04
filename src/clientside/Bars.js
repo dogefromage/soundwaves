@@ -1,4 +1,4 @@
-import { lerp } from '../../GameMath';
+import { lerp } from '../GameMath';
 
 export class Statusbar
 {
@@ -29,11 +29,14 @@ export class Statusbar
             let width = Math.max(Math.min(val * 100, 100), 0);
             this.bar.style.width = width + '%';
 
-            let compStyle = window.getComputedStyle(this.bar, null);
-            let barWidth = parseFloat(compStyle.getPropertyValue("width"));
+            let boundingRect = this.bar.getBoundingClientRect();
 
-            let newHeight = Math.max(3, Math.round(barWidth)) + "px";
-            this.bar.style.height = newHeight;
+            let newHeight = boundingRect.width + "px";
+
+            window.requestAnimationFrame(() =>
+            {
+                this.bar.style.height = newHeight;
+            });
         }
     }
 }

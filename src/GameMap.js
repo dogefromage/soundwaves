@@ -5,8 +5,9 @@ const generateMaze = require('./Maze');
 
 class GameMap
 {
-    constructor(size)
+    constructor(game, size)
     {
+        this.game = game;
         this.width = 2 * size + 1;
         this.height = 2 * size + 1;
         this.pixels = [];
@@ -19,7 +20,7 @@ class GameMap
             this.pixels[j] = [];
             for (let i = 0; i < this.height; i++)
             {
-                // take two mazes and merge them using the 'and' operation. this opens up new walkways and makes it more open
+                // take two mazes and merge them using the 'and' operation. this opens up new walkways
                 this.pixels[j][i] = !(maze1[j][i] || maze2[j][i]); 
                 this.pixels[j][i] = this.pixels[j][i] ? '1':'0';
             }

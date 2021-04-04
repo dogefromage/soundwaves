@@ -1,4 +1,4 @@
 node_modules
-public/dist/main.js
+src/clientside/static/main.js
 .vscode
 logs
