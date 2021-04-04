@@ -1,64 +1,41 @@
 
-class Setting
-{
-    constructor(name, value)
-    {
-        this.name = name;
-        this.value = value;
-    }
-}
+const Settings = require('./Settings');
+const { Setting, HiddenSetting, SliderSetting } = require('./SettingsComponents');
 
-const settingsList = 
+const gameSettingsTemplate = 
 [
-    // propertyname,        default,    display
-    [ 'mapSize',            3,      new Setting('Map Size') ],
-    [ 'playerSize',         0.04,   new Setting('Player Size') ],
-    [ 'playerSpeed',        0.4,    new Setting('Player Speed') ],
-    [ 'playerStepDistance', 0.24,   new Setting('Player Step Distance') ],
-    [ 'sneakFactor',        0.5,    new Setting('Player Sneak Factor') ],
-    [ 'chargeSpeed',        3,      new Setting('Player Charge Speed') ],
-    [ 'dischargeSpeed',     0.06,      new Setting('Player Discharge Speed') ],
-    
-    // static settings
-    [ 'walkSmoothness',     5 ],
-    [ 'spawnCooldown',      0.5 ],
-    [ 'hitCooldown',        0.3 ],
-    [ 'colDetectionRange',  0.5 ],
-    [ 'clientCorrection',   10 ],
+    //           propertyname,        default, name
+    new Setting('mapSize',            3,      'Map Size'),
+    new Setting('playerSize',         0.04,   'Player Size'),
+    new Setting('playerSpeed',        0.4,    'Player Speed'),
+    new Setting('playerStepDistance', 0.24,   'Player Step Distance'),
+    new Setting('sneakFactor',        0.5,    'Player Sneak Factor'),
+    new Setting('chargeSpeed',        3,      'Player Charge Speed'),
+    new Setting('dischargeSpeed',     0.06,   'Player Discharge Speed'),
+
+    new HiddenSetting('walkSmoothness',     5),
+    new HiddenSetting('spawnCooldown',      0.5),
+    new HiddenSetting('hitCooldown',        0.3),
+    new HiddenSetting('colDetectionRange',  0.1),
+    new HiddenSetting('clientCorrection',   10),
 ];
 
-class GameSettings
+class GameSettings extends Settings
 {
-
     constructor()
     {
-        for (let [ key, defaultVal ] of settingsList)
-        {
-            this[key] = defaultVal;
-        }
+        super(gameSettingsTemplate);
     }
 
     toArray()
     {
-        let arr = [];
-        for (let [ key ] of settingsList)
-        {
-            arr.push(this[key]);
-        }
-        return arr;
+        return super.toArray(gameSettingsTemplate);
     }
 
     static FromArray(arr)
     {
-        let settings = new GameSettings();
-
-        for (let [ key, defaultval ] of settingsList)
-        {
-            settings[key] = arr.shift() || defaultval;
-        }
-
-        return settings;
+        return super.FromArray(gameSettingsTemplate, GameSettings, arr);
     }
 }
 
-module.exports = { GameSettings, settingsList };
+module.exports = { GameSettings, gameSettingsTemplate };

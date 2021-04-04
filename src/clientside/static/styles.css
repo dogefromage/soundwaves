@@ -451,6 +451,7 @@ body
     color: #ffffffaa;
 }
 
+/* SETTINGS */
 .settings-panel
 {
     position: absolute;
@@ -459,17 +460,104 @@ body
     right: 0;
     top: 0;
     bottom: 0;
+
     width: 80%;
     height: 80%;
+    border: white solid 2em;
+    box-sizing: border-box;
 
     background-color: #fff;
     border-radius: 40px;
     box-shadow: 0px 0px 20px 0px #00000088;
 
     display: flex;
-    justify-content: center;
     flex-direction: column;
+    align-items: center;
 
-    /* opacity: 1;
-    transition: 0.4s opacity ease-in-out; */
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+/* SCROLLBAR */
+/* https://www.w3generator.com/scrollbar */
+::-webkit-scrollbar 
+{
+    width: 0.8em;
+    height: 0.8em;
+}
+::-webkit-scrollbar-thumb
+{
+    background: #cccccc;
+    border-radius: 0.4em;
+}
+::-webkit-scrollbar-thumb:hover
+{
+    background: #8a8a8a;
+}
+::-webkit-scrollbar-track
+{
+    /* background: #ededed; */
+    border-radius: 0.4em;
+}
+
+.setting
+{
+    height: 3em;
+    width: 90%;
+    display: flex;
+    align-items: center;
+    margin: 1em;
+}
+
+.setting :nth-child(1)
+{
+    flex-basis: 30%;
+}
+
+.setting span
+{
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.slider-setting
+{
+    font-size: inherit;
+    width: 80%;
+    border-radius: 0.5em;
+
+    -webkit-appearance: none;  /* Override default CSS styles*/
+    appearance: none;
+    height: 1.2em;
+
+    background-color: green;
+
+    outline: none; /*Remove outline*/
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .1s; /* 0.2 seconds transition on hover */
+    transition: opacity .1s;
+}
+
+.slider-setting:hover
+{
+    opacity: 1;
+}
+
+.slider-setting::-webkit-slider-thumb
+{
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 1em; /* Set a specific slider handle width */
+    height: 2em; /* Slider handle height */
+    border-radius: 0.5em;
+    background: #000000; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.slider-setting::-moz-range-thumb 
+{
+    width: 0.7em; /* Set a specific slider handle width */
+    height: 1.6em; /* Slider handle height */
+    background: #000000; /* Green background */
+    cursor: pointer; /* Cursor on hover */
 }

@@ -9,12 +9,23 @@ export class ClientGamemap
         this.width = width;
         this.height = height;
         this.pixels = [];
+        this.rects = [];
         for (let j = 0; j < this.height; j++)
         {
             this.pixels[j] = [];
+            this.rects[j] = [];
             for (let i = 0; i < this.width; i++)
             {
-                this.pixels[j][i] = data[ j * this.width + i ];
+                let pixel = data[ j * this.width + i ];
+                this.pixels[j][i] = pixel;
+                if (pixel == '1')
+                {
+                    this.rects[j][i] = new Rect(i, j, 1, 1);
+                }
+                else
+                {
+                    this.rects[j][i] = null;
+                }
             }
         }
 
@@ -35,10 +46,9 @@ export class ClientGamemap
         {
             for (let i = X; i < R; i++)
             {
-                if (this.pixels[j][i] == '1')
+                if (this.rects[j][i])
                 {
-                    const rect = new Rect(i, j, 1, 1);
-                    action(rect);
+                    action(this.rects[j][i]);
                 }
             }
         }

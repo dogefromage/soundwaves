@@ -1,11 +1,24 @@
 import { ClientGame } from './ClientGame';
 import { Statusbar, XPBar } from './Bars';
+import { UserSettings } from './UserSettings';
 
 window.socket = io.connect(location.host, { roomId: location.pathname });
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
 let lastTime = new Date().getTime();
+
+// takes old settings automatically from localStorage if exists
+const userSettings = new UserSettings();
+
+// joystickSize
+const updateJoystickSize = () =>
+{
+    const joystick = document.getElementById('joystick-container');
+    joystick.style.setProperty('--joystick-size', userSettings.joystickSize);
+}
+updateJoystickSize();
+userSettings.addEventListener('joystickSize', updateJoystickSize);
 
 const game = new ClientGame();
 // disable rightclick
@@ -54,59 +67,6 @@ fullscreenButton.addEventListener('click', () =>
         }
     }
 });
-
-// const evaluatePercentileHeight = (element, percentage) =>
-// {
-//     const rect = element.parentElement.getBoundingClientRect();
-//     return rect.height * percentage;
-// }
-
-// ////////////////// ALL SQUARE CONTAINERS :( ///////////////////////
-// const updateSquares = () =>
-// {
-//     const makeSquare = (element) =>
-//     {
-//         const styles = window.getComputedStyle(element, null)
-//         let width = styles.getPropertyValue('width');
-//         if (/%/.test(width))
-//             width = evaluatePercentileHeight(element, parseFloat(width) * 0.01);
-//         else
-//             width = parseFloat(width);
-//         let maxHeight = styles.getPropertyValue('max-height');
-//         if (/%/.test(maxHeight))
-//             maxHeight = evaluatePercentileHeight(element, parseFloat(maxHeight) * 0.01);
-//         else
-//             maxHeight = parseFloat(maxHeight);
-
-//         if (isNaN(width))
-//         {
-//             return;
-//         }
-
-//         if (!isNaN(maxHeight) && maxHeight < width)
-//         {
-//             element.style.width = maxHeight + "px";
-//             element.style.height = maxHeight + "px";
-//         }
-//         else
-//         {
-//             element.style.height = width + "px";
-//         }
-//     }
-
-//     const squares = document.getElementsByClassName('square');
-    
-//     for (let square of squares)
-//     {
-//         makeSquare(square);
-//     }
-// };
-// updateSquares();
-
-// window.addEventListener('resize', () =>
-// {
-//     updateSquares();
-// });
 
 // set data
 socket.on('server-data', (dataJSON) => 
@@ -203,9 +163,9 @@ function loop()
     
     //drawing
     game.draw(ctx, w, h);
-    healthBar.update(dt);
-    chargeBar.update(dt);
-    xpBar.update(dt);
+    // healthBar.update(dt);
+    // chargeBar.update(dt);
+    // xpBar.update(dt);
 
     window.requestAnimationFrame(loop);
 }
@@ -342,6 +302,8 @@ function switchSettingsPanel(turnOn)
     {
         settingsPanel.classList.remove('disabled');
         isSettingsPanelOn = true;
+
+        userSettings.display(settingsPanel);
     }
     else
     {

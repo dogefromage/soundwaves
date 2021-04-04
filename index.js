@@ -42,6 +42,11 @@ app.use((req, res, next) =>
 
 const gameRooms = new Map();
 
+function createUniqueRoomID()
+{
+    throw new Error('FUNCTION NOT IMPLEMENTED');
+}
+
 function addRoom(id = createUniqueRoomID())
 {
     const room = new GameRoom(io, id);
@@ -61,7 +66,7 @@ function closeRoom(id)
     }
 }
 
-for (let id of [ '1234', 'abcd', 'xyz' ])
+for (let id of [ 'xyz' ])
 {
     addRoom(id);
 }
