@@ -113,32 +113,36 @@ class GameRoom
         {
             deltaTime = 0.001; // prevent disaster 
         }
-    
-        // UPDATE GAME
-        this.game.update(deltaTime);
-    
-        // SEND GAME TO CLIENTS
-        for (let socket of this.sockets)
-        {
-            const gameData = this.game.getData(socket.id, socket.gameKnowledge);
-            gameData.dt = deltaTime; // is needed for interpolation
-            
-            const reducedJSON = JSON.stringify(gameData, function(key, value) {
-                // limit precision of floats
-                if (typeof value === 'number') {
-                    return parseFloat(value.toFixed(3)); // adequate, any lower looks like shit
-                }
-                // convert all maps to arrays with key-value sub arrays and all sets to arrays
-                else if (value instanceof Map || value instanceof Set) {
-                    return [...value];
-                }
-                return value
-            });
+
         
-            // console.log(reducedJSON); // show data
-            // console.log(reducedJSON.length); // show data size in characters
-    
-            socket.emit('server-data', reducedJSON);
+        if (this.sockets.size > 0)
+        {
+            // UPDATE GAME
+            this.game.update(deltaTime);
+        
+            // SEND GAME TO CLIENTS
+            for (let socket of this.sockets)
+            {
+                const gameData = this.game.getData(socket.id, socket.gameKnowledge);
+                gameData.dt = deltaTime; // is needed for interpolation
+                
+                const reducedJSON = JSON.stringify(gameData, function(key, value) {
+                    // limit precision of floats
+                    if (typeof value === 'number') {
+                        return parseFloat(value.toFixed(3)); // adequate, any lower looks like shit
+                    }
+                    // convert all maps to arrays with key-value sub arrays and all sets to arrays
+                    else if (value instanceof Map || value instanceof Set) {
+                        return [...value];
+                    }
+                    return value
+                });
+            
+                // console.log(reducedJSON); // show data
+                // console.log(reducedJSON.length); // show data size in characters
+        
+                socket.emit('server-data', reducedJSON);
+            }
         }
     
         let newScoreboard = this.game.getNewScoreboard(10);
