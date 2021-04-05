@@ -71,7 +71,7 @@ function closeRoom(id)
     }
 }
 
-for (let id of [ 'xyz', 'abcd', 'test', 'lol' ])
+for (let id of [ 'xyz', 'abcd', '1234' ])
 {
     addRoom(id);
 }
