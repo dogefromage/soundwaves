@@ -52,6 +52,7 @@
             <i id="fullscreen-button" class="fas fa-expand"></i>
             <i id="settings-button" class="fas fa-cog"></i>
             <i id="input-type-button" class="fas fa-mobile-alt"></i>
+            <i id="rooms-button" class="fas fa-list"></i>
         </div>
 
         <div id="join-card" class="card">
@@ -62,10 +63,8 @@
             <button onclick="joinGame()">Join game</button>
             <p id="nameError" class="disabled error">ERROR</p>
         </div>
-        
-        <div id="settings-panel" class="settings-panel disabled no-select">
-            <!-- Procedural code -->
-        </div>
+
+        <div id=panels></div>
 
         <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" 
                 integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" 

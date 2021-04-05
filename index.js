@@ -30,6 +30,11 @@ app.get('/', (req, res) =>
     res.redirect('/' + randomRoom);
 });
 
+app.get('/error', (req, res) =>
+{
+    res.status(404).sendFile(path.join(__dirname, 'src/clientside/404.html'));
+});
+
 app.get('/:id', (req, res) =>
 {
     res.sendFile(path.join(__dirname, 'src/clientside/index.html'));
@@ -66,7 +71,7 @@ function closeRoom(id)
     }
 }
 
-for (let id of [ 'xyz' ])
+for (let id of [ 'xyz', 'abcd', 'test', 'lol' ])
 {
     addRoom(id);
 }
@@ -94,6 +99,19 @@ io.on('connection', (socket) =>
     {
         socket.emit('room-not-found', [ id ]);
     }
+
+    socket.on('request-room-list', (callback) =>
+    {
+        // CHANGE!! THIS IS ONLY FOR TESTING
+        let roomList = [];
+
+        for (let [ id, room ] of gameRooms)
+        {
+            roomList.push([ id, room.sockets.size, room.maxSize ]);
+        }
+
+        callback(roomList);
+    });
 
     socket.on('disconnect', () => 
     {
