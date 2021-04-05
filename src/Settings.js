@@ -1,5 +1,6 @@
 
 const { EventHandler } = require('./EventHandler');
+const Panel = require('./clientside/Panel');
 
 class Settings extends EventHandler
 {
@@ -8,7 +9,7 @@ class Settings extends EventHandler
         super();
 
         this.settingsList = settingsList;
-        this.title = title;
+        this.panel = new Panel(title);
 
         for (let { propertyName, defaultVal } of this.settingsList)
         {
@@ -40,16 +41,11 @@ class Settings extends EventHandler
         return settings;
     }
 
-    display(parent)
+    generateUI()
     {
-        // clear parents html
-        parent.textContent = '';
+        let items = [];
 
-        // title
-        const titleEl = document.createElement('h1');
-        titleEl.textContent = this.title;
-        parent.appendChild(titleEl);
-
+        // display
         for (let setting of this.settingsList)
         {
             const currValue = this[setting.propertyName];
@@ -61,11 +57,10 @@ class Settings extends EventHandler
 
             const settingElement = setting.createElement(currValue, onchange);
 
-            if (settingElement)
-            {
-                parent.appendChild(settingElement);
-            }
+            items.push(settingElement)
         }
+
+        this.panel.generate(items);
     }
 }
 

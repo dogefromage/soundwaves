@@ -49,6 +49,11 @@ body
     background-color: #000000;
 }
 
+.click-invisible
+{
+    pointer-events: none;
+}
+
 .curtain
 {
     pointer-events: none;
@@ -451,8 +456,7 @@ body
     color: #ffffffaa;
 }
 
-/* SETTINGS */
-.settings-panel
+.panel
 {
     position: absolute;
     margin: auto;
@@ -463,6 +467,8 @@ body
 
     width: 80%;
     height: 80%;
+    max-width: 640px;
+
     border: white solid 2em;
     box-sizing: border-box;
 
@@ -487,12 +493,12 @@ body
 }
 ::-webkit-scrollbar-thumb
 {
-    background: #cccccc;
+    background-color: #cccccc;
     border-radius: 0.4em;
 }
 ::-webkit-scrollbar-thumb:hover
 {
-    background: #8a8a8a;
+    background-color: #8a8a8a;
 }
 ::-webkit-scrollbar-track
 {
@@ -511,13 +517,14 @@ body
 
 .setting :nth-child(1)
 {
-    flex-basis: 30%;
+    flex-basis: 35%;
 }
 
 .setting span
 {
     font-size: 1.2em;
     font-weight: bold;
+    margin: 0.3em;
 }
 
 .slider-setting
@@ -560,4 +567,66 @@ body
     height: 1.6em; /* Slider handle height */
     background: #000000; /* Green background */
     cursor: pointer; /* Cursor on hover */
+}
+
+
+/* ROOMLIST */
+
+.room
+{
+    text-decoration: none;
+    color: black;
+    height: 4em;
+    width: 90%;
+    display: flex;
+    align-items: center;
+    margin: 0.5em;
+    justify-content: center;
+    background-color: #eee;
+    border-radius: 1.5em;
+
+    -webkit-transition: background-color 0.1s;
+    transition: background-color 0.1s;
+    
+    position: relative;
+}
+
+.room:hover
+{
+    background-color: #ccc;
+}
+
+.room :nth-child(1)
+{
+    flex-basis: 20%;    
+}
+
+.room :nth-child(2)
+{
+    flex-basis: 20%;
+}
+
+.room span
+{
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0.2em;
+    text-align: center;
+}
+
+.room-name
+{
+    color: #aaa;
+}
+
+.room b
+{
+    color: black;
+}
+
+.room i
+{
+    position: absolute;
+    left: 80%;
+    font-size: 1.4em;
 }

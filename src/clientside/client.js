@@ -1,24 +1,13 @@
 import { ClientGame } from './ClientGame';
 import { Statusbar, XPBar } from './Bars';
 import { UserSettings } from './UserSettings';
+import Panel from './Panel';
 
 window.socket = io.connect(location.host, { roomId: location.pathname });
 
 const ctx = document.getElementById('canvas').getContext('2d');
 let w, h;
 let lastTime = new Date().getTime();
-
-// takes old settings automatically from localStorage if exists
-const userSettings = new UserSettings();
-
-// joystickSize
-const updateJoystickSize = () =>
-{
-    const joystick = document.getElementById('joystick-container');
-    joystick.style.setProperty('--joystick-size', userSettings.joystickSize);
-}
-updateJoystickSize();
-userSettings.addEventListener('joystickSize', updateJoystickSize);
 
 const game = new ClientGame();
 // disable rightclick
@@ -119,7 +108,11 @@ socket.on('server-data', (dataJSON) =>
     }
 });
 
-socket.on('room-not-found', () => alert("room not found"));
+socket.on('room-not-found', () => 
+{
+    window.location.replace('error');
+    // alert("room not found");
+});
 
 socket.on('room-closed', () => alert("room closed"));
 
@@ -291,32 +284,93 @@ function resizeCanvas()
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-/////////////////// SETTINGS ////////////////////
+//////////////////// SETTINGS ////////////////////
 
-const settingsPanel = document.getElementById('settings-panel');
+// takes old settings automatically from localStorage if exists
+const userSettings = new UserSettings();
+// generates panel and fills it with settings
+userSettings.generateUI();
+
 const settingsButton = document.getElementById('settings-button');
-let isSettingsPanelOn = false;
-function switchSettingsPanel(turnOn)
+settingsButton.addEventListener('click', () =>
 {
-    if (turnOn)
-    {
-        settingsPanel.classList.remove('disabled');
-        isSettingsPanelOn = true;
+    userSettings.panel.changeVisibility();
+});
 
-        userSettings.display(settingsPanel);
+// joystickSize
+const updateJoystickSize = () =>
+{
+    const joystick = document.getElementById('joystick-container');
+    joystick.style.setProperty('--joystick-size', userSettings.joystickSize);
+}
+updateJoystickSize();
+userSettings.addEventListener('joystickSize', updateJoystickSize);
+
+//////////////////// LEVEL LIST ////////////////////
+
+const roomListButton = document.getElementById('rooms-button');
+let roomsListShowing = false;
+let roomsListPanel;
+roomListButton.addEventListener('click', () =>
+{
+    if (!roomsListShowing)
+    {
+        roomsListPanel = new Panel('Rooms');
+        roomsListPanel.generate([]);
+        roomsListPanel.changeVisibility(true);
+        roomsListShowing = true;
+
+        socket.emit('request-room-list', (roomList) => 
+        {
+            if (roomsListShowing)
+            {
+                if (roomList.length > 0)
+                {
+                    let urlArr = window.location.href.split('/');
+                    let currentRoom = urlArr.pop();
+                    if (currentRoom == '')
+                    {
+                        currentRoom = urlArr.pop();
+                    }
+
+                    for (const [ name, players, maxPlayers ] of roomList)
+                    {
+                        const roomEl = document.createElement('a');
+                        roomEl.classList.add('room');
+                        roomEl.href = '/' + name;
+                        
+                        const roomName = document.createElement('span');
+                        roomName.classList = 'room-name';
+                        // roomName.innerHTML = `fledermaus.io/<b>${name}</b>`;
+                        roomName.innerHTML = `/<b>${name}</b>`;
+                        roomEl.appendChild(roomName);
+                        
+                        const roomPlayers = document.createElement('span');
+                        roomPlayers.classList = 'room-players';
+                        roomPlayers.innerHTML = `${players} / ${maxPlayers}`;
+                        roomEl.appendChild(roomPlayers);
+
+                        if (name == currentRoom)
+                        {
+                            const arrowIcon = document.createElement('i');
+                            arrowIcon.classList.add('fas');
+                            arrowIcon.classList.add('fa-arrow-left');
+                            roomEl.appendChild(arrowIcon);
+                        }
+
+                        roomsListPanel.addContent(roomEl);
+                    }
+                }
+            }
+        });
     }
     else
     {
-        settingsPanel.classList.add('disabled');
-        isSettingsPanelOn = false;
+        roomsListPanel.destroy();
+        roomsListPanel = null;
+        roomsListShowing = false;
     }
-}
-settingsButton.addEventListener('click', () =>
-{
-    switchSettingsPanel(!isSettingsPanelOn);
 });
-
-
 
 
 // let s = 
