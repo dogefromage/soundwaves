@@ -287,7 +287,7 @@ window.addEventListener('resize', resizeCanvas);
 //////////////////// SETTINGS ////////////////////
 
 // takes old settings automatically from localStorage if exists
-const userSettings = new UserSettings();
+const userSettings = new UserSettings(isMobile);
 // generates panel and fills it with settings
 userSettings.generateUI();
 

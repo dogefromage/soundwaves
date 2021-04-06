@@ -45,8 +45,6 @@ class Settings extends EventHandler
     {
         let items = [];
 
-        debugger
-
         // display
         for (let setting of this.settingsList)
         {

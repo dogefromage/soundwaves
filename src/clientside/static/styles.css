@@ -31,6 +31,7 @@ html
 
 .abs-full
 {
+    pointer-events: none;
     position:absolute;
     width: 100%;
     height: 100%;
@@ -42,16 +43,16 @@ html
     margin: 0;
 }
 
+.abs-full > *
+{
+    pointer-events: initial;
+}
+
 body
 {
     overflow-y: hidden;
     overflow-x: hidden;
     background-color: #000000;
-}
-
-.click-invisible
-{
-    pointer-events: none;
 }
 
 .curtain
@@ -119,9 +120,6 @@ body
     justify-content: center;
     flex-direction: column;
     align-items: center;
-
-    opacity: 1;
-    transition: 0.4s opacity ease-in-out;
 }
 
 .card h1
@@ -232,13 +230,21 @@ body
 
 .card .error
 {
+    font-weight: bold;
     color: red;
     margin: .7em;
+    margin-bottom: 0;
 }
 
 .hidden
 {
     visibility: hidden;
+}
+
+.animate-opacity
+{
+    opacity: 1;
+    transition: 0.4s opacity ease-in-out;
 }
 
 .opacity-zero
@@ -463,34 +469,33 @@ body
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
+    left: 4em;
+    right: 4em;
+    width: auto;
+    height: auto;
 }
 
-.panel *
+@media (orientation: portrait)
 {
-    pointer-events: initial;
+    .panels
+    {
+        flex-direction: column;
+    }
 }
 
 .panel
 {
-    /* position: absolute;
-    margin: auto;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0; */
-
     width: 80%;
-    height: 80%;
-    max-width: 640px;
-    margin: 5vh;
+    height: 70%;
+    max-width: 480px;
+    margin: 3vh;
 
     border: white solid 2em;
     box-sizing: border-box;
 
     background-color: #fff;
     border-radius: 40px;
-    box-shadow: 0px 0px 20px 0px #00000088;
+    box-shadow: 0px 0px 60px 0px #00000077;
 
     display: flex;
     flex-direction: column;

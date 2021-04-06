@@ -11,7 +11,7 @@ const userSettingsTemplate =
 
 class UserSettings extends Settings
 {
-    constructor()
+    constructor(isMobile)
     {
         super(userSettingsTemplate, 'Settings');
 
@@ -28,6 +28,13 @@ class UserSettings extends Settings
                         this[propertyName] = lastSettings[propertyName];
                     }
                 }
+            }
+        }
+        else
+        {
+            if (isMobile)
+            {
+                this['graphics'] = 'low';
             }
         }
 

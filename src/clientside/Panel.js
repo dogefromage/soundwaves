@@ -38,6 +38,7 @@ class Panel
         this.element.classList.add('panel');
         this.element.classList.add('no-select');
         this.element.classList.add('disabled');
+        
         parent.appendChild(this.element);
 
         // title
