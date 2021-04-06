@@ -49,10 +49,18 @@ const gameRooms = new Map();
 
 function createUniqueRoomID()
 {
-    throw new Error('FUNCTION NOT IMPLEMENTED');
+    let id;
+    do
+    {
+        const randNum = Math.floor(Math.random() * 10000);
+        id = "0000" + randNum;
+        id = id.substring(id.length - 4);
+    }
+    while (gameRooms.has(id));
+    return id;
 }
 
-function addRoom(id = createUniqueRoomID())
+function openRoom(id = createUniqueRoomID())
 {
     const room = new GameRoom(io, id);
     if (!gameRooms.has(id))
@@ -71,9 +79,9 @@ function closeRoom(id)
     }
 }
 
-for (let id of [ 'xyz', 'abcd', '1234' ])
+for (let i = 0; i < 5; i++)
 {
-    addRoom(id);
+    openRoom();
 }
 
 io.on('connection', (socket) => 
@@ -107,7 +115,8 @@ io.on('connection', (socket) =>
 
         for (let [ id, room ] of gameRooms)
         {
-            roomList.push([ id, room.sockets.size, room.maxSize ]);
+            const info = room.game.getInfo();
+            roomList.push( [ id, ...info ] );
         }
 
         callback(roomList);

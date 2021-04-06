@@ -12,6 +12,7 @@ const gameSettingsTemplate =
     new Setting('sneakFactor',        0.5,    'Player Sneak Factor'),
     new Setting('chargeSpeed',        3,      'Player Charge Speed'),
     new Setting('dischargeSpeed',     0.06,   'Player Discharge Speed'),
+    new Setting('maxPlayers',     10,   'Number of Players'),
 
     new HiddenSetting('walkSmoothness',     5),
     new HiddenSetting('spawnCooldown',      0.5),

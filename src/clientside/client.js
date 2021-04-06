@@ -298,7 +298,7 @@ settingsButton.addEventListener('click', () =>
 });
 
 // joystickSize
-const updateJoystickSize = () =>
+const updateJoystickSize = (newVal) =>
 {
     const joystick = document.getElementById('joystick-container');
     joystick.style.setProperty('--joystick-size', userSettings.joystickSize);
@@ -316,7 +316,7 @@ roomListButton.addEventListener('click', () =>
     if (!roomsListShowing)
     {
         roomsListPanel = new Panel('Rooms');
-        roomsListPanel.generate([]);
+        roomsListPanel.generate();
         roomsListPanel.changeVisibility(true);
         roomsListShowing = true;
 

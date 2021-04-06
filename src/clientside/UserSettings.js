@@ -1,12 +1,12 @@
 
 const Settings = require('../Settings');
-const { Setting, HiddenSetting, SliderSetting } = require('../SettingsComponents');
+const { Setting, HiddenSetting, SliderSetting, RadioSetting } = require('../SettingsComponents');
 
 const userSettingsTemplate = 
 [
-    //                propertyName        default name              min     max     step
     // new SliderSetting('volume',           0,      'Volume',         0,      1,      0.01),
     new SliderSetting('joystickSize',     1,      'Joystick Size',  0.5,    1.5,    0.01),
+    new RadioSetting('graphics', 'high', 'Graphics', [['low', 'Low'], ['high', 'High'], ['ultra', 'Ultra']]),
 ];
 
 class UserSettings extends Settings

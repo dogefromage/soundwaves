@@ -27,9 +27,18 @@ class Game
         // start val... gets reset every update
         this.quadTree = new QuadTree(new Rect(0, 0, this.map.width, this.map.width));
 
+        this.numberOfPlayers = 0;
         this.usedNames = new Set();
 
         this.lastScoreboard = [];
+    }
+
+    getInfo()
+    {
+        return [
+            this.numberOfPlayers, 
+            this.settings.maxPlayers,
+        ];
     }
 
     *gameObjectsOfType(T)
@@ -77,6 +86,16 @@ class Game
         this.gameObjects.set(id, go);
     }
 
+    isFull()
+    {
+        return (this.numberOfPlayers >= this.settings.maxPlayers);
+    }
+
+    hasName(name)
+    {
+        return this.usedNames.has(name)
+    }
+
     addPlayer(id, name, hue)
     {
         const { x, y } = this.map.findEmptySpawningSpace(0.4);
@@ -87,11 +106,12 @@ class Game
         const p = new Player(this, x, y, id, name, color);
         this.addGameObject(p, id);
         this.usedNames.add(name);
+        this.numberOfPlayers++;
+    }
 
-        // setTimeout(() =>
-        // {
-        //     p.dead = true;
-        // }, 5000);
+    removePlayer(id)
+    {
+        this.deleteGameObject(id);
     }
 
     deleteGameObject(id, go = undefined)
@@ -109,6 +129,7 @@ class Game
         if (go instanceof Player)
         {
             this.usedNames.delete(go.name);
+            this.numberOfPlayers--;
         }
         
         this.gameObjects.delete(id);

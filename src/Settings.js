@@ -45,13 +45,15 @@ class Settings extends EventHandler
     {
         let items = [];
 
+        debugger
+
         // display
         for (let setting of this.settingsList)
         {
             const currValue = this[setting.propertyName];
-            const onchange = (e) =>
+            const onchange = (value) =>
             {
-                this[setting.propertyName] = e.srcElement.value;
+                this[setting.propertyName] = value;
                 this.call(setting.propertyName); // calls event
             }
 

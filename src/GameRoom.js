@@ -3,12 +3,11 @@ const Logger = require('./Logger');
 
 class GameRoom
 {
-    constructor(io, id, gameSettings = undefined, maxSize = 10)
+    constructor(io, id, gameSettings = undefined)
     {
         this.io = io;
         this.id = id;
         this.game = new Game(gameSettings);
-        this.maxSize = maxSize;
         this.sockets = new Set();
         this.lastUpdateTime = process.hrtime();
         this.isRunning = true;
@@ -33,31 +32,28 @@ class GameRoom
         
         socket.on('request-join', (name, color) =>
         {
-            if (name.length == 0)
+            if (name.length == 0) // name too short
             {
                 socket.emit('answer-join', [ false ]);
             }
-            else if (name.length > 30)
+            else if (name.length > 30) // name too long
             {
                 socket.emit('answer-join', [ false, "Your name must be under 30 characters long!" ]);
             }
-            else
+            else if (this.game.hasName(name)) // name is in use
             {
-                let unique = !this.game.usedNames.has(name);
-
-                if (unique)
-                {
-                    // NAME IS VALID
-                    socket.emit('answer-join', [ true ]);
-                    this.game.addPlayer(socket.id, name, color);
-                    
-                    Logger().joins++;
-                }
-                else
-                {
-                    // NAME IS ALREADY IN USE
-                    socket.emit('answer-join', [ false, 'This name is already taken!' ]);
-                }
+                socket.emit('answer-join', [ false, 'This name is already in use!' ]);
+            }
+            else if (this.game.isFull()) // game is full
+            {
+                socket.emit('answer-join', [ false, 'This room is already full!' ]);
+            }
+            else // client can join
+            {
+                socket.emit('answer-join', [ true ]);
+                this.game.addPlayer(socket.id, name, color);
+                
+                Logger().joins++;
             }
         });
         
@@ -76,10 +72,10 @@ class GameRoom
 
     leave(socket)
     {
-        this.game.deleteGameObject(socket.id);
+        this.game.removePlayer(socket.id);
 
         this.sockets.delete(socket);
-        socket.leave(this.id);
+        socket.leave(this.id); // leave socket.io room
 
         delete socket.gameKnowledge;
 

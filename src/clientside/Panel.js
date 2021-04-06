@@ -26,7 +26,7 @@ class Panel
         }
     }
 
-    generate(itemsIterable)
+    generate(itemsIterable = [])
     {
         const parent = document.getElementById(this.parentObj);
         if (!parent)

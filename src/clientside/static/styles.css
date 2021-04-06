@@ -427,6 +427,7 @@ body
     color: #ffffffaa;
     font-size: 2em;
     margin: .5em;
+    cursor: pointer;
 }
 
 .icons-right i:hover
@@ -456,18 +457,33 @@ body
     color: #ffffffaa;
 }
 
+.panels
+{
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.panel *
+{
+    pointer-events: initial;
+}
+
 .panel
 {
-    position: absolute;
+    /* position: absolute;
     margin: auto;
     left: 0;
     right: 0;
     top: 0;
-    bottom: 0;
+    bottom: 0; */
 
     width: 80%;
     height: 80%;
     max-width: 640px;
+    margin: 5vh;
 
     border: white solid 2em;
     box-sizing: border-box;
@@ -512,12 +528,17 @@ body
     width: 90%;
     display: flex;
     align-items: center;
-    margin: 1em;
+    margin: .6em;
 }
 
-.setting :nth-child(1)
+.setting > :nth-child(1)
 {
     flex-basis: 35%;
+}
+
+.setting > :nth-child(2)
+{
+    flex-basis: 65%;
 }
 
 .setting span
@@ -532,6 +553,8 @@ body
     font-size: inherit;
     width: 80%;
     border-radius: 0.5em;
+    margin: 0.2em;
+
 
     -webkit-appearance: none;  /* Override default CSS styles*/
     appearance: none;
@@ -541,7 +564,7 @@ body
 
     outline: none; /*Remove outline*/
     opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-    -webkit-transition: .1s; /* 0.2 seconds transition on hover */
+    -webkit-transition: opacity .1s; /* 0.2 seconds transition on hover */
     transition: opacity .1s;
 }
 
@@ -552,23 +575,77 @@ body
 
 .slider-setting::-webkit-slider-thumb
 {
-    -webkit-appearance: none; /* Override default look */
+    -webkit-appearance: none;
     appearance: none;
-    width: 1em; /* Set a specific slider handle width */
-    height: 2em; /* Slider handle height */
+    width: 0.9em;
+    height: 1.9em;
     border-radius: 0.5em;
-    background: #000000; /* Green background */
-    cursor: pointer; /* Cursor on hover */
+    background: #032207;
+    cursor: pointer;
 }
 
 .slider-setting::-moz-range-thumb 
 {
-    width: 0.7em; /* Set a specific slider handle width */
-    height: 1.6em; /* Slider handle height */
-    background: #000000; /* Green background */
-    cursor: pointer; /* Cursor on hover */
+    width: 0.9em;
+    height: 1.9em;
+    background: #032207;
+    cursor: pointer;
 }
 
+/* RADIO SETTING */
+/* https://www.youtube.com/watch?v=sSF0bXFUFGM&ab_channel=CodingArtist */
+
+.radio-setting
+{
+    display: inline-flex;
+    gap: 0.3em;
+    justify-content: center;
+    
+
+    --radio-color: #c73a70;
+}
+
+.radio-setting > input[type='radio']
+{
+    display:none;
+}
+
+.radio-setting >  label
+{
+    flex-basis: 100%;
+    text-align: center;
+
+    cursor: pointer;
+
+    background-color: white;
+    border: solid var(--radio-color) 0.15em;
+    box-sizing: border-box;
+    height: 1.6em;
+    border-radius: 1.3em;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    padding: 0;
+    font-weight: bold;
+    color: var(--radio-color);
+    
+    transition: background-color 0.1s;
+    -webkit-transition: background-color 0.1s;
+}
+
+/* .radio-setting > label:hover
+{
+    --radio-color: var(--radio-color-hover);
+} */
+
+.radio-setting > input[type='radio']:checked + label, .radio-setting label:hover
+{
+    color:white;
+    background-color: var(--radio-color);
+}
 
 /* ROOMLIST */
 
