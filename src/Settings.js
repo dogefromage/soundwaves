@@ -13,7 +13,10 @@ class Settings extends EventHandler
 
         for (let { propertyName, defaultVal } of this.settingsList)
         {
-            this[propertyName] = defaultVal;
+            if (propertyName) // sometimes is null because descriptions
+            {
+                this[propertyName] = defaultVal;
+            }
         }
     }
 
@@ -22,7 +25,10 @@ class Settings extends EventHandler
         let arr = [];
         for (let { propertyName } of this.settingsList)
         {
-            arr.push(this[propertyName]);
+            if (propertyName)
+            {
+                arr.push(this[propertyName]);
+            }
         }
         return arr;
     }
@@ -35,17 +41,22 @@ class Settings extends EventHandler
         {
             return;
         }
-        
-        if (settingsList.length != arr.length)
-        {
-            return;
-        }
 
         let arrCopy = arr.slice();
 
         for (let { propertyName, defaultVal } of settingsList)
         {
-            settings[propertyName] = arrCopy.shift() || defaultVal;
+            if (propertyName)
+            {
+                if (arrCopy.length > 0)
+                {
+                    settings[propertyName] = arrCopy.shift() || defaultVal;
+                }
+                else
+                {
+                    return undefined;
+                }
+            }
         }
         return settings;
     }

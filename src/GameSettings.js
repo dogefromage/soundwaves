@@ -1,9 +1,10 @@
 
 const Settings = require('./Settings');
-const { Setting, HiddenSetting, SliderSetting, RadioSetting } = require('./SettingsComponents');
+const { Setting, HiddenSetting, SliderSetting, RadioSetting, Description } = require('./SettingsComponents');
 
 const gameSettingsTemplate = 
 [
+    new Description('Herjlaksdflak lk asd jskdf eufhskjd j ksjd ue fksj udhksjdhf u skjdf udjfhjsk usduf skd jkj su sudf ksk k sudf jjhksdjf uskdfheusif kvjs kh u ksejhf hf '),
     new SliderSetting('maxPlayers', 10, 'Number of Players', 2, 10, 1),
     new SliderSetting('mapSize', 3, 'Map Size', 1, 5, 1),
     new SliderSetting('playerSize', 0.04, 'Player Size', 0.02, 0.08, 0.0005),

@@ -159,7 +159,29 @@ class RadioSetting extends Setting
     }
 }
 
+class Description extends Setting
+{
+    constructor(text)
+    {
+        // propertyName = null ==> no property on settingsObject
+        super(null, "", "");
+        this.text = text;
+    }
+
+    createElement()
+    {
+        if (document)
+        {
+            const el = document.createElement('p');
+            el.classList.add('description');
+            el.innerText = this.text;
+
+            return el;
+        }
+    }
+}
+
 module.exports = 
 {
-    Setting, HiddenSetting, SliderSetting, RadioSetting
+    HiddenSetting, SliderSetting, RadioSetting, Description
 }

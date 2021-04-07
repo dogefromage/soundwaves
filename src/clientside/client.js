@@ -285,19 +285,14 @@ function resizeCanvas()
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-//////////////////// SETTINGS ////////////////////
+/**
+ * Only defined if a panel is opened
+ */
+let currentPanel;
 
+//////////////////// USERSETTINGS ////////////////////
 // takes old settings automatically from localStorage if exists
 const userSettings = new UserSettings(isMobile);
-// generates panel and fills it with settings
-userSettings.generateUI();
-
-const settingsButton = document.getElementById('settings-button');
-settingsButton.addEventListener('click', () =>
-{
-    userSettings.panel.changeVisibility();
-});
-
 // joystickSize
 const updateJoystickSize = (newVal) =>
 {
@@ -307,14 +302,35 @@ const updateJoystickSize = (newVal) =>
 updateJoystickSize();
 userSettings.addEventListener('joystickSize', updateJoystickSize);
 
-//////////////////// LEVEL LIST ////////////////////
+// USERSETTINGS UI
+// generates panel and fills it with settings
+userSettings.generateUI();
+const settingsButton = document.getElementById('settings-button');
+settingsButton.addEventListener('click', () =>
+{
+    const userSettingsPanel = userSettings.panel;
+    if (userSettingsPanel.isPanelOn)
+    {
+        userSettingsPanel.changeVisibility(false);
+        currentPanel = null;
+    }
+    else
+    {   
+        if (currentPanel)
+        {
+            currentPanel.changeVisibility(false);
+        }
+        userSettingsPanel.changeVisibility(true);
+        currentPanel = userSettingsPanel;
+    }
+});
 
+//////////////////// LEVEL LIST ////////////////////
 const roomListButton = document.getElementById('rooms-button');
-let roomsListShowing = false;
 let roomsListPanel;
 roomListButton.addEventListener('click', () =>
 {
-    if (!roomsListShowing)
+    if (!roomsListPanel)
     {
         roomsListPanel = new Panel('Rooms');
         roomsListPanel.generate();
