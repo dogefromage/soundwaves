@@ -22,7 +22,7 @@ export class ClientPlayer extends ClientEntity
 		ctx.font = "bold 14px Trebuchet MS";
 		ctx.textAlign = 'center';
 		let textPos = camera.WorldToCanvas({ x: this.getCenterX(), y: this.getBottom() });
-		ctx.fillText(this.name, textPos.x, textPos.y + 18);
+		ctx.fillText(this.name, Math.floor(textPos.x), Math.floor(textPos.y) + 18);
 	}
 }
 
