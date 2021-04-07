@@ -4,12 +4,12 @@ const Panel = require('./clientside/Panel');
 
 class Settings extends EventHandler
 {
-    constructor(settingsList, title)
+    constructor(settingsList)
     {
         super();
 
         this.settingsList = settingsList;
-        this.panel = new Panel(title);
+        this.panel;
 
         for (let { propertyName, defaultVal } of this.settingsList)
         {
@@ -61,7 +61,7 @@ class Settings extends EventHandler
         return settings;
     }
 
-    generateUI()
+    createUI(panelTitle)
     {
         let items = [];
 
@@ -83,12 +83,13 @@ class Settings extends EventHandler
             }
         }
 
-        this.panel.generate(items);
+        this.panel = new Panel(panelTitle, items);
     }
 
     destroyUI()
     {
         this.panel.destroy();
+        this.panel = null;
     }
 }
 

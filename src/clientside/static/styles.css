@@ -197,6 +197,17 @@ body
     cursor: pointer; /* Cursor on hover */
 }
 
+button
+{
+    background: #333;
+    color: white;
+}
+
+button:hover
+{
+    cursor:pointer;
+}
+
 .card button
 {
     font-size: inherit;
@@ -206,9 +217,7 @@ body
     border: 0;
     padding: 0;
     border-radius: 0.5em;
-    background: #222;
     transition-duration: 0.1s;
-    color: white;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -218,7 +227,7 @@ body
     user-select: none;
 }
 
-.card button:active
+button:active
 {
     background: #000;
 }
@@ -228,12 +237,12 @@ button:focus
     outline: none;
 }
 
-.card .error
+.error
 {
     font-weight: bold;
     color: red;
     margin: .7em;
-    margin-bottom: 0;
+    margin-bottom: .4;
 }
 
 .hidden
@@ -489,6 +498,7 @@ button:focus
     height: 70%;
     max-width: 560px;
     margin: 3vh;
+    position: relative;
 
     border: white solid 2em;
     box-sizing: border-box;
@@ -530,7 +540,7 @@ button:focus
 
 .setting
 {
-    height: 3em;
+    min-height: 2.8em;
     margin: .6em;
     width: 90%;
     display: flex;
@@ -539,19 +549,18 @@ button:focus
 
 .setting > :nth-child(1)
 {
-    flex-basis: 35%;
+    flex-basis: 40%;
 }
 
 .setting > :nth-child(2)
 {
-    flex-basis: 65%;
+    flex-basis: 60%;
 }
 
 .setting span
 {
     font-size: 1.1em;
     font-weight: bold;
-    margin: 0.3em;
 }
 
 .slider-setting
@@ -721,16 +730,20 @@ button:focus
     font-size: 1.1em;
     width: 90%;
     margin: .6em;
-    height: 1.6em;
+    min-height: 2em;
     border: 0;
     padding: 0;
     border-radius: 0.5em;
     background: #222;
     transition-duration: 0.1s;
     color: white;
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
 }
 
 .description
 {
     width: 90%;
+    text-align: justify;
 }

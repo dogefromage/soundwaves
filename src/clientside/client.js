@@ -288,13 +288,13 @@ window.addEventListener('resize', resizeCanvas);
 /**
  * Only defined if a panel is opened
  */
-let currentPanel;
+let currentPanel = undefined;
 
 //////////////////// USERSETTINGS ////////////////////
 // takes old settings automatically from localStorage if exists
 const userSettings = new UserSettings(isMobile);
 // joystickSize
-const updateJoystickSize = (newVal) =>
+const updateJoystickSize = () =>
 {
     const joystick = document.getElementById('joystick-container');
     joystick.style.setProperty('--joystick-size', userSettings.joystickSize);
@@ -302,47 +302,73 @@ const updateJoystickSize = (newVal) =>
 updateJoystickSize();
 userSettings.addEventListener('joystickSize', updateJoystickSize);
 
-// USERSETTINGS UI
-// generates panel and fills it with settings
-userSettings.generateUI();
-const settingsButton = document.getElementById('settings-button');
-settingsButton.addEventListener('click', () =>
+const updateQuality = () =>
 {
-    const userSettingsPanel = userSettings.panel;
-    if (userSettingsPanel.isPanelOn)
+    let factor = 1;
+    if (userSettings.graphics == "low")
+        factor = 1;
+    else if (userSettings.graphics == "high")
+        factor = 2;
+    else if (userSettings.graphics == "ultra")
+        factor = 4;
+
+    if (game.settings)
     {
-        userSettingsPanel.changeVisibility(false);
+        game.settings.waveQualityFactor = factor;
+    }
+    else
+    {
+        // repeat function if game hasn't received its settings from the server yet
+        setTimeout(updateQuality, 20);
+    }
+}
+updateQuality();
+userSettings.addEventListener('graphics', updateQuality);
+
+document.getElementById('settings-button').addEventListener('click', () =>
+{
+    if (currentPanel && (currentPanel == userSettings.panel))
+    {
+        userSettings.destroyUI();
         currentPanel = null;
     }
     else
-    {   
+    {
         if (currentPanel)
         {
-            currentPanel.changeVisibility(false);
+            currentPanel.destroy();
         }
-        userSettingsPanel.changeVisibility(true);
-        currentPanel = userSettingsPanel;
+        userSettings.createUI();
+        currentPanel = userSettings.panel;
     }
 });
 
+let roomListPanel = null;
 //////////////////// LEVEL LIST ////////////////////
-const roomListButton = document.getElementById('rooms-button');
-let roomsListPanel;
-roomListButton.addEventListener('click', () =>
+document.getElementById('rooms-button').addEventListener('click', () =>
 {
-    if (!roomsListPanel)
+    if (currentPanel && (currentPanel == roomListPanel))
     {
-        roomsListPanel = new Panel('Rooms');
-        roomsListPanel.generate();
-        roomsListPanel.changeVisibility(true);
-        roomsListShowing = true;
+        roomListPanel.destroy();
+        currentPanel = roomListPanel = null;
+    }
+    else
+    {
+        if (currentPanel)
+        {
+            currentPanel.destroy();
+        }
+
+        roomListPanel = new Panel('Rooms', []);
+        currentPanel = roomListPanel;
 
         socket.emit('request-room-list', (roomList) => 
         {
-            if (roomsListShowing)
+            if (roomListPanel)
             {
                 if (roomList.length > 0)
                 {
+                    // get location
                     let urlArr = window.location.href.split('/');
                     let currentRoom = urlArr.pop();
                     if (currentRoom == '')
@@ -375,37 +401,38 @@ roomListButton.addEventListener('click', () =>
                             roomEl.appendChild(arrowIcon);
                         }
 
-                        roomsListPanel.addContent(roomEl);
+                        roomListPanel.addContent(roomEl);
                     }
                 }
             }
         });
     }
-    else
-    {
-        roomsListPanel.destroy();
-        roomsListPanel = null;
-        roomsListShowing = false;
-    }
 });
 
-const createRoomButton = document.getElementById('create-room-button');
-let createRoomShowing = false;
-let createRoomGameSettings;
-createRoomButton.addEventListener('click', () =>
+let createRoomSettings = new GameSettings();
+document.getElementById('create-room-button').addEventListener('click', () =>
 {
-    if (!createRoomShowing)
+    if (currentPanel && (currentPanel == createRoomSettings.panel))
     {
-        createRoomGameSettings = new GameSettings();
-        createRoomGameSettings.generateUI();
-        //<button id="submit-room-button" class="settings-submit no-select">Submit</button>
-        const submitButton = document.createElement('buttom');
+        createRoomSettings.destroyUI();
+        currentPanel = null;
+    }
+    else
+    {
+        if (currentPanel)
+        {
+            currentPanel.destroy();
+        }
+        createRoomSettings.createUI();
+        currentPanel = createRoomSettings.panel;
+
+        const submitButton = document.createElement('button');
         submitButton.classList.add('settings-submit');
         submitButton.classList.add('no-select');
         submitButton.innerText = "Create";
         submitButton.addEventListener('click', () =>
         {
-            const settings = createRoomGameSettings.toArray();
+            const settings = createRoomSettings.toArray();
             socket.emit('request-new-room', settings, 
                 ([ responce = false, linkOrErrorMsg = "Couldn't create this room. Sorry!" ]) =>
             {
@@ -415,22 +442,24 @@ createRoomButton.addEventListener('click', () =>
                 }
                 else
                 {
-                    const errorElement = document.createElement('p');
-                    errorElement.classList.add('error');
-                    errorElement.innerText = linkOrErrorMsg;
-                    createRoomGameSettings.panel.element.appendChild(errorElement);
+                    // delete old errors
+                    let errors = createRoomSettings.panel.element.querySelectorAll('p[class="error"]');
+                    for (let error of errors)
+                    {
+                        error.parentElement.removeChild(error);
+                    }
+                    setTimeout(() =>
+                    {
+                        // create new error
+                        const errorElement = document.createElement('p');
+                        errorElement.classList.add('error');
+                        errorElement.innerText = linkOrErrorMsg;
+                        createRoomSettings.panel.element.insertBefore(errorElement, submitButton);
+                    }, 100);
                 }
             });
         });
-        createRoomGameSettings.panel.element.appendChild(submitButton);
-        createRoomGameSettings.panel.changeVisibility(true);
-        createRoomShowing = true;
-    }
-    else
-    {
-        createRoomGameSettings.destroyUI();
-        createRoomGameSettings = null;
-        createRoomShowing = false;
+        createRoomSettings.panel.element.appendChild(submitButton);
     }
 });
 

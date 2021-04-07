@@ -9,6 +9,15 @@ export class ClientSoundwave extends Soundwave
         const color = new Color(co.r, co.g, co.b, co.a);
         const settings = new SoundwaveSettings(...se);
 
+        if (game.settings)
+        {
+            if (game.settings.waveQualityFactor)
+            {
+                settings.resolutionClient *= game.settings.waveQualityFactor;
+            }
+        }
+
+
         super(game, ce.x, ce.y, null, settings, color, true);
         this.age = ag;
     }

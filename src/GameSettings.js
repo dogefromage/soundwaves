@@ -25,7 +25,7 @@ class GameSettings extends Settings
 {
     constructor()
     {
-        super(gameSettingsTemplate, "Create Room");
+        super(gameSettingsTemplate);
     }
 
     toArray()
@@ -36,6 +36,11 @@ class GameSettings extends Settings
     static FromArray(arr)
     {
         return super.FromArray(gameSettingsTemplate, GameSettings, arr);
+    }
+
+    createUI()
+    {
+        super.createUI('Create Room');
     }
 }
 
