@@ -36,12 +36,12 @@ class SoundwaveSettings
         return new SoundwaveSettings(0.6, 0.5, 0, 0, 2 * Math.PI, 0, 50);
     }
 
-    static hurt()
+    static hurt(qualitySetting)
     {
         return new SoundwaveSettings(0.3, 0.8, 0, 0, 2 * Math.PI, 0, 60);
     }
 
-    static death()
+    static death(qualitySetting)
     {
         return new SoundwaveSettings(0.1, 3, 0, 0, 2 * Math.PI, 0, 50);
     }

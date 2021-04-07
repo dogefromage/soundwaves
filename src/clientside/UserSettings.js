@@ -1,19 +1,20 @@
 
 const Settings = require('../Settings');
-const { Setting, HiddenSetting, SliderSetting } = require('../SettingsComponents');
+const { SliderSetting, RadioSetting, Description } = require('../SettingsComponents');
 
 const userSettingsTemplate = 
 [
-    //                propertyName        default name              min     max     step
     // new SliderSetting('volume',           0,      'Volume',         0,      1,      0.01),
+    new RadioSetting('graphics', 'high', 'Graphics', [['low', 'Low'], ['high', 'High'], ['ultra', 'Ultra']]),
+    new Description('The graphics setting mainly controls the resolution of the waves. Higher looks better, but is slower.'),
     new SliderSetting('joystickSize',     1,      'Joystick Size',  0.5,    1.5,    0.01),
 ];
 
 class UserSettings extends Settings
 {
-    constructor()
+    constructor(isMobile)
     {
-        super(userSettingsTemplate, 'Settings');
+        super(userSettingsTemplate);
 
         let lastSettingsJSON = window.localStorage.getItem('fl-usersettings');
         if (lastSettingsJSON)
@@ -28,6 +29,13 @@ class UserSettings extends Settings
                         this[propertyName] = lastSettings[propertyName];
                     }
                 }
+            }
+        }
+        else
+        {
+            if (isMobile)
+            {
+                this['graphics'] = 'low';
             }
         }
 
@@ -63,6 +71,11 @@ class UserSettings extends Settings
 
         let json = JSON.stringify(settingsObj);
         window.localStorage.setItem('fl-usersettings', json);
+    }
+
+    createUI()
+    {
+        super.createUI('Settings');
     }
 }
 

@@ -5,6 +5,7 @@ const socket = require('socket.io');
 const path = require('path');
 const Logger = require('./src/Logger');
 const GameRoom = require('./src/GameRoom');
+const { GameSettings } = require('./src/GameSettings') 
 
 // // PROFILE CPU
 // const NodeProfiler = require('./NodeProfiler');
@@ -26,8 +27,17 @@ app.get('/', (req, res) =>
 {
     // select some room
     // NOT OPTIMAL O(n) CHANGE IN FUTURE
-    let randomRoom = [...gameRooms.keys()][Math.floor(Math.random() * gameRooms.size)];
-    res.redirect('/' + randomRoom);
+    let roomId;
+    if (gameRooms.size > 0)
+    {
+        roomId = [...gameRooms.keys()][Math.floor(Math.random() * gameRooms.size)];
+    }
+    else
+    {
+        roomId = 'error';
+    }
+
+    res.redirect('/' + roomId);
 });
 
 app.get('/error', (req, res) =>
@@ -49,16 +59,27 @@ const gameRooms = new Map();
 
 function createUniqueRoomID()
 {
-    throw new Error('FUNCTION NOT IMPLEMENTED');
+    let id;
+    do
+    {
+        const randNum = Math.floor(Math.random() * 10000);
+        id = "0000" + randNum;
+        id = id.substring(id.length - 4);
+    }
+    while (gameRooms.has(id));
+    return id;
 }
 
-function addRoom(id = createUniqueRoomID())
+function openRoom(settings = undefined, id = createUniqueRoomID())
 {
-    const room = new GameRoom(io, id);
     if (!gameRooms.has(id))
     {
+        const room = new GameRoom(io, id, settings);
         gameRooms.set(id, room);
+        return room;
     }
+
+    return undefined;
 }
 
 function closeRoom(id)
@@ -71,9 +92,9 @@ function closeRoom(id)
     }
 }
 
-for (let id of [ 'xyz', 'abcd', '1234' ])
+for (let i = 0; i < 1; i++)
 {
-    addRoom(id);
+    openRoom();
 }
 
 io.on('connection', (socket) => 
@@ -107,10 +128,37 @@ io.on('connection', (socket) =>
 
         for (let [ id, room ] of gameRooms)
         {
-            roomList.push([ id, room.sockets.size, room.maxSize ]);
+            const info = room.game.getInfo();
+            roomList.push( [ id, ...info ] );
         }
 
         callback(roomList);
+    });
+
+    socket.on('request-new-room', (settingsArr, callback) =>
+    {
+        let settingsObj = GameSettings.FromArray(settingsArr);
+        if (!settingsObj)
+        {
+            callback([ false, "This room couldn't be created. Sorry!" ]);
+        }
+        else if (false) // too many rooms
+        {
+            callback([ false, "There are currently too many rooms open. Try again later."]);
+        }
+        else
+        {
+            // try to create room
+            const roomOrUndef = openRoom(settingsObj);
+            if (roomOrUndef)
+            {
+                callback([ true, roomOrUndef.id ]); // room created
+            }
+            else
+            {
+                callback([ false, 'A room with this name already exists! ']);
+            }
+        }
     });
 
     socket.on('disconnect', () => 

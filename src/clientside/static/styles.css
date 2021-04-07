@@ -31,6 +31,7 @@ html
 
 .abs-full
 {
+    pointer-events: none;
     position:absolute;
     width: 100%;
     height: 100%;
@@ -42,16 +43,16 @@ html
     margin: 0;
 }
 
+.abs-full > *
+{
+    pointer-events: initial;
+}
+
 body
 {
     overflow-y: hidden;
     overflow-x: hidden;
     background-color: #000000;
-}
-
-.click-invisible
-{
-    pointer-events: none;
 }
 
 .curtain
@@ -119,9 +120,6 @@ body
     justify-content: center;
     flex-direction: column;
     align-items: center;
-
-    opacity: 1;
-    transition: 0.4s opacity ease-in-out;
 }
 
 .card h1
@@ -199,6 +197,17 @@ body
     cursor: pointer; /* Cursor on hover */
 }
 
+button
+{
+    background: #333;
+    color: white;
+}
+
+button:hover
+{
+    cursor:pointer;
+}
+
 .card button
 {
     font-size: inherit;
@@ -208,9 +217,7 @@ body
     border: 0;
     padding: 0;
     border-radius: 0.5em;
-    background: #222;
     transition-duration: 0.1s;
-    color: white;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -220,25 +227,33 @@ body
     user-select: none;
 }
 
-.card button:active
+button:active
 {
     background: #000;
 }
 
-.card button:focus
+button:focus
 {
     outline: none;
 }
 
-.card .error
+.error
 {
+    font-weight: bold;
     color: red;
     margin: .7em;
+    margin-bottom: .4;
 }
 
 .hidden
 {
     visibility: hidden;
+}
+
+.animate-opacity
+{
+    opacity: 1;
+    transition: 0.4s opacity ease-in-out;
 }
 
 .opacity-zero
@@ -427,6 +442,7 @@ body
     color: #ffffffaa;
     font-size: 2em;
     margin: .5em;
+    cursor: pointer;
 }
 
 .icons-right i:hover
@@ -456,29 +472,45 @@ body
     color: #ffffffaa;
 }
 
+.panels
+{
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    left: 4em;
+    right: 4em;
+    width: auto;
+    height: auto;
+}
+
+@media (orientation: portrait)
+{
+    .panels
+    {
+        flex-direction: column;
+    }
+}
+
 .panel
 {
-    position: absolute;
-    margin: auto;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-
     width: 80%;
-    height: 80%;
-    max-width: 640px;
+    height: 70%;
+    max-width: 560px;
+    margin: 3vh;
+    position: relative;
 
     border: white solid 2em;
     box-sizing: border-box;
 
     background-color: #fff;
     border-radius: 40px;
-    box-shadow: 0px 0px 20px 0px #00000088;
+    box-shadow: 0px 0px 60px 0px #00000077;
 
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex-shrink: 0;
 
     overflow-x: hidden;
     overflow-y: scroll;
@@ -508,23 +540,27 @@ body
 
 .setting
 {
-    height: 3em;
+    min-height: 2.8em;
+    margin: .6em;
     width: 90%;
     display: flex;
     align-items: center;
-    margin: 1em;
 }
 
-.setting :nth-child(1)
+.setting > :nth-child(1)
 {
-    flex-basis: 35%;
+    flex-basis: 40%;
+}
+
+.setting > :nth-child(2)
+{
+    flex-basis: 60%;
 }
 
 .setting span
 {
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: bold;
-    margin: 0.3em;
 }
 
 .slider-setting
@@ -532,6 +568,8 @@ body
     font-size: inherit;
     width: 80%;
     border-radius: 0.5em;
+    margin: 0.2em;
+
 
     -webkit-appearance: none;  /* Override default CSS styles*/
     appearance: none;
@@ -541,7 +579,7 @@ body
 
     outline: none; /*Remove outline*/
     opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-    -webkit-transition: .1s; /* 0.2 seconds transition on hover */
+    -webkit-transition: opacity .1s; /* 0.2 seconds transition on hover */
     transition: opacity .1s;
 }
 
@@ -552,23 +590,77 @@ body
 
 .slider-setting::-webkit-slider-thumb
 {
-    -webkit-appearance: none; /* Override default look */
+    -webkit-appearance: none;
     appearance: none;
-    width: 1em; /* Set a specific slider handle width */
-    height: 2em; /* Slider handle height */
+    width: 0.9em;
+    height: 1.9em;
     border-radius: 0.5em;
-    background: #000000; /* Green background */
-    cursor: pointer; /* Cursor on hover */
+    background: #032207;
+    cursor: pointer;
 }
 
 .slider-setting::-moz-range-thumb 
 {
-    width: 0.7em; /* Set a specific slider handle width */
-    height: 1.6em; /* Slider handle height */
-    background: #000000; /* Green background */
-    cursor: pointer; /* Cursor on hover */
+    width: 0.9em;
+    height: 1.9em;
+    background: #032207;
+    cursor: pointer;
 }
 
+/* RADIO SETTING */
+/* https://www.youtube.com/watch?v=sSF0bXFUFGM&ab_channel=CodingArtist */
+
+.radio-setting
+{
+    display: inline-flex;
+    gap: 0.3em;
+    justify-content: center;
+    
+
+    --radio-color: #c73a70;
+}
+
+.radio-setting > input[type='radio']
+{
+    display:none;
+}
+
+.radio-setting >  label
+{
+    flex-basis: 100%;
+    text-align: center;
+
+    cursor: pointer;
+
+    background-color: white;
+    border: solid var(--radio-color) 0.15em;
+    box-sizing: border-box;
+    height: 1.6em;
+    border-radius: 1.3em;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    padding: 0;
+    font-weight: bold;
+    color: var(--radio-color);
+    
+    transition: background-color 0.1s;
+    -webkit-transition: background-color 0.1s;
+}
+
+/* .radio-setting > label:hover
+{
+    --radio-color: var(--radio-color-hover);
+} */
+
+.radio-setting > input[type='radio']:checked + label, .radio-setting label:hover
+{
+    color:white;
+    background-color: var(--radio-color);
+}
 
 /* ROOMLIST */
 
@@ -629,4 +721,29 @@ body
     position: absolute;
     left: 80%;
     font-size: 1.4em;
+}
+
+/* CREATE LEVEL */
+
+.settings-submit
+{
+    font-size: 1.1em;
+    width: 90%;
+    margin: .6em;
+    min-height: 2em;
+    border: 0;
+    padding: 0;
+    border-radius: 0.5em;
+    background: #222;
+    transition-duration: 0.1s;
+    color: white;
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+}
+
+.description
+{
+    width: 90%;
+    text-align: justify;
 }

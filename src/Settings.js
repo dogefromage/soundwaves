@@ -4,16 +4,19 @@ const Panel = require('./clientside/Panel');
 
 class Settings extends EventHandler
 {
-    constructor(settingsList, title)
+    constructor(settingsList)
     {
         super();
 
         this.settingsList = settingsList;
-        this.panel = new Panel(title);
+        this.panel;
 
         for (let { propertyName, defaultVal } of this.settingsList)
         {
-            this[propertyName] = defaultVal;
+            if (propertyName) // sometimes is null because descriptions
+            {
+                this[propertyName] = defaultVal;
+            }
         }
     }
 
@@ -22,7 +25,10 @@ class Settings extends EventHandler
         let arr = [];
         for (let { propertyName } of this.settingsList)
         {
-            arr.push(this[propertyName]);
+            if (propertyName)
+            {
+                arr.push(this[propertyName]);
+            }
         }
         return arr;
     }
@@ -30,18 +36,32 @@ class Settings extends EventHandler
     static FromArray(settingsList, Type, arr)
     {
         let settings = new Type();
-        
+
+        if (!(arr instanceof Array))
+        {
+            return;
+        }
+
         let arrCopy = arr.slice();
 
         for (let { propertyName, defaultVal } of settingsList)
         {
-            settings[propertyName] = arrCopy.shift() || defaultVal;
+            if (propertyName)
+            {
+                if (arrCopy.length > 0)
+                {
+                    settings[propertyName] = arrCopy.shift() || defaultVal;
+                }
+                else
+                {
+                    return undefined;
+                }
+            }
         }
-
         return settings;
     }
 
-    generateUI()
+    createUI(panelTitle)
     {
         let items = [];
 
@@ -49,18 +69,27 @@ class Settings extends EventHandler
         for (let setting of this.settingsList)
         {
             const currValue = this[setting.propertyName];
-            const onchange = (e) =>
+            const onchange = (value) =>
             {
-                this[setting.propertyName] = e.srcElement.value;
+                this[setting.propertyName] = value;
                 this.call(setting.propertyName); // calls event
             }
 
             const settingElement = setting.createElement(currValue, onchange);
 
-            items.push(settingElement)
+            if (settingElement)
+            {
+                items.push(settingElement)
+            }
         }
 
-        this.panel.generate(items);
+        this.panel = new Panel(panelTitle, items);
+    }
+
+    destroyUI()
+    {
+        this.panel.destroy();
+        this.panel = null;
     }
 }
 

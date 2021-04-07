@@ -2,6 +2,7 @@ import { ClientGame } from './ClientGame';
 import { Statusbar, XPBar } from './Bars';
 import { UserSettings } from './UserSettings';
 import Panel from './Panel';
+import { GameSettings } from '../GameSettings';
 
 window.socket = io.connect(location.host, { roomId: location.pathname });
 
@@ -284,19 +285,14 @@ function resizeCanvas()
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-//////////////////// SETTINGS ////////////////////
+/**
+ * Only defined if a panel is opened
+ */
+let currentPanel = undefined;
 
+//////////////////// USERSETTINGS ////////////////////
 // takes old settings automatically from localStorage if exists
-const userSettings = new UserSettings();
-// generates panel and fills it with settings
-userSettings.generateUI();
-
-const settingsButton = document.getElementById('settings-button');
-settingsButton.addEventListener('click', () =>
-{
-    userSettings.panel.changeVisibility();
-});
-
+const userSettings = new UserSettings(isMobile);
 // joystickSize
 const updateJoystickSize = () =>
 {
@@ -306,26 +302,73 @@ const updateJoystickSize = () =>
 updateJoystickSize();
 userSettings.addEventListener('joystickSize', updateJoystickSize);
 
-//////////////////// LEVEL LIST ////////////////////
-
-const roomListButton = document.getElementById('rooms-button');
-let roomsListShowing = false;
-let roomsListPanel;
-roomListButton.addEventListener('click', () =>
+const updateQuality = () =>
 {
-    if (!roomsListShowing)
+    let factor = 1;
+    if (userSettings.graphics == "low")
+        factor = 1;
+    else if (userSettings.graphics == "high")
+        factor = 2;
+    else if (userSettings.graphics == "ultra")
+        factor = 4;
+
+    if (game.settings)
     {
-        roomsListPanel = new Panel('Rooms');
-        roomsListPanel.generate([]);
-        roomsListPanel.changeVisibility(true);
-        roomsListShowing = true;
+        game.settings.waveQualityFactor = factor;
+    }
+    else
+    {
+        // repeat function if game hasn't received its settings from the server yet
+        setTimeout(updateQuality, 20);
+    }
+}
+updateQuality();
+userSettings.addEventListener('graphics', updateQuality);
+
+document.getElementById('settings-button').addEventListener('click', () =>
+{
+    if (currentPanel && (currentPanel == userSettings.panel))
+    {
+        userSettings.destroyUI();
+        currentPanel = null;
+    }
+    else
+    {
+        if (currentPanel)
+        {
+            currentPanel.destroy();
+        }
+        userSettings.createUI();
+        currentPanel = userSettings.panel;
+    }
+});
+
+let roomListPanel = null;
+//////////////////// LEVEL LIST ////////////////////
+document.getElementById('rooms-button').addEventListener('click', () =>
+{
+    if (currentPanel && (currentPanel == roomListPanel))
+    {
+        roomListPanel.destroy();
+        currentPanel = roomListPanel = null;
+    }
+    else
+    {
+        if (currentPanel)
+        {
+            currentPanel.destroy();
+        }
+
+        roomListPanel = new Panel('Rooms', []);
+        currentPanel = roomListPanel;
 
         socket.emit('request-room-list', (roomList) => 
         {
-            if (roomsListShowing)
+            if (roomListPanel)
             {
                 if (roomList.length > 0)
                 {
+                    // get location
                     let urlArr = window.location.href.split('/');
                     let currentRoom = urlArr.pop();
                     if (currentRoom == '')
@@ -358,20 +401,67 @@ roomListButton.addEventListener('click', () =>
                             roomEl.appendChild(arrowIcon);
                         }
 
-                        roomsListPanel.addContent(roomEl);
+                        roomListPanel.addContent(roomEl);
                     }
                 }
             }
         });
     }
-    else
-    {
-        roomsListPanel.destroy();
-        roomsListPanel = null;
-        roomsListShowing = false;
-    }
 });
 
+let createRoomSettings = new GameSettings();
+document.getElementById('create-room-button').addEventListener('click', () =>
+{
+    if (currentPanel && (currentPanel == createRoomSettings.panel))
+    {
+        createRoomSettings.destroyUI();
+        currentPanel = null;
+    }
+    else
+    {
+        if (currentPanel)
+        {
+            currentPanel.destroy();
+        }
+        createRoomSettings.createUI();
+        currentPanel = createRoomSettings.panel;
+
+        const submitButton = document.createElement('button');
+        submitButton.classList.add('settings-submit');
+        submitButton.classList.add('no-select');
+        submitButton.innerText = "Create";
+        submitButton.addEventListener('click', () =>
+        {
+            const settings = createRoomSettings.toArray();
+            socket.emit('request-new-room', settings, 
+                ([ responce = false, linkOrErrorMsg = "Couldn't create this room. Sorry!" ]) =>
+            {
+                if (responce)
+                {
+                    window.location.href = linkOrErrorMsg;
+                }
+                else
+                {
+                    // delete old errors
+                    let errors = createRoomSettings.panel.element.querySelectorAll('p[class="error"]');
+                    for (let error of errors)
+                    {
+                        error.parentElement.removeChild(error);
+                    }
+                    setTimeout(() =>
+                    {
+                        // create new error
+                        const errorElement = document.createElement('p');
+                        errorElement.classList.add('error');
+                        errorElement.innerText = linkOrErrorMsg;
+                        createRoomSettings.panel.element.insertBefore(errorElement, submitButton);
+                    }, 100);
+                }
+            });
+        });
+        createRoomSettings.panel.element.appendChild(submitButton);
+    }
+});
 
 // let s = 
 //     '  __ _          _                                        _'+"\n" +

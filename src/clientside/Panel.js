@@ -2,42 +2,16 @@
 
 class Panel
 {
-    constructor(title, parentObj = 'panels')
+    constructor(title, content, parentObj = 'panels')
     {
         this.title = title;
         this.parentObj = parentObj;
-        this.element;
-        this.isPanelOn = false;
-    }
 
-    changeVisibility(show = !this.isPanelOn)
-    {
-        if (!this.element) return;
-
-        if (show)
-        {
-            this.element.classList.remove('disabled');
-            this.isPanelOn = true;
-        }
-        else
-        {
-            this.element.classList.add('disabled');
-            this.isPanelOn = false;
-        }
-    }
-
-    generate(itemsIterable)
-    {
         const parent = document.getElementById(this.parentObj);
-        if (!parent)
-        {
-            return;
-        }
 
         this.element = document.createElement('div');
         this.element.classList.add('panel');
         this.element.classList.add('no-select');
-        this.element.classList.add('disabled');
         parent.appendChild(this.element);
 
         // title
@@ -45,11 +19,27 @@ class Panel
         titleEl.textContent = this.title;
         this.element.appendChild(titleEl);
 
-        for (const item of itemsIterable)
+        for (const item of content)
         {
             this.addContent(item);
         }
     }
+
+    // changeVisibility(show = !this.isPanelOn)
+    // {
+    //     if (!this.element) return;
+
+    //     if (show)
+    //     {
+    //         this.element.classList.remove('disabled');
+    //         this.isPanelOn = true;
+    //     }
+    //     else
+    //     {
+    //         this.element.classList.add('disabled');
+    //         this.isPanelOn = false;
+    //     }
+    // }
 
     addContent(item)
     {
