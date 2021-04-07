@@ -2,6 +2,7 @@ import { ClientGame } from './ClientGame';
 import { Statusbar, XPBar } from './Bars';
 import { UserSettings } from './UserSettings';
 import Panel from './Panel';
+import { GameSettings } from '../GameSettings';
 
 window.socket = io.connect(location.host, { roomId: location.pathname });
 
@@ -372,6 +373,50 @@ roomListButton.addEventListener('click', () =>
     }
 });
 
+const createRoomButton = document.getElementById('create-room-button');
+let createRoomShowing = false;
+let createRoomGameSettings;
+createRoomButton.addEventListener('click', () =>
+{
+    if (!createRoomShowing)
+    {
+        createRoomGameSettings = new GameSettings();
+        createRoomGameSettings.generateUI();
+        //<button id="submit-room-button" class="settings-submit no-select">Submit</button>
+        const submitButton = document.createElement('buttom');
+        submitButton.classList.add('settings-submit');
+        submitButton.classList.add('no-select');
+        submitButton.innerText = "Create";
+        submitButton.addEventListener('click', () =>
+        {
+            const settings = createRoomGameSettings.toArray();
+            socket.emit('request-new-room', settings, 
+                ([ responce = false, linkOrErrorMsg = "Couldn't create this room. Sorry!" ]) =>
+            {
+                if (responce)
+                {
+                    window.location.href = linkOrErrorMsg;
+                }
+                else
+                {
+                    const errorElement = document.createElement('p');
+                    errorElement.classList.add('error');
+                    errorElement.innerText = linkOrErrorMsg;
+                    createRoomGameSettings.panel.element.appendChild(errorElement);
+                }
+            });
+        });
+        createRoomGameSettings.panel.element.appendChild(submitButton);
+        createRoomGameSettings.panel.changeVisibility(true);
+        createRoomShowing = true;
+    }
+    else
+    {
+        createRoomGameSettings.destroyUI();
+        createRoomGameSettings = null;
+        createRoomShowing = false;
+    }
+});
 
 // let s = 
 //     '  __ _          _                                        _'+"\n" +

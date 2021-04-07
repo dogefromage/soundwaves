@@ -30,14 +30,23 @@ class Settings extends EventHandler
     static FromArray(settingsList, Type, arr)
     {
         let settings = new Type();
+
+        if (!(arr instanceof Array))
+        {
+            return;
+        }
         
+        if (settingsList.length != arr.length)
+        {
+            return;
+        }
+
         let arrCopy = arr.slice();
 
         for (let { propertyName, defaultVal } of settingsList)
         {
             settings[propertyName] = arrCopy.shift() || defaultVal;
         }
-
         return settings;
     }
 
@@ -57,10 +66,18 @@ class Settings extends EventHandler
 
             const settingElement = setting.createElement(currValue, onchange);
 
-            items.push(settingElement)
+            if (settingElement)
+            {
+                items.push(settingElement)
+            }
         }
 
         this.panel.generate(items);
+    }
+
+    destroyUI()
+    {
+        this.panel.destroy();
     }
 }
 

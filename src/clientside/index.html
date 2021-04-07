@@ -53,6 +53,7 @@
             <i id="settings-button" class="fas fa-cog"></i>
             <i id="input-type-button" class="fas fa-mobile-alt"></i>
             <i id="rooms-button" class="fas fa-list"></i>
+            <i id="create-room-button" class="far fa-plus-square"></i>
         </div>
 
         <div id="join-card" class="card animate-opacity">
@@ -60,7 +61,7 @@
             <input id=nameInput class="text-input no-outline" type=text placeholder="Player name" autocomplete="off" maxlength="30">
             <input id=colorInput class="color-input" type=range min="1" max="100" value="50">
             <script> document.getElementById('colorInput').value = Math.floor(Math.random() * 100); </script>
-            <button onclick="joinGame()">Join game</button>
+            <button onclick="joinGame()" class="no-select">Join game</button>
             <p id="nameError" class="disabled error">ERROR</p>
         </div>
 
@@ -86,6 +87,7 @@
                     <span>ASDASDASD</span>
                     <input class="slider-setting" type=range min=0 max=100 value=50>
                 </div>
+                <button id="submit-room-button" class="settings-submit no-select">Submit</button>
             </div> -->
         </div>
 

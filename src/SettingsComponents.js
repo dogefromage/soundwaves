@@ -75,7 +75,7 @@ class SliderSetting extends Setting
             {
                 slider.addEventListener('change', (e) =>
                 {
-                    onchange(e.srcElement.value); // calls callback with new value
+                    onchange(Number(e.srcElement.value)); // calls callback with new value
                 });
             }
             el.appendChild(slider);
@@ -161,5 +161,5 @@ class RadioSetting extends Setting
 
 module.exports = 
 {
-    	Setting, HiddenSetting, SliderSetting, RadioSetting
+    Setting, HiddenSetting, SliderSetting, RadioSetting
 }
