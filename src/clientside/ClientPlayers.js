@@ -52,13 +52,13 @@ export class ClientMainPlayer extends ClientPlayer
             this.isCharging = false;
         });
 
-        // document.addEventListener('keydown', (e) =>
-        // {
-        //     if (e.keyCode == 32)
-        //     {
-        //         this.onHurt();
-        //     }
-        // })
+        document.addEventListener('keydown', (e) =>
+        {
+            if (e.keyCode == 32)
+            {
+                this.onHurt();
+            }
+        })
     }
     
 	setData(serverObj, deltaTimeServer)
