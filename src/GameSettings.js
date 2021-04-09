@@ -6,7 +6,7 @@ const gameSettingsTemplate =
 [
     new Description('Herjlaksdflak lk asd jskdf eufhskjd j ksjd ue fksj udhksjdhf u skjdf udjfhjsk usduf skd jkj su sudf ksk k sudf jjhksdjf uskdfheusif kvjs kh u ksejhf hf '),
     new SliderSetting('maxPlayers', 10, 'Number of Players', 2, 10, 1),
-    new SliderSetting('mapSize', 1, 'Map Size', 1, 5, 1),
+    new SliderSetting('mapSize', 3, 'Map Size', 1, 5, 1),
     new SliderSetting('playerSize', 0.04, 'Player Size', 0.02, 0.08, 0.0005),
     new SliderSetting('playerSpeed', 0.4, 'Player Speed', 0.1, 1, 0.01),
     new SliderSetting('playerStepDistance', 0.24,   'Soundwave Spawn Rate', 0.15, 0.6, 0.01),
