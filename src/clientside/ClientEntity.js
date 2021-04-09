@@ -3,6 +3,8 @@ import Rect from "../Rect";
 import Color from "../Color";
 import { lerp } from '../GameMath';
 import Glow from '../Glow';
+import { ShardParticle } from './ClientParticle';
+import { ClientPlayer } from "./ClientPlayers";
 
 export class ClientEntity extends Rect
 {
@@ -15,11 +17,17 @@ export class ClientEntity extends Rect
         this.glow = new Glow();
 		this.glow.brightness = br;
 
+		this.dead = false;
+		this.isHurt = false;
+
         // for interpolating non-mainplayers
 		this.lastServerPos = new Vec2(x, y);
 		this.newServerPos = new Vec2(x, y);
 		this.serverTimeStep = null;
 		this.timeSinceLastData = 0;
+
+		// rough estimate of velocity using serverdata
+		this.v = new Vec2();
     }
 
     setData(serverObj, deltaTimeServer)
@@ -43,10 +51,23 @@ export class ClientEntity extends Rect
 			}
 
 			this.timeSinceLastData = 0;
+
+			// v = ds/dt
+			this.v = this.newServerPos.sub(this.lastServerPos).mult(1 / this.serverTimeStep);
 		}
 
 		if (serverObj.hasOwnProperty('br'))
 			this.glow.brightness = serverObj.br;
+
+		if (serverObj.hasOwnProperty('dead'))
+		{
+			this.dead = serverObj.dead;
+		}
+
+		if (serverObj.hasOwnProperty('hurt'))
+		{
+			this.isHurt = serverObj.hurt;
+		}
 	}
 
 	getBounds()
@@ -89,6 +110,82 @@ export class ClientEntity extends Rect
 			}
 		}
 	}
+
+	onHurt()
+	{
+		for (let n = 0; n < 2; n++)
+		{
+			// create random shard
+			let vertices = [];
+			for (let i = 0; i < 4; i++)
+			{
+				const pos = new Vec2(0.5, 0.5).add(
+					new Vec2(0.2 + Math.random() * 0.2, 0)
+						.rotate(Math.PI * i / 2 + Math.random()));
+				vertices.push(this.uvToCoordinates(pos));
+			}
+			const speed = 0.1 + Math.random() * 0.1;
+			const vel = new Vec2(speed, 0).rotate(2 * Math.PI * Math.random()).add(this.v);
+	
+			const particle = new ShardParticle(
+				this.game, vertices, vel, this.color.copy(), 0.3);
+			this.game.addGameObject(particle);
+		}
+	}
+
+    onDeath()
+    {
+        /**
+		 * Split rectangle into four pieces 
+         */
+        let center = 
+        [
+            0.1 + 0.8 * Math.random(),
+            0.1 + 0.8 * Math.random()
+		];
+		let left = 0.1 + 0.8 * Math.random();
+		let top = 0.1 + 0.8 * Math.random();
+		let right = 0.1 + 0.8 * Math.random();
+		let bottom = 0.1 + 0.8 * Math.random();
+
+        let pieces = 
+        [
+            [ [0,0], [top, 0], center, [0, left] ],
+            [ [top, 0], [1, 0], [1, right], center ],
+            [ center, [1, right], [1, 1], [bottom, 1] ],
+            [ [0, left], center, [bottom, 1], [0, 1] ],
+        ];
+
+        for (const piece of pieces)
+        {
+			let vertices = [];
+			let vel = new Vec2();
+			for (let [ x, y ] of piece)
+			{
+				vertices.push(this.uvToCoordinates({ x, y }));
+			}
+
+			/**
+			 * evaluate velocity as average of all directions 
+			 * from center of player to shard vertices
+			 */
+			for (const v of vertices)
+			{
+				vel.x += v.x;
+				vel.y += v.y;
+			}
+			vel.x -= this.getCenterX() * vertices.length;
+			vel.y -= this.getCenterY() * vertices.length;
+			
+			let speed = 2 + Math.random() * 1;
+			vel = vel.mult(speed);
+			vel = vel.add(this.v); // conservation of momentum
+
+            const particle = new ShardParticle(
+				this.game, vertices, vel, this.color.copy(), 0.7);
+            this.game.addGameObject(particle);
+        }
+    }
 
 	draw(ctx, camera)
 	{

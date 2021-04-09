@@ -230,6 +230,16 @@ class Player extends Entity
 			data.xp = this.xp.getLogarithmic();
 		}
 
+        if (this.dead)
+        {
+            data.dead = true;
+        }
+
+		if (this.isHurt)
+		{
+			data.hurt = true;
+		}
+
 		return data;
 	}
 }

@@ -4,7 +4,7 @@ const XP = require('./XP');
 
 class Entity extends Rect
 {
-    constructor(game, x, y, w, h, color, health)
+    constructor(game, x, y, w, h, color, maxHealth)
     {
         super(x, y, w, h);
 		
@@ -16,8 +16,10 @@ class Entity extends Rect
 		this.glow = new Glow();
 		this.hurtCooldown = this.game.settings.spawnCooldown;
 		
-		this.health = health;
+		this.health = this.maxHealth = maxHealth;
+		this.timeSinceLastDmg = 0;
 
+		this.isHurt = false;
 		this.dead = false;
 
 		this.xp = new XP();
@@ -39,6 +41,17 @@ class Entity extends Rect
 		// color
 		this.glow.update(dt);
 		this.hurtCooldown = Math.max(0, this.hurtCooldown - dt);
+
+		// Health
+		this.timeSinceLastDmg += dt;
+		if (this.timeSinceLastDmg > this.game.settings.regenDelayTime)
+		{
+			this.health += this.game.settings.regenRate * dt;
+		}
+		if (this.health > this.maxHealth)
+		{
+			this.health = this.maxHealth;
+		}
 
 		if (this.health < 0)
 		{
@@ -67,9 +80,11 @@ class Entity extends Rect
 	{
         if (this.hurtCooldown <= 0)
         {
+			this.isHurt = true;
             this.health -= damage;
             this.lastAttacker = attacker;
             this.hurtCooldown += this.game.settings.hitCooldown;
+			this.timeSinceLastDmg = 0;
     
             // glow for short moment
 			this.glow.agitate();

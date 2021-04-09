@@ -69,6 +69,12 @@ class Game
         return id;
     }
 
+    addGameObject(go, id = this.createUniqueID())
+    {
+        // create unique ID for new entity and add to map
+        this.gameObjects.set(id, go);
+    }
+
     addNewGOsFromArray(arr)
     {
         if (arr)
@@ -78,12 +84,6 @@ class Game
                 this.addGameObject(el);
             }
         }
-    }
-
-    addGameObject(go, id = this.createUniqueID())
-    {
-        // create unique ID for new entity and add to map
-        this.gameObjects.set(id, go);
     }
 
     isFull()
@@ -137,15 +137,13 @@ class Game
 
     update(deltaTime)
     {
-        /////////////////////////// SPAWN BUGS //////////////////////////
-        let newBugs = this.bugPopulation.update(deltaTime, this.map);
-        this.addNewGOsFromArray(newBugs);
-
-        ////////////////////////// ENTITIES ///////////////////////
+        // remove dead entities and unhurt
         for (const [id, go] of this.gameObjects)
         {
-            let updateGOs = go.update(deltaTime, this.map);
-            this.addNewGOsFromArray(updateGOs);
+            if (go.isHurt)
+            {
+                go.isHurt = false;
+            }
 
             // IS DEAD?
             if (go.dead)
@@ -155,14 +153,6 @@ class Game
 
                 this.deleteGameObject(id, go);
             }
-        }
- 
-        ////////////////////////// BUILD QUADTREE /////////////////////////
-        this.quadTree.clear(); // clear last
-
-        for (const [id, go] of this.gameObjects)
-        {
-            this.quadTree.insert(go.getBounds(), [id, go]);
         }
 
         ////////////////// SOUNDWAVE collides with ENTITIES /////////////////
@@ -207,6 +197,26 @@ class Game
                     }
                 }
             }
+        }
+
+        ////////////////////////// UPDATE ENTITIES //////////////////////////
+
+        for (const [id, go] of this.gameObjects)
+        {
+            let updateGOs = go.update(deltaTime, this.map);
+            this.addNewGOsFromArray(updateGOs);
+        }
+        
+        /////////////////////////// SPAWN BUGS //////////////////////////
+        let newBugs = this.bugPopulation.update(deltaTime, this.map);
+        this.addNewGOsFromArray(newBugs);
+ 
+        ////////////////////////// BUILD QUADTREE /////////////////////////
+        this.quadTree.clear(); // clear last
+
+        for (const [id, go] of this.gameObjects)
+        {
+            this.quadTree.insert(go.getBounds(), [id, go]);
         }
     }
 
