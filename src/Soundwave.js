@@ -211,10 +211,9 @@ class Soundwave // version 4 or something???!
         return [];
     }
     
-    onDeath()
-    {
-        
-    }
+    onHurt() {}
+
+    onDeath() {}
 
     getType()
     {

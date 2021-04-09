@@ -94,6 +94,14 @@ class Rect
         return true;
     }
 
+    uvToCoordinates(point)
+    {
+        return {
+            x: this.x + point.x * this.w,
+            y: this.y + point.y * this.h,
+        }
+    }
+
     static intersectPoint(rect, point, margin = 0)
     {
         return - margin + rect.getLeft() < point.x && margin + rect.getRight() > point.x

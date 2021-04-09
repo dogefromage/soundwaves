@@ -53,7 +53,6 @@ class Bug extends Entity
             r: this.radius,
             br: this.glow.brightness,
         };
-
         if (!this.isWhite)
         {
             data.co = this.color;
@@ -64,10 +63,23 @@ class Bug extends Entity
 
     getDataUpdate()
     {
-        return {
+        let data = 
+        {
             x: this.x,
             y: this.y,
         }
+
+        if (this.dead)
+        {
+            data.dead = true;
+        }
+
+		if (this.isHurt)
+		{
+			data.hurt = true;
+		}
+
+        return data;
     }
 }
 

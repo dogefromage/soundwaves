@@ -1,5 +1,7 @@
 import Color from "../Color";
 import { ClientEntity } from "./ClientEntity";
+import { SphereParticle } from "./ClientParticle";
+import { Vec2 } from "../Vector"
 
 export class ClientBug extends ClientEntity
 {
@@ -17,6 +19,15 @@ export class ClientBug extends ClientEntity
     hurt(damage, sender)
     {
         this.glow.agitate();
+    }
+
+    onHurt() {} // prevent super
+    
+    onDeath()
+    {
+        const particle = new SphereParticle(
+            this.game, this.getCenterX(), this.getCenterY(), this.radius, this.v, this.color, 0.15);
+        this.game.addGameObject(particle);
     }
 
     draw(ctx, camera)

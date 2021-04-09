@@ -2,6 +2,7 @@ import { Vec2 } from "../Vector";
 import Rect from "../Rect";
 import { ClientEntity } from "./ClientEntity";
 import SoundwaveSettings from "../SoundwaveSettings";
+import { lerp } from "../GameMath";
 
 export class ClientPlayer extends ClientEntity
 {
@@ -9,7 +10,7 @@ export class ClientPlayer extends ClientEntity
 	{
 		super(game, { x, y, w, h, co, br });
 		this.name = na;
-        this.velocity = new Vec2();
+        this.v = new Vec2();
 	}
 
 	draw(ctx, camera)
@@ -28,9 +29,9 @@ export class ClientPlayer extends ClientEntity
 
 export class ClientMainPlayer extends ClientPlayer
 {
-	constructor(game, { x, y, w, h, na, co, br, he })
+	constructor(game, { x, y, w, h, na, co, br, he, dead = false })
     {
-        super(game, { x, y, w, h, na, co, br })
+        super(game, { x, y, w, h, na, co, br, dead })
         this.health = he;
 		this.charge = 0;
 		this.xp = 0;
@@ -50,6 +51,14 @@ export class ClientMainPlayer extends ClientPlayer
         {
             this.isCharging = false;
         });
+
+        document.addEventListener('keydown', (e) =>
+        {
+            if (e.keyCode == 32)
+            {
+                this.onHurt();
+            }
+        })
     }
     
 	setData(serverObj, deltaTimeServer)
@@ -79,7 +88,7 @@ export class ClientMainPlayer extends ClientPlayer
         targetVel = targetVel.mult(speed);
         // apply
         let k = Math.min(1, dt * this.game.settings.walkSmoothness); // make lerp time relative
-        this.velocity = this.velocity.lerp(targetVel, k)
+        this.v = this.v.lerp(targetVel, k)
         // correction using last server pos
         let correction = this.newServerPos.sub(this);
         let q = this.game.settings.clientCorrection * dt;
@@ -88,10 +97,10 @@ export class ClientMainPlayer extends ClientPlayer
          * smoothly limit correction vector to a certain magnitude, so that
          * the player can still move if large lagspike and doesn't get held back 
          */
-        this.velocity = this.velocity.add(correction.mult(q));
+        this.v = this.v.add(correction.mult(q));
 
-        this.x += this.velocity.x * dt; // integrate
-        this.y += this.velocity.y * dt;
+        this.x += this.v.x * dt; // integrate
+        this.y += this.v.y * dt;
 
         ///////////////////////////////////// COLLISION WALLS /////////////////////////////////////
 		// optimise collision search by only checking in a specified range

@@ -229,7 +229,7 @@ export class Input
 
             if (game.mainPlayer && this.isCharging) // PROBABLY changes nothing
             {
-                let angle = calcAngle(e.offsetX, e.offsetY);
+                let angle = calcAngle(e.clientX, e.clientY);
 
                 this.events.get('chargemove').invoke({ angle });
             }
@@ -245,7 +245,7 @@ export class Input
 
             if (game.mainPlayer) // PROBABLY no effect
             {
-                let angle = calcAngle(e.offsetX, e.offsetY);
+                let angle = calcAngle(e.clientX, e.clientY);
 
                 this.isCharging = false;
 

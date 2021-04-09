@@ -8,6 +8,7 @@ import { Vec2 } from '../Vector';
 import { GameSettings } from '../GameSettings';
 import { ClientCamera } from './ClientCamera';
 import { Input } from './Input';
+import { ClientParticle, Particle } from './ClientParticle';
 
 export class ClientGame
 {
@@ -32,6 +33,23 @@ export class ClientGame
             }
         }
     }
+    
+    createUniqueID()
+    {
+        let id;
+        do
+        {
+            id = "" + Math.floor(Math.random() * 10000000);
+        }
+        while (this.gameObjects.has(id));
+
+        return id;
+    }
+
+    addGameObject(go, id = this.createUniqueID())
+    {
+        this.gameObjects.set(id, go);
+    }
 
     update(dt)
     {
@@ -40,9 +58,20 @@ export class ClientGame
         {
             go.update(dt, this.map);
 
-            if (go.dead) // mainly used for soundwaves
+            if (go.dead)
             {
-                this.gameObjects.delete(id);
+                go.onDeath?.();
+                go.dead = false;
+
+                if (go instanceof ClientSoundwave || go instanceof Particle)
+                {
+                    this.gameObjects.delete(id);
+                }
+            }
+            else if (go.isHurt)
+            {
+                go.onHurt?.();
+                go.isHurt = false;
             }
         }
         
@@ -101,6 +130,7 @@ export class ClientGame
             {
                 if (data[0] == 'del')
                 {
+                    let go = this.gameObjects.get(id);
                     this.gameObjects.delete(id);
                 }
                 else if (data[0] == 'upd')
@@ -172,6 +202,12 @@ export class ClientGame
 
         ////////////////////////////////// DRAW WAVES //////////////////////////////////
         for (const [id, go] of this.gameObjectsOfType(ClientSoundwave))
+        {
+            go.draw(ctx, this.camera);
+        }
+
+        ////////////////////////////////// DRAW PARTICLES //////////////////////////////////
+        for (const [id, go] of this.gameObjectsOfType(Particle))
         {
             go.draw(ctx, this.camera);
         }
