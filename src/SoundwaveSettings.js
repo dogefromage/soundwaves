@@ -53,7 +53,7 @@ class SoundwaveSettings
         // seems reasonable
         let lifetime = 2;
         // damage rises exponentially to eliminate spamming
-        let damage = 0.3 * Math.expm1(power);
+        let damage = 0.5 * Math.expm1(power);
         // spread similar to 1/x but offset so f(0)=PI
         let spread = 3.1415 / (30 * power + 0.1);
 

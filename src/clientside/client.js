@@ -432,32 +432,35 @@ document.getElementById('create-room-button').addEventListener('click', () =>
         submitButton.innerText = "Create";
         submitButton.addEventListener('click', () =>
         {
-            const settings = createRoomSettings.toArray();
-            socket.emit('request-new-room', settings, 
-                ([ responce = false, linkOrErrorMsg = "Couldn't create this room. Sorry!" ]) =>
+            if (prompt('Enter the secret code') == '696969')
             {
-                if (responce)
+                const settings = createRoomSettings.toArray();
+                socket.emit('request-new-room', settings, 
+                    ([ responce = false, linkOrErrorMsg = "Couldn't create this room. Sorry!" ]) =>
                 {
-                    window.location.href = linkOrErrorMsg;
-                }
-                else
-                {
-                    // delete old errors
-                    let errors = createRoomSettings.panel.element.querySelectorAll('p[class="error"]');
-                    for (let error of errors)
+                    if (responce)
                     {
-                        error.parentElement.removeChild(error);
+                        window.location.href = linkOrErrorMsg;
                     }
-                    setTimeout(() =>
+                    else
                     {
-                        // create new error
-                        const errorElement = document.createElement('p');
-                        errorElement.classList.add('error');
-                        errorElement.innerText = linkOrErrorMsg;
-                        createRoomSettings.panel.element.insertBefore(errorElement, submitButton);
-                    }, 100);
-                }
-            });
+                        // delete old errors
+                        let errors = createRoomSettings.panel.element.querySelectorAll('p[class="error"]');
+                        for (let error of errors)
+                        {
+                            error.parentElement.removeChild(error);
+                        }
+                        setTimeout(() =>
+                        {
+                            // create new error
+                            const errorElement = document.createElement('p');
+                            errorElement.classList.add('error');
+                            errorElement.innerText = linkOrErrorMsg;
+                            createRoomSettings.panel.element.insertBefore(errorElement, submitButton);
+                        }, 100);
+                    }
+                });
+            }
         });
         createRoomSettings.panel.element.appendChild(submitButton);
     }
