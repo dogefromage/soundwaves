@@ -15,7 +15,10 @@ export class Statusbar
 
     set(value)
     {
-        this.targetValue = value;
+        if (!isNaN(value))
+        {
+            this.targetValue = Number(value);
+        }
     }
 
     update(dt)

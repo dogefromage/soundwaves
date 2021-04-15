@@ -13,9 +13,22 @@ const Bug = require('./Bug');
 
 class Game
 {
-    constructor(settings = new GameSettings())
+    constructor(settings = undefined)
     {
-        this.settings = settings;
+        if (settings)
+        {
+            this.settings = settings;
+            this.isCustom = true;
+        }
+        else
+        {
+            this.settings = new GameSettings()
+            // make large for big public rooms
+            this.settings.maxPlayers = 50;
+            this.settings.mapSize = 10;
+            
+            this.isCustom = false;
+        }
 
         this.map = new GameMap(this, this.settings.mapSize);
 
@@ -38,6 +51,7 @@ class Game
         return [
             this.numberOfPlayers, 
             this.settings.maxPlayers,
+            this.isCustom ? 1 : 0,
         ];
     }
 

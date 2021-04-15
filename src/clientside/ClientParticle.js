@@ -73,6 +73,8 @@ export class ShardParticle extends Particle
     {
         // x, y not needed, set to 0
         super(game, 0, 0, v, color, lifeTime);
+        
+        // this.lineWidth = 6;
 
         this.vertices = [];
         for (let { x, y } of vertices)
@@ -92,8 +94,10 @@ export class ShardParticle extends Particle
             this.vertices[i] = this.vertices[i].add(ds);
         }
 
+        // this.lineWidth += 8 * dt;
+
         // expand from centerpoint M by factor of k
-        let k = .5 * dt;
+        let k = .7 * dt;
         let M = new Vec2();
         for (let i = 0; i < this.vertices.length; i++)
         {
@@ -114,7 +118,12 @@ export class ShardParticle extends Particle
             return;
         }
 
-        ctx.fillStyle = this.color.toHex();
+        let color = this.color.toHex();
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 7;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.beginPath();
 
         let startP = camera.WorldToCanvas(this.vertices[0]);
@@ -125,6 +134,7 @@ export class ShardParticle extends Particle
             let p = camera.WorldToCanvas(this.vertices[index]);
             ctx.lineTo(p.x, p.y);
         }
-        ctx.fill();
+        // ctx.fill();
+        ctx.stroke();
     }
 }

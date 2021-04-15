@@ -2,7 +2,6 @@ import { Vec2 } from "../Vector";
 import Rect from "../Rect";
 import { ClientEntity } from "./ClientEntity";
 import SoundwaveSettings from "../SoundwaveSettings";
-import { lerp } from "../GameMath";
 
 export class ClientPlayer extends ClientEntity
 {

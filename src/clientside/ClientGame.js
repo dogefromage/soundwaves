@@ -183,8 +183,8 @@ export class ClientGame
         ////////////////////////////////// DRAW GRID //////////////////////////////////
         let range = this.camera.CanvasToWorldRect(new Rect(0, 0, w, h));
         range = range.roundUp();
-        ctx.strokeStyle = "#050505";
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#070707";
+        ctx.lineWidth = 4;
         ctx.beginPath();
         for (let j = range.getTop(); j < range.getBottom(); j += 0.10)
         {
