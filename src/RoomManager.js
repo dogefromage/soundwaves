@@ -91,7 +91,7 @@ class RoomManager
 
         this.openRoom({ expirationTime: Infinity });
         this.openRoom({ expirationTime: Infinity });
-        this.openRoom({ expirationTime: Infinity });
+        // this.openRoom({ expirationTime: Infinity });
 
         setTimeout(() => { this.update(); }, 10); 
     }
