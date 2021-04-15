@@ -92,7 +92,7 @@ class Player extends Entity
 	{
 		if (this.charge > 0.05)
 		{
-			let settings = SoundwaveSettings.Attack(this.shootAngle, this.charge);
+			let settings = SoundwaveSettings.Attack(this.shootAngle, this.charge, this.game.settings);
 			const newWave = this.createSoundwave(settings);
 			waves.push(newWave);
 		}
@@ -142,11 +142,11 @@ class Player extends Entity
 			let sqrMaxSneakVel = 0.33 * this.game.settings.playerSpeed * this.game.settings.playerSpeed;
 			if (this.velocity.sqrMagnitude() < sqrMaxSneakVel) // FOR FUTURE: MAKE WAVE SIZE DEPENDENT ON SPEED
 			{
-				waveSettings = SoundwaveSettings.sneak();
+				waveSettings = SoundwaveSettings.sneak(this.game.settings);
 			}
 			else
 			{
-				waveSettings = SoundwaveSettings.walk();
+				waveSettings = SoundwaveSettings.walk(this.game.settings);
 			}
 			const newWave = this.createSoundwave(waveSettings);
 			newSoundWaves.push(newWave);
@@ -185,7 +185,7 @@ class Player extends Entity
 		super.hurt(damage, offender);
 		if (this.health < 0)
 		{
-			const newWave = this.createSoundwave(SoundwaveSettings.death());
+			const newWave = this.createSoundwave(SoundwaveSettings.death(this.game.settings));
 			return [newWave] // one wave
 		}
 
