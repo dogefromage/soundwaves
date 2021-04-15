@@ -109,7 +109,6 @@ class GameRoom
         {
             deltaTime = 0.001; // prevent disaster 
         }
-
         
         if (this.sockets.size > 0)
         {
