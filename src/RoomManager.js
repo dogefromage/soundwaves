@@ -118,7 +118,7 @@ class RoomManager
             const info = room.game.getInfo();
             info.unshift(id);
             this.roomList.push(info);
-            // info := [ id, players, maxPlayers ]
+            // info := [ id, players, maxPlayers, isCustom ]
         }
         this.roomList.sort((a, b) => (b[2] - b[1]) - (a[2] - a[1]) ); // descending by free space
 

@@ -5,8 +5,8 @@ import Panel from './Panel';
 import { GameSettings } from '../GameSettings';
 
 window.socket = io.connect(location.host, { roomId: location.pathname });
-
 const ctx = document.getElementById('canvas').getContext('2d');
+
 let w, h;
 let lastTime = new Date().getTime();
 
@@ -32,8 +32,7 @@ fullscreenButton.addEventListener('click', () =>
     {
         fullscreenButton.classList.remove('fa-compress');
         fullscreenButton.classList.add('fa-expand');
-
-
+        
         if (document.exitFullscreen) {
             document.exitFullscreen();
         } else if (document.webkitExitFullscreen) { /* Safari */
@@ -315,9 +314,9 @@ const updateQuality = () =>
     if (userSettings.graphics == "low")
         factor = 1;
     else if (userSettings.graphics == "high")
-        factor = 2;
+        factor = 3;
     else if (userSettings.graphics == "ultra")
-        factor = 4;
+        factor = 5;
 
     if (game.settings)
     {
@@ -383,7 +382,7 @@ document.getElementById('rooms-button').addEventListener('click', () =>
                         currentRoom = urlArr.pop();
                     }
 
-                    for (const [ name, players, maxPlayers ] of roomList)
+                    for (const [ name, players, maxPlayers, isCustom ] of roomList)
                     {
                         const roomEl = document.createElement('a');
                         roomEl.classList.add('room');
@@ -399,6 +398,18 @@ document.getElementById('rooms-button').addEventListener('click', () =>
                         roomPlayers.classList = 'room-players';
                         roomPlayers.innerHTML = `${players} / ${maxPlayers}`;
                         roomEl.appendChild(roomPlayers);
+                        
+                        const roomType = document.createElement('span');
+                        roomType.classList = 'room-type';
+                        if (isCustom)
+                        {
+                            roomType.innerHTML = '<span style="color:crimson;">Custom</span>';
+                        }
+                        else
+                        {
+                            roomType.innerHTML = 'Classic';
+                        }
+                        roomEl.appendChild(roomType);
 
                         if (name == currentRoom)
                         {

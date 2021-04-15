@@ -4,7 +4,7 @@ import Color from "../Color";
 import { lerp } from '../GameMath';
 import Glow from '../Glow';
 import { ShardParticle } from './ClientParticle';
-import { ClientPlayer } from "./ClientPlayers";
+import roundRect from './roundRect';
 
 export class ClientEntity extends Rect
 {
@@ -117,74 +117,94 @@ export class ClientEntity extends Rect
 		{
 			// create random shard
 			let vertices = [];
-			for (let i = 0; i < 4; i++)
+			for (let i = 0; i < 3; i++)
 			{
 				const pos = new Vec2(0.5, 0.5).add(
-					new Vec2(0.2 + Math.random() * 0.2, 0)
+					new Vec2(0.1 + Math.random() * 0.1, 0)
 						.rotate(Math.PI * i / 2 + Math.random()));
 				vertices.push(this.uvToCoordinates(pos));
 			}
-			const speed = 0.1 + Math.random() * 0.1;
+			const speed = 0.2 + Math.random() * 0.2;
 			const vel = new Vec2(speed, 0).rotate(2 * Math.PI * Math.random()).add(this.v);
 	
 			const particle = new ShardParticle(
-				this.game, vertices, vel, this.color.copy(), 0.3);
+				this.game, vertices, vel, this.color.copy(), 0.5);
 			this.game.addGameObject(particle);
 		}
 	}
 
     onDeath()
     {
-        /**
-		 * Split rectangle into four pieces 
-         */
-        let center = 
-        [
-            0.1 + 0.8 * Math.random(),
-            0.1 + 0.8 * Math.random()
-		];
-		let left = 0.1 + 0.8 * Math.random();
-		let top = 0.1 + 0.8 * Math.random();
-		let right = 0.1 + 0.8 * Math.random();
-		let bottom = 0.1 + 0.8 * Math.random();
-
-        let pieces = 
-        [
-            [ [0,0], [top, 0], center, [0, left] ],
-            [ [top, 0], [1, 0], [1, right], center ],
-            [ center, [1, right], [1, 1], [bottom, 1] ],
-            [ [0, left], center, [bottom, 1], [0, 1] ],
-        ];
-
-        for (const piece of pieces)
-        {
+		for (let n = 0; n < 8; n++)
+		{
+			// create random shard
 			let vertices = [];
-			let vel = new Vec2();
-			for (let [ x, y ] of piece)
+			for (let i = 0; i < 3; i++)
 			{
-				vertices.push(this.uvToCoordinates({ x, y }));
+				const pos = new Vec2(0.5, 0.5).add(
+					new Vec2(0.1 + Math.random() * 0.1, 0)
+						.rotate(Math.PI * i / 2 + Math.random()));
+				vertices.push(this.uvToCoordinates(pos));
 			}
+			const speed = 0.1 + Math.random() * 0.05;
+			const vel = new Vec2(speed, 0).rotate(2 * Math.PI * Math.random()).add(this.v);
+	
+			const particle = new ShardParticle(
+				this.game, vertices, vel, this.color.copy(), .9);
+			this.game.addGameObject(particle);
+		}
 
-			/**
-			 * evaluate velocity as average of all directions 
-			 * from center of player to shard vertices
-			 */
-			for (const v of vertices)
-			{
-				vel.x += v.x;
-				vel.y += v.y;
-			}
-			vel.x -= this.getCenterX() * vertices.length;
-			vel.y -= this.getCenterY() * vertices.length;
+
+        // /**
+		//  * Split rectangle into four pieces 
+        //  */
+        // let center = 
+        // [
+        //     0.1 + 0.8 * Math.random(),
+        //     0.1 + 0.8 * Math.random()
+		// ];
+		// let left = 0.1 + 0.8 * Math.random();
+		// let top = 0.1 + 0.8 * Math.random();
+		// let right = 0.1 + 0.8 * Math.random();
+		// let bottom = 0.1 + 0.8 * Math.random();
+
+        // let pieces = 
+        // [
+        //     [ [0,0], [top, 0], center, [0, left] ],
+        //     [ [top, 0], [1, 0], [1, right], center ],
+        //     [ center, [1, right], [1, 1], [bottom, 1] ],
+        //     [ [0, left], center, [bottom, 1], [0, 1] ],
+        // ];
+
+        // for (const piece of pieces)
+        // {
+		// 	let vertices = [];
+		// 	let vel = new Vec2();
+		// 	for (let [ x, y ] of piece)
+		// 	{
+		// 		vertices.push(this.uvToCoordinates({ x, y }));
+		// 	}
+
+		// 	/**
+		// 	 * evaluate velocity as average of all directions 
+		// 	 * from center of player to shard vertices
+		// 	 */
+		// 	for (const v of vertices)
+		// 	{
+		// 		vel.x += v.x;
+		// 		vel.y += v.y;
+		// 	}
+		// 	vel.x -= this.getCenterX() * vertices.length;
+		// 	vel.y -= this.getCenterY() * vertices.length;
 			
-			let speed = 2 + Math.random() * 1;
-			vel = vel.mult(speed);
-			vel = vel.add(this.v); // conservation of momentum
+		// 	let speed = 2 + Math.random() * 1;
+		// 	vel = vel.mult(speed);
+		// 	vel = vel.add(this.v); // conservation of momentum
 
-            const particle = new ShardParticle(
-				this.game, vertices, vel, this.color.copy(), 0.7);
-            this.game.addGameObject(particle);
-        }
+        //     const particle = new ShardParticle(
+		// 		this.game, vertices, vel, this.color.copy(), 0.7);
+        //     this.game.addGameObject(particle);
+        // }
     }
 
 	draw(ctx, camera)
@@ -194,6 +214,10 @@ export class ClientEntity extends Rect
 
 		// rect
 		const canRect = camera.WorldToCanvasRect(this);
-		ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);
+		// ctx.fillRect(canRect.x, canRect.y, canRect.w, canRect.h);
+		
+		ctx.beginPath();
+		roundRect(ctx, canRect.x, canRect.y, canRect.w, canRect.h, canRect.w * 0.13);
+		ctx.fill();
 	}
 }

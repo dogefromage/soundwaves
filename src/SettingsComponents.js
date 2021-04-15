@@ -38,13 +38,14 @@ class HiddenSetting extends Setting
 
 class SliderSetting extends Setting
 {
-    constructor(propertyName, defaultVal, name, min, max, step)
+    constructor(propertyName, defaultVal, name, min, max, step, isRelative = true)
     {
         super(propertyName, defaultVal, name);
         
         this.min = min;
         this.max = max;
         this.step = step;
+        this.isRelative = isRelative;
     }
 
     createElement(value, onchange = undefined)
@@ -71,14 +72,39 @@ class SliderSetting extends Setting
             slider.max = this.max;
             slider.step = this.step;
             slider.value = value;
+            el.appendChild(slider);
+
+            const valueDisplay = document.createElement('span');
+            valueDisplay.classList.add('slider-value');
+            let setValueDisplay = (val) =>
+            {
+                if (this.isRelative)
+                {
+                    valueDisplay.innerHTML = 
+                        (val / this.defaultVal).toFixed(1);
+                }
+                else
+                {
+                    valueDisplay.innerHTML = val;
+                }
+            };
+            setValueDisplay(value);
+            el.appendChild(valueDisplay);
+            
+            slider.addEventListener('input', (e) =>
+            {
+                let sliderVal = Number(e.srcElement.value);
+                setValueDisplay(sliderVal);
+            });
+
             if (onchange)
             {
                 slider.addEventListener('change', (e) =>
                 {
-                    onchange(Number(e.srcElement.value)); // calls callback with new value
+                    const sliderVal = Number(e.srcElement.value)
+                    onchange(sliderVal); // calls callback with new value
                 });
             }
-            el.appendChild(slider);
 
             return el;
         }
@@ -174,7 +200,7 @@ class Description extends Setting
         {
             const el = document.createElement('p');
             el.classList.add('description');
-            el.innerText = this.text;
+            el.innerHTML = this.text;
 
             return el;
         }

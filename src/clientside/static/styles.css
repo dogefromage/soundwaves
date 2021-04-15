@@ -282,7 +282,7 @@ button:focus
     position: absolute;
     left: 0px;
     top: 0px;
-    width: 23%;
+    width: 24%;
     max-width: 300px;
     bottom: 0px;
     display: flex;
@@ -494,10 +494,10 @@ button:focus
 
 .panel
 {
-    width: 80%;
+    width: 100%;
     height: 70%;
-    max-width: 560px;
-    margin: 3vh;
+    max-width: 600px;
+    /* margin: 3vh; */
     position: relative;
 
     border: white solid 2em;
@@ -573,12 +573,12 @@ button:focus
 
     -webkit-appearance: none;  /* Override default CSS styles*/
     appearance: none;
-    height: 1.2em;
+    height: 1.1em;
 
-    background-color: green;
+    background-color: rgb(78, 139, 53);
 
     outline: none; /*Remove outline*/
-    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    opacity: 0.8; /* Set transparency (for mouse-over effects on hover) */
     -webkit-transition: opacity .1s; /* 0.2 seconds transition on hover */
     transition: opacity .1s;
 }
@@ -592,19 +592,25 @@ button:focus
 {
     -webkit-appearance: none;
     appearance: none;
-    width: 0.9em;
+    width: 0.85em;
     height: 1.9em;
     border-radius: 0.5em;
-    background: #032207;
+    background: #1b1f1c;
     cursor: pointer;
 }
 
 .slider-setting::-moz-range-thumb 
 {
-    width: 0.9em;
+    width: 0.85em;
     height: 1.9em;
-    background: #032207;
+    background: #1b1f1c;
     cursor: pointer;
+}
+
+.slider-value
+{
+    width: 10%;
+    text-align: center;
 }
 
 /* RADIO SETTING */
@@ -673,9 +679,12 @@ button:focus
     display: flex;
     align-items: center;
     margin: 0.5em;
-    justify-content: center;
+    justify-content:space-evenly;
     background-color: #eee;
     border-radius: 1.5em;
+    padding-right: 2em;
+    padding-left: 2em;
+    box-sizing: border-box;
 
     -webkit-transition: background-color 0.1s;
     transition: background-color 0.1s;
@@ -688,7 +697,7 @@ button:focus
     background-color: #ccc;
 }
 
-.room :nth-child(1)
+/* .room :nth-child(1)
 {
     flex-basis: 20%;    
 }
@@ -696,9 +705,9 @@ button:focus
 .room :nth-child(2)
 {
     flex-basis: 20%;
-}
+} */
 
-.room span
+.room > span
 {
     font-size: 1.2em;
     font-weight: bold;
@@ -719,7 +728,7 @@ button:focus
 .room i
 {
     position: absolute;
-    left: 80%;
+    left: 90%;
     font-size: 1.4em;
 }
 
@@ -746,4 +755,10 @@ button:focus
 {
     width: 90%;
     text-align: justify;
+}
+
+.description h3
+{
+    text-align: center;
+    margin: 0;
 }

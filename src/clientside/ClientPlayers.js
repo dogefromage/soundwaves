@@ -2,7 +2,6 @@ import { Vec2 } from "../Vector";
 import Rect from "../Rect";
 import { ClientEntity } from "./ClientEntity";
 import SoundwaveSettings from "../SoundwaveSettings";
-import { lerp } from "../GameMath";
 
 export class ClientPlayer extends ClientEntity
 {
@@ -52,13 +51,13 @@ export class ClientMainPlayer extends ClientPlayer
             this.isCharging = false;
         });
 
-        document.addEventListener('keydown', (e) =>
-        {
-            if (e.keyCode == 32)
-            {
-                this.onHurt();
-            }
-        })
+        // document.addEventListener('keydown', (e) =>
+        // {
+        //     if (e.keyCode == 32)
+        //     {
+        //         this.onDeath();
+        //     }
+        // })
     }
     
 	setData(serverObj, deltaTimeServer)

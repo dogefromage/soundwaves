@@ -52,6 +52,7 @@ export class ClientSoundwave extends Soundwave
             ctx.strokeStyle = gradient2;
             ctx.lineWidth = 15;
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
 
             ctx.beginPath();
             for (let a = 0; a < this.vertices.length; a++)
