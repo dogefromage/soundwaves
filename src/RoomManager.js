@@ -144,7 +144,7 @@ class RoomManager
         for (let i = 0; i < this.roomList.length; i++)
         {
             let room = this.roomList[i];
-            if (!room.isGameFull())
+            if (!this.gameRooms.get(room[0]).isGameFull())
             {
                 return room[0];
             }
