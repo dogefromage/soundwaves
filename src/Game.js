@@ -24,8 +24,8 @@ class Game
         {
             this.settings = new GameSettings()
             // make large for big public rooms
-            this.settings.maxPlayers = 50;
-            this.settings.mapSize = 10;
+            this.settings.maxPlayers = 30;
+            this.settings.mapSize = 7;
             
             this.isCustom = false;
         }

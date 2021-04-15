@@ -73,6 +73,11 @@ class GameRoom
         });
     }
 
+    isGameFull()
+    {
+        return this.game.isFull();
+    }
+
     leave(socket)
     {
         this.game.removePlayer(socket.id);
