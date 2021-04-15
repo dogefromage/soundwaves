@@ -91,16 +91,18 @@ export class ClientEntity extends Rect
 			this.x = interpolatedPosition.x;
 			this.y = interpolatedPosition.y;
 
-			///////////////////////////////////// COLLISION WALLS /////////////////////////////////////
-			// optimise collision search by only checking in a specified range
-			const rangeRect = this.extend(this.game.settings.colDetectionRange);
-			// check collision
-			map.foreachWall((wall) =>
-			{
-				Rect.collide(wall, this);
-			}, rangeRect);
-			this.oldX = this.x;
-			this.oldY = this.y;
+			// collisions necessary???
+			
+			// ///////////////////////////////////// COLLISION WALLS /////////////////////////////////////
+			// // optimise collision search by only checking in a specified range
+			// const rangeRect = this.extend(this.game.settings.colDetectionRange);
+			// // check collision
+			// map.foreachWall((wall) =>
+			// {
+			// 	Rect.collide(wall, this);
+			// }, rangeRect);
+			// this.oldX = this.x;
+			// this.oldY = this.y;
 
 			this.glow.update(dt);
 

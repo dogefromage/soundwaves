@@ -88,15 +88,23 @@ export class ClientMainPlayer extends ClientPlayer
         // apply
         let k = Math.min(1, dt * this.game.settings.walkSmoothness); // make lerp time relative
         this.v = this.v.lerp(targetVel, k)
-        // correction using last server pos
-        let correction = this.newServerPos.sub(this);
-        let q = this.game.settings.clientCorrection * dt;
-        /**
-         * FOR FUTURE:
-         * smoothly limit correction vector to a certain magnitude, so that
-         * the player can still move if large lagspike and doesn't get held back 
-         */
-        this.v = this.v.add(correction.mult(q));
+
+        // correct position slightly using servers position 
+        // so that both approach the same value.
+
+        // if difference is too large, just use servers position:
+        let clientServerDifference = this.newServerPos.sub(this);
+        if (clientServerDifference.sqrMagnitude() > 0.5) // adjust maybe
+        {
+            this.x = this.lastServerPos.x;
+            this.y = this.lastServerPos.y;
+        }
+        else
+        {
+            // slightly nudge velocity vector towards server pos
+            let q = this.game.settings.clientCorrection * dt;
+            this.v = this.v.add(clientServerDifference.mult(q));
+        }
 
         this.x += this.v.x * dt; // integrate
         this.y += this.v.y * dt;

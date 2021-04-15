@@ -57,6 +57,11 @@ fullscreenButton.addEventListener('click', () =>
     }
 });
 
+window.addEventListener('blur', () =>
+{
+    game?.input.reset();
+});
+
 // set data
 socket.on('server-data', (dataJSON) => 
 {
@@ -159,6 +164,11 @@ function loop()
     lastTime = time;
 
     // update
+    if (dt > 0.5)
+    {
+        dt = 0.5;
+    }
+
     game.update(dt);
     
     //drawing

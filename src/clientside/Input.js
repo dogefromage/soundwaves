@@ -387,4 +387,11 @@ export class Input
 
         return [ this.history, this.history = [] ][0]; // swap 'n' clear
     }
+
+    reset()
+    {
+        this.keys = new Map();
+        this.axisX = this.axisY = 0;
+        this.events.get('chargestop')?.invoke({ angle: 0 });
+    }
 }
