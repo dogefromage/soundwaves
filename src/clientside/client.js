@@ -144,6 +144,13 @@ socket.on('scoreboard', (topPlayers) =>
 
         scoreboard.appendChild(para);
     }
+
+    // if (topPlayers.length <= 1)
+    // {
+    //     const closeMessage = document.createElement('p');
+    //     closeMessage.innerHTML = "This room will automatically close after being left empty for more than 30s.";
+    //     scoreboard.appendChild(closeMessage);
+    // }
 });
 
 function loop()
@@ -432,7 +439,7 @@ document.getElementById('create-room-button').addEventListener('click', () =>
         submitButton.innerText = "Create";
         submitButton.addEventListener('click', () =>
         {
-            if (prompt('Enter the secret code') == '696969')
+            if (true) //prompt('Enter the secret code') == '696969')
             {
                 const settings = createRoomSettings.toArray();
                 socket.emit('request-new-room', settings, 

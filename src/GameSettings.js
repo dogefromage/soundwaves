@@ -4,7 +4,7 @@ const { Setting, HiddenSetting, SliderSetting, RadioSetting, Description } = req
 
 const gameSettingsTemplate = 
 [
-    new Description('Do not create a room please.'),
+    new Description('Here you can create your own room. Your friends can join by entering the link in your searchbar. The room will automatically close after 30s if it is left empty.'),
     new SliderSetting('maxPlayers', 10, 'Number of Players', 2, 10, 1),
     new SliderSetting('mapSize', 3, 'Map Size', 1, 5, 1),
     new SliderSetting('playerSize', 0.04, 'Player Size', 0.02, 0.08, 0.0005),

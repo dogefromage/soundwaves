@@ -27,7 +27,7 @@ app.use(express.static('src/clientside/static'));
 app.get('/', (req, res) =>
 {
     // select some room
-    let roomId = roomManager.getRandomRoom();
+    let roomId = roomManager.getAvailableRoom();
     if (roomId)
     {
         res.redirect('/' + roomId);

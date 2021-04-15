@@ -1,6 +1,6 @@
-const Logger = require('./src/Logger');
-const GameRoom = require('./src/GameRoom');
-const { GameSettings } = require('./src/GameSettings'); 
+const Logger = require('./Logger');
+const GameRoom = require('./GameRoom');
+const { GameSettings } = require('./GameSettings'); 
 
 class RoomManager
 {
@@ -67,7 +67,7 @@ class RoomManager
                 else
                 {
                     // try to create room
-                    const roomOrUndef = openRoom(settingsObj);
+                    const roomOrUndef = this.openRoom({ settings: settingsObj });
                     if (roomOrUndef)
                     {
                         callback([ true, roomOrUndef.id ]); // room created
@@ -89,15 +89,27 @@ class RoomManager
             });
         });
 
-        setTimeout(this.update, 1000); 
+        this.openRoom({ expirationTime: Infinity });
+        this.openRoom({ expirationTime: Infinity });
+        this.openRoom({ expirationTime: Infinity });
+
+        setTimeout(() => { this.update(); }, 10); 
     }
 
     update()
     {
-        /////// add or remove rooms
-        
+        /////// add rooms
 
 
+        /////// remove rooms
+        for (let [ id, room ] of this.gameRooms)
+        {
+            if (!room.isRunning)
+            {
+                room.close(); // just double checking
+                this.gameRooms.delete(id);
+            }
+        }
 
         /////// update roomList
         this.roomList = [];
@@ -105,12 +117,13 @@ class RoomManager
         {
             const info = room.game.getInfo();
             info.unshift(id);
+            this.roomList.push(info);
             // info := [ id, players, maxPlayers ]
         }
         this.roomList.sort((a, b) => (b[2] - b[1]) - (a[2] - a[1]) ); // descending by free space
 
         /////// recall function
-        setTimeout(this.update, 1000);
+        setTimeout(() => { this.update(); }, 1000);
     }
 
     createUniqueRoomID()
@@ -128,14 +141,15 @@ class RoomManager
 
     getAvailableRoom() // room for newly entering player
     {
-
+        let randomRoom = this.roomList[Math.floor(Math.random() * this.roomList.length)];
+        return randomRoom[0];
     }
 
-    openRoom(settings = undefined, id = createUniqueRoomID())
+    openRoom({ id = this.createUniqueRoomID(), settings, expirationTime })
     {
         if (!this.gameRooms.has(id))
         {
-            const room = new GameRoom(io, id, settings);
+            const room = new GameRoom(this.io, id, settings, expirationTime);
             this.gameRooms.set(id, room);
             return room;
         }

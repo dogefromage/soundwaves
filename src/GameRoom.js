@@ -3,7 +3,7 @@ const Logger = require('./Logger');
 
 class GameRoom
 {
-    constructor(io, id, gameSettings = undefined)
+    constructor(io, id, gameSettings = undefined, expirationTime = 30)
     {
         this.io = io;
         this.id = id;
@@ -11,6 +11,9 @@ class GameRoom
         this.sockets = new Set();
         this.lastUpdateTime = process.hrtime();
         this.isRunning = true;
+
+        this.expirationTime = expirationTime;
+        this.gameRoomEmptyTime = 0; // counts up if room left empty
 
         setTimeout(() =>
         {
@@ -112,6 +115,9 @@ class GameRoom
         
         if (this.sockets.size > 0)
         {
+            // reset
+            this.gameRoomEmptyTime = 0; // s
+
             // UPDATE GAME
             this.game.update(deltaTime);
         
@@ -137,6 +143,18 @@ class GameRoom
                 // console.log(reducedJSON.length); // show data size in characters
         
                 socket.emit('server-data', reducedJSON);
+            }
+        }
+        else
+        {
+            // server will close if empty time is too large
+
+            this.gameRoomEmptyTime += deltaTime; // s
+            
+            if (this.gameRoomEmptyTime > this.expirationTime) // s
+            {
+                // room expired
+                this.isRunning = false;    
             }
         }
     
