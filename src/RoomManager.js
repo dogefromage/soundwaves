@@ -141,8 +141,17 @@ class RoomManager
 
     getAvailableRoom() // room for newly entering player
     {
-        let randomRoom = this.roomList[Math.floor(Math.random() * this.roomList.length)];
-        return randomRoom[0];
+        for (let i = 0; i < this.roomList.length; i++)
+        {
+            let room = this.roomList[i];
+            if (!this.gameRooms.get(room[0]).isGameFull())
+            {
+                return room[0];
+            }
+        }
+
+        // return random room to spectate if every other one is full
+        return this.roomList[Math.floor(Math.random() * this.roomList.length)][0];
     }
 
     openRoom({ id = this.createUniqueRoomID(), settings, expirationTime })
