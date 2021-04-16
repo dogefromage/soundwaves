@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm install && webpack --config webpack.prod.js && node index.js",
-    "dev": "webpack --config webpack.dev.js && node index.js",
-    "prod": "webpack --config webpack.prod.js"
+    "build": "npm install && webpack --config webpack.prod.js",
+    "start": "node index.js",
+    "dev": "webpack --config webpack.dev.js && node index.js"
   },
   "author": "dogefromage",
   "license": "ISC",
