@@ -5,4 +5,4 @@
 _npm run dev_
 
 **Run in production mode** <br>
-_npm run start_
+_npm run build && npm run start_
