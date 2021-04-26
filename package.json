@@ -17,6 +17,6 @@
     "webpack-cli": "^4.6.0"
   },
   "devDependencies": {
-    "v8-profiler-node8": "^6.3.0",
+    "v8-profiler-node8": "^6.3.0"
   }
 }
