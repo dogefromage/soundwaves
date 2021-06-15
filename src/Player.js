@@ -12,12 +12,15 @@ class Player extends Entity
 {
 	constructor(game, x, y, id, name, color) 
 	{
-		const size = game.settings.playerSize;
-		super(game, x, y, size, size, color, 1);
+		this.size = game.settings.playerSize;
+		super(game, x, y, this.size, this.size, color, 1);
 
 		// player name
 		this.name = name;
 		this.id = id;
+
+		this.speed = this.game.settings.playerSpeed;
+
 
 		// for soundwave spawning
 		this.lastStep = new Vec2(this.x, this.y);
@@ -33,7 +36,7 @@ class Player extends Entity
 		this.shooting = false;
 		this.angle = 0;
 
-		this.glow = new Glow(0.1); // replace old glow with snappier one
+		this.glow = new Glow(0.1); // replace glow with quicker one
 	}
 
 	setInput(inputs)
